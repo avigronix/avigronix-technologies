@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ shop_data.shop_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    {% if shop_data.logo %}
+                    <img src="{{ shop_data.logo }}" alt="{{ shop_data.shop_name }}" class="w-12 h-12 rounded-lg">
+                    {% endif %}
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ shop_data.shop_name }}</h1>
+                        <p class="text-gray-600 text-sm">{{ shop_data.about[:60] }}...</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="tel:{{ shop_data.contact_number }}" 
+                       class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center space-x-2">
+                        <i class="fas fa-phone"></i>
+                        <span>Call Now</span>
+                    </a>
+                    <a href="https://wa.me/{{ shop_data.contact_number | replace('+', '') | replace(' ', '') }}" 
+                       class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-semibold flex items-center space-x-2">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="relative">
+        {% if shop_data.banner %}
+        <img src="{{ shop_data.banner }}" alt="Shop Banner" class="w-full h-64 md:h-80 object-cover">
+        {% else %}
+        <div class="w-full h-64 md:h-80 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+            <div class="text-center text-white">
+                <h2 class="text-4xl font-bold mb-4">{{ shop_data.shop_name }}</h2>
+                <p class="text-xl">{{ shop_data.about }}</p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- About Section -->
+        <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-info-circle mr-3 text-blue-600"></i>
+                About Our Shop
+            </h2>
+            <p class="text-gray-700 text-lg leading-relaxed">{{ shop_data.about }}</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="text-center p-6 bg-blue-50 rounded-xl">
+                    <i class="fas fa-tag text-3xl text-blue-600 mb-3"></i>
+                    <h3 class="font-bold text-lg mb-2">Category</h3>
+                    <p class="text-gray-600">{{ shop_data.category }}</p>
+                </div>
+                <div class="text-center p-6 bg-green-50 rounded-xl">
+                    <i class="fas fa-briefcase text-3xl text-green-600 mb-3"></i>
+                    <h3 class="font-bold text-lg mb-2">Business Type</h3>
+                    <p class="text-gray-600">{{ shop_data.business_type }}</p>
+                </div>
+                <div class="text-center p-6 bg-purple-50 rounded-xl">
+                    <i class="fas fa-star text-3xl text-purple-600 mb-3"></i>
+                    <h3 class="font-bold text-lg mb-2">Quality</h3>
+                    <p class="text-gray-600">Premium Service</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-address-book mr-3 text-green-600"></i>
+                Contact Us
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Contact Info -->
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-phone text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">Call Us</h3>
+                            <p class="text-gray-600">{{ shop_data.contact_number }}</p>
+                            <a href="tel:{{ shop_data.contact_number }}" class="text-green-600 hover:text-green-700 text-sm font-semibold">
+                                Tap to call →
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-envelope text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">Email Us</h3>
+                            <p class="text-gray-600">{{ shop_data.email }}</p>
+                            <a href="mailto:{{ shop_data.email }}" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+                                Send email →
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">WhatsApp</h3>
+                            <p class="text-gray-600">Quick chat support</p>
+                            <a href="https://wa.me/{{ shop_data.contact_number | replace('+', '') | replace(' ', '') }}" 
+                               class="text-green-600 hover:text-green-700 text-sm font-semibold">
+                                Message us →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="space-y-4">
+                    <a href="tel:{{ shop_data.contact_number }}" 
+                       class="w-full bg-green-600 text-white py-4 rounded-xl hover:bg-green-700 transition-colors font-bold text-lg flex items-center justify-center space-x-3">
+                        <i class="fas fa-phone"></i>
+                        <span>Call Now</span>
+                    </a>
+                    
+                    <a href="https://wa.me/{{ shop_data.contact_number | replace('+', '') | replace(' ', '') }}?text=Hi%20{{ shop_data.shop_name | urlencode }}%2C%20I%20would%20like%20to%20know%20more%20about%20your%20products" 
+                       class="w-full bg-green-500 text-white py-4 rounded-xl hover:bg-green-600 transition-colors font-bold text-lg flex items-center justify-center space-x-3">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp Message</span>
+                    </a>
+                    
+                    <a href="mailto:{{ shop_data.email }}?subject=Inquiry%20about%20{{ shop_data.shop_name | urlencode }}" 
+                       class="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition-colors font-bold text-lg flex items-center justify-center space-x-3">
+                        <i class="fas fa-envelope"></i>
+                        <span>Send Email</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Business Info -->
+        <section class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold mb-4">Visit Our Online Store</h2>
+                <p class="text-xl mb-6 opacity-90">We're here to serve you with the best products and service</p>
+                
+                <div class="bg-white/20 rounded-xl p-6 inline-block">
+                    <p class="text-2xl font-mono font-bold">
+                        {{ shop_data.shop_name }}
+                    </p>
+                    <p class="opacity-90 mt-2">Your trusted {{ shop_data.category }} partner</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">{{ shop_data.shop_name }}</h3>
+            <p class="text-gray-400 mb-6 max-w-2xl mx-auto">{{ shop_data.about }}</p>
+            
+            <div class="flex justify-center space-x-6 mb-6">
+                {% if shop_data.contact_number %}
+                <a href="tel:{{ shop_data.contact_number }}" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-phone mr-2"></i>Call
+                </a>
+                {% endif %}
+                {% if shop_data.email %}
+                <a href="mailto:{{ shop_data.email }}" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-envelope mr-2"></i>Email
+                </a>
+                {% endif %}
+                <a href="https://wa.me/{{ shop_data.contact_number | replace('+', '') | replace(' ', '') }}" class="text-gray-400 hover:text-white">
+                    <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                </a>
+            </div>
+            
+            <p class="text-gray-500 text-sm">
+                &copy; 2024 {{ shop_data.shop_name }}. All rights reserved.
+                <br>
+                Powered by <strong class="text-blue-400">avigronix.com</strong>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 flex flex-col space-y-3">
+        <a href="https://wa.me/{{ shop_data.contact_number | replace('+', '') | replace(' ', '') }}" 
+           class="bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110">
+            <i class="fab fa-whatsapp text-2xl"></i>
+        </a>
+        <a href="tel:{{ shop_data.contact_number }}" 
+           class="bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110">
+            <i class="fas fa-phone text-xl"></i>
+        </a>
+    </div>
+
+    <script>
+        // Simple animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to sections
+            const sections = document.querySelectorAll('section');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'all 0.6s ease';
+                
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

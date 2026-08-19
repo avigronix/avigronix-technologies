@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ shop_data.shop_name }} - Official Website</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+      * {
+        font-family: "Inter", sans-serif;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: #ffffff;
+        overflow-x: hidden;
+      }
+
+      .header-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .section {
+        padding: 5rem 0;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+      }
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, #3b82f6, #8b5cf6);
+        border-radius: 2px;
+      }
+
+      .info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        transition: all 0.4s ease;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        position: relative;
+        overflow: hidden;
+      }
+      .info-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, #3b82f6, #8b5cf6);
+      }
+
+      .info-card:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        transform: translateY(-10px);
+      }
+
+      .icon-box {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 55px;
+        height: 55px;
+        border-radius: 14px;
+        font-size: 24px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+      }
+      .social-link:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      footer {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white;
+      }
+      footer a {
+        color: #3b82f6;
+        transition: color 0.3s ease;
+      }
+      footer a:hover {
+        color: #60a5fa;
+      }
+
+      /* Mobile Menu */
+      .mobile-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: white;
+        z-index: 1000;
+        transition: right 0.4s ease;
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .mobile-menu.active {
+        right: 0;
+      }
+
+      .menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .menu-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .hero-gradient {
+        background: linear-gradient(
+          135deg,
+          rgba(30, 41, 59, 0.85) 0%,
+          rgba(15, 23, 42, 0.7) 100%
+        );
+      }
+      .payment-box {
+        max-width: 420px; /* controlled width */
+        margin-left: auto;
+        margin-right: auto;
+        padding: 1.8rem !important;
+        border-radius: 20px;
+      }
+      .payment-box p {
+        margin-bottom: 6px !important;
+      }
+
+      @media (max-width: 768px) {
+        .section {
+          padding: 3rem 0;
+        }
+        .section-title {
+          font-size: 2rem;
+        }
+        .info-card {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- HEADER -->
+    <header class="bg-white/90 header-shadow sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <img
+              src="{{ shop_data.logo }}"
+              alt="{{ shop_data.shop_name }} logo"
+              class="w-14 h-14 rounded-xl object-cover shadow-md"
+            />
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">
+                {{ shop_data.shop_name }}
+              </h1>
+              <p class="text-sm text-gray-600">{{ shop_data.category }}</p>
+            </div>
+          </div>
+
+          <nav class="hidden md:flex items-center gap-8">
+            <a
+              href="#home"
+              class="text-gray-700 hover:text-blue-600 font-medium transition"
+              >Home</a
+            >
+            <a
+              href="#about"
+              class="text-gray-700 hover:text-blue-600 font-medium transition"
+              >About</a
+            >
+            <a
+              href="#contact"
+              class="text-gray-700 hover:text-blue-600 font-medium transition"
+              >Contact</a
+            >
+          </nav>
+
+          <button
+            id="mobile-menu-button"
+            class="md:hidden text-gray-700 text-2xl"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobile-menu">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-xl font-bold">Menu</h2>
+        <button id="close-menu" class="text-2xl text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <nav class="flex flex-col gap-6">
+        <a href="#home" class="text-gray-700 text-lg font-medium py-2 border-b"
+          >Home</a
+        >
+        <a href="#about" class="text-gray-700 text-lg font-medium py-2 border-b"
+          >About</a
+        >
+        <a
+          href="#contact"
+          class="text-gray-700 text-lg font-medium py-2 border-b"
+          >Contact</a
+        >
+      </nav>
+    </div>
+    <div class="menu-overlay" id="menu-overlay"></div>
+
+    <!-- HERO -->
+    <section id="home" class="relative">
+      <div class="relative h-96 md:h-[500px] overflow-hidden">
+        <img
+          src="{{ shop_data.banner }}"
+          alt="Banner"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 hero-gradient"></div>
+
+        <div class="absolute inset-0 flex items-center">
+          <div class="max-w-7xl mx-auto px-6 w-full">
+            <div class="max-w-2xl text-white">
+              <h2 class="text-4xl md:text-5xl font-black mb-4">
+                Welcome to {{ shop_data.shop_name }}
+              </h2>
+              <p class="text-lg md:text-xl opacity-90">{{ shop_data.about }}</p>
+              <p class="mt-4 text-sm text-white/80">
+                {{ shop_data.address }}, {{ shop_data.city }}, {{
+                shop_data.state }} - {{ shop_data.pincode }}
+              </p>
+              <p class="mt-1 text-sm text-white/80">
+                Official Website:
+                <a href="{{ shop_data.shop_url }}" class="underline"
+                  >{{ shop_data.shop_url }}</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section bg-gray-50">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="section-title">About Our Business</h2>
+          <p class="text-gray-600 text-lg mt-6 max-w-3xl mx-auto">
+            {{ shop_data.about }}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Business Details -->
+          <div class="info-card">
+            <div class="icon-box bg-blue-100 text-blue-600">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Business Details</h3>
+            <p class="text-gray-700">
+              <strong>Business Name:</strong> {{ shop_data.shop_name }}
+            </p>
+            <p class="text-gray-700">
+              <strong>Type:</strong> {{ shop_data.business_type }}
+            </p>
+            <p class="text-gray-700">
+              <strong>Category:</strong> {{ shop_data.category }}
+            </p>
+            <p class="text-gray-700">
+              <strong>GST Number:</strong> {{ shop_data.gst_number }}
+            </p>
+            <p class="text-gray-700">
+              <strong>Subdomain:</strong> {{ shop_data.subdomain }}.avigronix.com
+            </p>
+            <p class="text-gray-700">
+              <strong>Status:</strong> {{ shop_data.shop_status | capitalize }}
+            </p>
+          </div>
+
+          <!-- Contact & Support -->
+          <div class="info-card">
+            <div class="icon-box bg-green-100 text-green-600">
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Contact & Support</h3>
+            <p class="text-gray-700">
+              <strong>Phone:</strong> {{ shop_data.contact_number }}
+            </p>
+            <p class="text-gray-700">
+              <strong>Email:</strong> {{ shop_data.email }}
+            </p>
+            <p class="text-gray-700">
+              <strong>Support Email:</strong> {{ shop_data.support_email }}
+            </p>
+            <p class="text-gray-700 mt-3">
+              <strong>Delivery Available:</strong> {{ "Yes" if
+              shop_data.delivery_available else "No" }}
+            </p>
+          </div>
+
+          <!-- Location -->
+          <div class="info-card">
+            <div class="icon-box bg-red-100 text-red-600">
+              <i class="fas fa-location-dot"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Our Location</h3>
+            <p class="text-gray-700">{{ shop_data.address }}</p>
+            <p class="text-gray-700 font-semibold">
+              {{ shop_data.city }}, {{ shop_data.state }}
+            </p>
+            <p class="text-gray-700">PIN: {{ shop_data.pincode }}</p>
+            <p class="text-gray-700 mt-4">
+              <strong>Website URL:</strong><br />{{ shop_data.shop_url }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section bg-white">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="section-title">Get In Touch</h2>
+          <p class="text-gray-600 text-lg mt-6">
+            We would love to hear from you!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <!-- Left: Contact info -->
+          <div>
+            <h3 class="text-2xl font-bold mb-6">Contact Information</h3>
+
+            <div class="space-y-6">
+              <div class="flex gap-4">
+                <div class="icon-box bg-green-100 text-green-600">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 uppercase">Phone</p>
+                  <p class="text-lg font-bold">
+                    {{ shop_data.contact_number }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4">
+                <div class="icon-box bg-blue-100 text-blue-600">
+                  <i class="fas fa-envelope"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 uppercase">Email</p>
+                  <p class="text-lg font-bold">{{ shop_data.email }}</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4">
+                <div class="icon-box bg-purple-100 text-purple-600">
+                  <i class="fas fa-headset"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 uppercase">Support Email</p>
+                  <p class="text-lg font-bold">{{ shop_data.support_email }}</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4">
+                <div class="icon-box bg-orange-100 text-orange-600">
+                  <i class="fas fa-map"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500 uppercase">Address</p>
+                  <p class="text-lg font-bold">
+                    {{ shop_data.address }}, {{ shop_data.city }}, {{
+                    shop_data.state }} - {{ shop_data.pincode }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="mt-10">
+              <h4 class="text-xl font-bold mb-4">Follow Us</h4>
+              <div class="flex gap-4">
+                {% if shop_data.social_media.whatsapp %}
+                <a
+                  href="https://wa.me/{{ shop_data.social_media.whatsapp }}"
+                  target="_blank"
+                  class="social-link text-green-500"
+                >
+                  <i class="fab fa-whatsapp"></i>
+                </a>
+                {% endif %} {% if shop_data.social_media.instagram %}
+                <a
+                  href="https://instagram.com/{{ shop_data.social_media.instagram }}"
+                  target="_blank"
+                  class="social-link text-pink-500"
+                >
+                  <i class="fab fa-instagram"></i>
+                </a>
+                {% endif %} {% if shop_data.social_media.facebook %}
+                <a
+                  href="https://facebook.com/{{ shop_data.social_media.facebook }}"
+                  target="_blank"
+                  class="social-link text-blue-600"
+                >
+                  <i class="fab fa-facebook"></i>
+                </a>
+                {% endif %} {% if shop_data.social_media.youtube %}
+                <a
+                  href="https://youtube.com/{{ shop_data.social_media.youtube }}"
+                  target="_blank"
+                  class="social-link text-red-500"
+                >
+                  <i class="fab fa-youtube"></i>
+                </a>
+                {% endif %} {% if shop_data.social_media.website %}
+                <a
+                  href="https://{{ shop_data.social_media.website }}"
+                  target="_blank"
+                  class="social-link text-indigo-500"
+                >
+                  <i class="fas fa-globe"></i>
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+         <!-- RIGHT SIDE : PREMIUM PAYMENT SECTION -->
+<div>
+  <h3 class="text-3xl font-extrabold mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+    Secure Payment Information
+  </h3>
+
+  <!-- Payment QR -->
+  {% if shop_data.payment_info.payment_qr %}
+  <div
+    class="rounded-2xl p-6 bg-white shadow-xl border border-gray-200 mb-10 hover:shadow-2xl transition-all duration-300"
+  >
+    <p class="font-semibold text-lg mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fas fa-qrcode text-blue-600 text-xl"></i> Scan & Pay
+    </p>
+    <img
+      src="{{ shop_data.payment_info.payment_qr }}"
+      alt="Payment QR"
+      class="rounded-xl w-full shadow-md hover:scale-[1.02] transition-transform duration-300"
+    />
+  </div>
+  {% endif %}
+
+  <!-- Payment Details Card -->
+  {% if shop_data.payment_info.bank_name or shop_data.payment_info.upi_id %}
+  <div
+    class="relative overflow-hidden rounded-2xl p-8 bg-white shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300"
+  >
+    <!-- gradient top border -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+    <h4 class="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
+      <i class="fas fa-money-check text-green-600"></i> Bank / UPI Details
+    </h4>
+
+    <div class="space-y-4 text-gray-800">
+
+      {% if shop_data.payment_info.account_holder %}
+      <p class="flex justify-between border-b pb-2">
+        <span class="font-semibold text-gray-600">Account Holder:</span>
+        <span>{{ shop_data.payment_info.account_holder }}</span>
+      </p>
+      {% endif %}
+
+      {% if shop_data.payment_info.bank_name %}
+      <p class="flex justify-between border-b pb-2">
+        <span class="font-semibold text-gray-600">Bank Name:</span>
+        <span>{{ shop_data.payment_info.bank_name }}</span>
+      </p>
+      {% endif %}
+
+      {% if shop_data.payment_info.account_number %}
+      <p class="flex justify-between border-b pb-2">
+        <span class="font-semibold text-gray-600">Account Number:</span>
+        <span>{{ shop_data.payment_info.account_number }}</span>
+      </p>
+      {% endif %}
+
+      {% if shop_data.payment_info.ifsc_code %}
+      <p class="flex justify-between border-b pb-2">
+        <span class="font-semibold text-gray-600">IFSC Code:</span>
+        <span>{{ shop_data.payment_info.ifsc_code }}</span>
+      </p>
+      {% endif %}
+
+      {% if shop_data.payment_info.upi_id %}
+      <p class="flex justify-between border-b pb-2">
+        <span class="font-semibold text-gray-600">UPI ID:</span>
+        <span>{{ shop_data.payment_info.upi_id }}</span>
+      </p>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div>
+            <h3 class="text-xl font-bold mb-4">{{ shop_data.shop_name }}</h3>
+            <p class="text-gray-400 mb-4">{{ shop_data.about }}</p>
+            <p class="text-gray-400">
+              {{ shop_data.city }}, {{ shop_data.state }}
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+            <ul class="space-y-2 text-gray-400">
+              <li><a href="#home">Home</a></li>
+              <li><a href="#about">About Us</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold mb-4">Contact Info</h3>
+            <p class="text-gray-400">
+              <i class="fas fa-phone mr-2"></i>{{ shop_data.contact_number }}
+            </p>
+            <p class="text-gray-400">
+              <i class="fas fa-envelope mr-2"></i>{{ shop_data.email }}
+            </p>
+            <p class="text-gray-400">
+              <i class="fas fa-map-marker-alt mr-2"></i>{{ shop_data.city }}
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+          © 2024 {{ shop_data.shop_name }} | Developed by
+          <a
+            href="https://avigronix.com"
+            target="_blank"
+            class="font-bold"
+            >AVIGRONIX TECHNOLOGIES</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      /* Mobile Menu */
+      const mobileBtn = document.getElementById("mobile-menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+      const closeMenu = document.getElementById("close-menu");
+      const overlay = document.getElementById("menu-overlay");
+
+      mobileBtn.onclick = () => {
+        mobileMenu.classList.add("active");
+        overlay.classList.add("active");
+      };
+      closeMenu.onclick = () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+      };
+      overlay.onclick = () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+      };
+    </script>
+  </body>
+</html>

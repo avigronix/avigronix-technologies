@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Our Team – AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block description %}
+Meet our world-class development team — expert software engineers, backend specialists, frontend experts, DevOps professionals, mobile developers & AI engineers delivering high-performance digital products.
+{% endblock %}
+
+{% block content %}
+
+<!-- ===================== HERO ===================== -->
+<section class="relative bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 py-32 text-white overflow-hidden">
+
+    <!-- Glow Background -->
+    <div class="pointer-events-none absolute inset-0">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-blue-700/20 blur-[140px] rounded-full"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-700/20 blur-[140px] rounded-full"></div>
+    </div>
+
+    <div class="container mx-auto px-6 max-w-4xl text-center relative z-10">
+        <p class="text-blue-300 text-xs tracking-[0.25em] uppercase mb-4">Meet Our Experts</p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+            Development Team<br/>Powering Your Digital Transformation
+        </h1>
+        <p class="text-slate-300 text-lg max-w-3xl mx-auto">
+            A highly skilled team of engineers, innovators, and problem-solvers creating scalable, secure,
+            and future-ready digital products.
+        </p>
+    </div>
+</section>
+
+
+<!-- ===================== DEVELOPMENT TEAM (10 MEMBERS) ===================== -->
+<section class="py-24 bg-slate-50">
+    <div class="container mx-auto px-6 max-w-7xl">
+
+        <div class="text-center mb-20">
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">Development Team</h2>
+            <p class="text-slate-600 text-lg max-w-3xl mx-auto">
+                Skilled engineers, developers, and architects building high-performance digital products.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-10">
+
+            <!-- 1 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-sky-100">
+                    <i class="fab fa-python text-sky-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Neha Singh</h3>
+                <p class="text-blue-600 font-semibold mb-3">Senior Python Developer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    FastAPI & microservices expert delivering scalable backend architectures.
+                </p>
+            </div>
+
+            <!-- 2 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-cyan-100">
+                    <i class="fab fa-react text-cyan-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Rohit Verma</h3>
+                <p class="text-blue-600 font-semibold mb-3">Frontend Engineer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Specializes in React.js, reusable UI components & performance optimization.
+                </p>
+            </div>
+
+            <!-- 3 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-purple-100">
+                    <i class="fab fa-android text-purple-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Sneha Gupta</h3>
+                <p class="text-blue-600 font-semibold mb-3">Mobile App Developer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Builds seamless cross-platform apps using Flutter & React Native.
+                </p>
+            </div>
+
+            <!-- 4 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-indigo-100">
+                    <i class="fas fa-database text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Vikram Joshi</h3>
+                <p class="text-blue-600 font-semibold mb-3">Database Architect</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Expert in PostgreSQL, MongoDB & high-availability database design.
+                </p>
+            </div>
+
+            <!-- 5 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-emerald-100">
+                    <i class="fas fa-cloud text-emerald-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Deepak Rao</h3>
+                <p class="text-blue-600 font-semibold mb-3">DevOps Engineer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    AWS, Docker, CI/CD & Kubernetes automation expert.
+                </p>
+            </div>
+
+            <!-- 6 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-rose-100">
+                    <i class="fas fa-brain text-rose-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Ankit Tiwari</h3>
+                <p class="text-blue-600 font-semibold mb-3">AI / ML Engineer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Builds AI-powered automation, LLM integrations & ML pipelines.
+                </p>
+            </div>
+
+            <!-- 7 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-yellow-100">
+                    <i class="fas fa-sitemap text-yellow-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Pooja Rao</h3>
+                <p class="text-blue-600 font-semibold mb-3">Full-Stack Developer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Expert in React + FastAPI, scalable APIs & admin dashboards.
+                </p>
+            </div>
+
+            <!-- 8 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-teal-100">
+                    <i class="fas fa-server text-teal-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Harsh Mehta</h3>
+                <p class="text-blue-600 font-semibold mb-3">System Engineer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    API scaling, server optimization & performance engineering.
+                </p>
+            </div>
+
+            <!-- 9 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-green-100">
+                    <i class="fab fa-node-js text-green-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Saurabh Pandey</h3>
+                <p class="text-blue-600 font-semibold mb-3">Node.js Backend Developer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Builds backend API services & real-time applications.
+                </p>
+            </div>
+
+            <!-- 10 -->
+            <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-blue-100">
+                    <i class="fas fa-code text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Varun Sharma</h3>
+                <p class="text-blue-600 font-semibold mb-3">Software Engineer</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Full-stack developer focusing on modular, maintainable code.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ===================== CTA ===================== -->
+<section class="py-24 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+    <div class="container mx-auto px-6 max-w-3xl">
+
+        <h2 class="text-4xl font-bold mb-4">Want to Work With Our Team?</h2>
+
+        <p class="text-blue-100 text-lg mb-10">
+            Join a team of passionate engineers building cutting-edge solutions for global businesses.
+        </p>
+
+        <a href="/contact" class="px-10 py-4 bg-white text-blue-700 font-semibold text-lg rounded-2xl shadow-xl hover:bg-slate-100 transition">
+            View Open Positions
+        </a>
+    </div>
+</section>
+
+{% endblock %}

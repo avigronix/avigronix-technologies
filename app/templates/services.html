@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Our Services – AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block description %}
+Explore world-class software development, mobile apps, e-commerce systems, DevOps, cloud solutions, AI automation, SEO, and digital transformation services delivered by AVIGRONIX TECHNOLOGIES.
+{% endblock %}
+
+{% block content %}
+
+<!-- ======================= HERO ======================= -->
+<section class="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-32 text-white overflow-hidden">
+
+    <!-- background glow -->
+    <div class="pointer-events-none absolute inset-0">
+        <div class="absolute -top-40 -left-20 w-96 h-96 rounded-full bg-blue-600/25 blur-[120px]"></div>
+        <div class="absolute -bottom-40 -right-20 w-96 h-96 rounded-full bg-purple-600/25 blur-[120px]"></div>
+    </div>
+
+    <div class="relative container mx-auto px-6 max-w-4xl text-center">
+        <p class="text-blue-300 text-xs tracking-[0.25em] uppercase mb-4">What We Do</p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+            Digital Solutions Designed<br/>For Modern Businesses
+        </h1>
+        <p class="text-slate-300 text-lg max-w-3xl mx-auto">
+            From enterprise-grade applications to cloud-native systems and AI-powered automation, 
+            we engineer technology that delivers performance, scalability, and real business impact.
+        </p>
+    </div>
+</section>
+
+
+<!-- ======================= SERVICES GRID ======================= -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6 max-w-7xl">
+
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">Our Core Services</h2>
+            <p class="text-slate-600 text-lg max-w-3xl mx-auto">
+                A carefully crafted suite of technology services built to support your growth from ideation to enterprise scale.
+            </p>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+            <!-- SERVICE CARD TEMPLATE -->
+            {% macro service(icon, color, title, desc, features) %}
+            <div class="group bg-slate-50 border border-slate-200 hover:border-transparent hover:shadow-xl p-8 rounded-3xl transition">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+                    style="background-color: {{ color }}20;">
+                    <i class="{{ icon }} text-3xl" style="color: {{ color }}"></i>
+                </div>
+
+                <h3 class="text-2xl font-bold text-slate-900 mb-4">{{ title }}</h3>
+                <p class="text-slate-600 mb-6 leading-relaxed">{{ desc }}</p>
+
+                <ul class="space-y-2 mb-6 text-slate-700 text-sm">
+                    {% for f in features %}
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i> {{ f }}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <a href="/contact" class="text-blue-600 font-semibold hover:text-blue-800 inline-flex items-center">
+                    Get Started <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            {% endmacro %}
+
+            <!-- 1. Web Development -->
+            {{ service(
+                'fas fa-code',
+                '#2563eb',
+                'Custom Web Development',
+                'High-performance, scalable web applications using modern tech stacks like FastAPI, Python, React & Node.js.',
+                [
+                    'FastAPI Backend',
+                    'Responsive UI/UX',
+                    'Real-time Features',
+                    'API-first Architecture'
+                ]
+            ) }}
+
+            <!-- 2. E-commerce -->
+            {{ service(
+                'fas fa-shopping-cart',
+                '#059669',
+                'E-commerce Development',
+                'AI-powered online stores, multi-vendor systems, order automation & payment gateway integrations.',
+                [
+                    'AI Recommendations',
+                    'Multi-vendor Support',
+                    'Omnichannel Selling',
+                    'Analytics Dashboard'
+                ]
+            ) }}
+
+            <!-- 3. Mobile Apps -->
+            {{ service(
+                'fas fa-mobile-alt',
+                '#7c3aed',
+                'Mobile App Development',
+                'Cross-platform mobile applications for iOS & Android with modern UI and native-like performance.',
+                [
+                    'Flutter / React Native',
+                    'Offline Support',
+                    'Push Notifications',
+                    'API Integration'
+                ]
+            ) }}
+
+            <!-- 4. Cloud & DevOps -->
+            {{ service(
+                'fas fa-cloud',
+                '#06b6d4',
+                'Cloud & DevOps Solutions',
+                'Cloud infrastructure, CI/CD pipelines, containerization, microservices & automation.',
+                [
+                    'AWS / GCP Setup',
+                    'Docker & Kubernetes',
+                    'CI/CD Pipelines',
+                    'Auto Scaling'
+                ]
+            ) }}
+
+            <!-- 5. AI & Automation -->
+            {{ service(
+                'fas fa-brain',
+                '#e11d48',
+                'AI & Intelligent Automation',
+                'Chatbots, LLM integrations, predictive analytics & automation tools for modern businesses.',
+                [
+                    'AI Chatbots',
+                    'Machine Learning',
+                    'Process Automation',
+                    'Data Insights'
+                ]
+            ) }}
+
+            <!-- 6. SEO & Digital Marketing -->
+            {{ service(
+                'fas fa-bullhorn',
+                '#f59e0b',
+                'SEO & Digital Marketing',
+                'Result-focused SEO, paid ads, branding & performance marketing to grow your online presence.',
+                [
+                    'SEO Optimization',
+                    'Ad Campaigns',
+                    'Brand Positioning',
+                    'Lead Generation'
+                ]
+            ) }}
+
+            <!-- 7. UI/UX Design -->
+            {{ service(
+                'fas fa-palette',
+                '#3b82f6',
+                'UI/UX & Product Design',
+                'World-class user experience and interface design focused on clarity, usability & conversion.',
+                [
+                    'Wireframes & Prototypes',
+                    'Design Systems',
+                    'Product Branding',
+                    'High-Fidelity UI'
+                ]
+            ) }}
+
+            <!-- 8. ERP & Enterprise Systems -->
+            {{ service(
+                'fas fa-sitemap',
+                '#16a34a',
+                'ERP & Enterprise Development',
+                'Custom ERP systems, HRMS, CRM, workflow automation & enterprise management tools.',
+                [
+                    'HRMS & Payroll',
+                    'Vendor Management',
+                    'Workflow Automation',
+                    'Secure Role-based Access'
+                ]
+            ) }}
+
+            <!-- 9. Maintenance -->
+            {{ service(
+                'fas fa-tools',
+                '#8b5cf6',
+                'Support & Maintenance',
+                '24/7 monitoring, enhancements, updates, and long-term support for all digital products.',
+                [
+                    '24/7 Support',
+                    'Performance Optimization',
+                    'Security Patches',
+                    'Error Monitoring'
+                ]
+            ) }}
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ======================= CTA ======================= -->
+<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+    <div class="container mx-auto px-6 max-w-3xl">
+        <h2 class="text-4xl font-bold mb-4">Let’s Build Your Next Digital Product</h2>
+        <p class="text-blue-100 text-lg mb-8">
+            Whether you need a modern web app, enterprise ERP, mobile solution, or cloud automation —
+            we deliver with precision and passion.
+        </p>
+        <a href="/contact" class="px-10 py-4 bg-white text-blue-700 font-semibold text-lg rounded-2xl shadow-xl hover:bg-slate-100 transition">
+            Get Free Consultation
+        </a>
+    </div>
+</section>
+
+{% endblock %}

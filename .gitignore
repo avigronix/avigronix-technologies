@@ -1,0 +1,100 @@
+# ============================
+# 📌 Python / FastAPI Backend
+# ============================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment variables
+.env
+.env.*
+*.env
+!.env.example
+
+# Logs
+*.log
+logs/
+uwsgi.log
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+pytest_cache/
+__pypackages__/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# SQLite / local DB
+*.sqlite3
+*.db
+
+# Uploads / temp files
+uploads/
+media/
+temp/
+tmp/
+
+# IDE folders
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ==================================================
+# 📌 Node / React / Frontend (if you have frontend)
+# ==================================================
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency folders
+node_modules/
+
+# Production build
+build/
+dist/
+out/
+
+# Temporary
+*.tmp
+*.temp
+
+# Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==================================================
+# 📌 Docker
+# ==================================================
+docker/data/
+docker/volumes/
+docker-compose.override.yml
+
+# ==================================================
+# 📌 Misc
+# ==================================================
+*.swp
+*.swo
+*.bak
+*.orig

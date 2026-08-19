@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {# ---------- BASIC META ---------- #}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    {# ---------- SEO TITLE + DESCRIPTION (OVERRIDABLE) ---------- #}
+    <title>
+        {% block title %}
+            {{ seo_title or "AVIGRONIX TECHNOLOGIES | Software, Web, Mobile & AI Development Company in India" }}
+        {% endblock %}
+    </title>
+
+    <meta name="description"
+          content="{% block meta_description %}
+              {{ seo_description or 'AVIGRONIX TECHNOLOGIES is a India-based software development, website, mobile app and AI automation company serving clients across Kushinagar, Noida and pan India.' }}
+          {% endblock %}">
+
+    <meta name="keywords"
+          content="{% block meta_keywords %}
+              {{ seo_keywords or 'software company Kushinagar, website development India, mobile app development Noida, AI automation India, AVIGRONIX TECHNOLOGIES' }}
+          {% endblock %}">
+
+    <meta name="author" content="AVIGRONIX TECHNOLOGIES" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#2563eb">
+
+    {# ---------- CANONICAL URL ---------- #}
+    <link rel="canonical" href="{{ canonical_url or request.url }}"/>
+
+    {# ---------- GEO / LOCAL SEO (KUSHINAGAR / INDIA) ---------- #}
+    <meta name="geo.region" content="IN-UP">
+    <meta name="geo.placename" content="Kushinagar">
+    <meta name="geo.position" content="26.7398;83.8870">
+    <meta name="ICBM" content="26.7398, 83.8870">
+
+    {# ---------- OPEN GRAPH (FACEBOOK / LINKEDIN) ---------- #}
+    <meta property="og:site_name" content="AVIGRONIX TECHNOLOGIES"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="{{ seo_title or 'AVIGRONIX TECHNOLOGIES | Digital Excellence in India' }}"/>
+    <meta property="og:description"
+          content="{{ seo_description or 'Enterprise-grade software development, websites, mobile apps & AI solutions for businesses across India.' }}"/>
+    <meta property="og:url" content="{{ request.url }}"/>
+    <meta property="og:image"
+          content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    {# ---------- TWITTER CARD ---------- #}
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="{{ seo_title or 'AVIGRONIX TECHNOLOGIES' }}"/>
+    <meta name="twitter:description"
+          content="{{ seo_description or 'Modern IT solutions, web, mobile & AI services from India.' }}"/>
+    <meta name="twitter:image"
+          content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
+
+    {# ---------- FAVICON ---------- #}
+    <link rel="icon" href="{{ url_for('static', path='images/favicon.png') }}" type="image/png"/>
+    <link rel="apple-touch-icon" href="{{ url_for('static', path='images/favicon.png') }}">
+
+    {# ---------- TAILWIND + FONTAWESOME ---------- #}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+
+    {# ---------- GLOBAL STYLES ---------- #}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMZ7RMVX47"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-QMZ7RMVX47');
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-white: #ffffff;
+            --bg-gray-50: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Glass effect for navbar */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Navigation link animations */
+        .nav-link {
+            position: relative;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        /* Mobile menu animations */
+        .mobile-menu-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .mobile-menu-enter-active {
+            transform: translateX(0);
+            opacity: 1;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .mobile-menu-exit {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .mobile-menu-exit-active {
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+        }
+
+        /* Overlay animation */
+        .overlay-enter {
+            opacity: 0;
+        }
+
+        .overlay-enter-active {
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .overlay-exit {
+            opacity: 1;
+        }
+
+        .overlay-exit-active {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* Hover effects for buttons */
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Responsive typography */
+        @media (max-width: 640px) {
+            .text-responsive {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+
+    {# EXTRA CSS PER PAGE #}
+    {% block extra_css %}{% endblock %}
+
+    {# ---------- ORGANIZATION SCHEMA (JSON-LD) ---------- #}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "AVIGRONIX TECHNOLOGIES",
+        "url": "{{ site_url or 'https://avigronix.com' }}",
+        "logo": "{{ site_logo or url_for('static', path='images/logo.png') }}",
+        "description": "Leading software development, website, mobile app and AI automation company in India",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Sector 59",
+            "addressLocality": "Kushinagar",
+            "addressRegion": "Uttar Pradesh",
+            "postalCode": "274409",
+            "addressCountry": "IN"
+        },
+        "contactPoint": [{
+            "@type": "ContactPoint",
+            "telephone": "+91-9450891557",
+            "contactType": "customer service",
+            "areaServed": "IN",
+            "availableLanguage": ["English", "Hindi"]
+        }],
+        "sameAs": [
+            "https://facebook.com/itwebtechsolutions",
+            "https://twitter.com/itwebtech",
+            "https://linkedin.com/company/itwebtechsolutions"
+        ]
+    }
+    </script>
+</head>
+
+<body class="bg-white text-gray-900 antialiased">
+    {# ================= NAVIGATION BAR ================= #}
+    <nav class="glass-nav fixed top-0 left-0 w-full z-50 py-3">
+        <div class="container mx-auto px-4 md:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <!-- Logo Section -->
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div class="relative">
+                        <img src="{{ url_for('static', path='images/logo.png') }}"
+                             class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
+                             alt="AVIGRONIX TECHNOLOGIES Logo"
+                             loading="eager"
+                             width="auto"
+                             height="auto" />
+                        <div class="absolute -inset-1 bg-blue-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                   
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-1">
+                    {% set current_path = request.url.path %}
+                    
+                    {% macro desktop_nav_item(name, link, icon) %}
+                        <a href="{{ link }}"
+                           class="nav-link flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 
+                                  {{ 'active' if current_path == link else '' }}
+                                  hover:bg-blue-50">
+                            <i class="{{ icon }} mr-2 text-blue-600 text-sm"></i>
+                            <span class="font-medium text-sm tracking-wide">{{ name }}</span>
+                        </a>
+                    {% endmacro %}
+
+                    {{ desktop_nav_item("Home", "/", "fas fa-home") }}
+                    {{ desktop_nav_item("About", "/about", "fas fa-info-circle") }}
+                    {{ desktop_nav_item("Services", "/services", "fas fa-cogs") }}
+                    {{ desktop_nav_item("Projects", "/projects", "fas fa-briefcase") }}
+                    {{ desktop_nav_item("Team", "/team", "fas fa-users") }}
+                    {{ desktop_nav_item("Blog", "/blog", "fas fa-newspaper") }}
+                    {{ desktop_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
+
+                    <!-- Contact CTA Button -->
+                    <a href="/contact"
+                       class="ml-4 flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg shadow-md hover-lift transition-all duration-300 group">
+                        <i class="fas fa-paper-plane mr-2 transform group-hover:translate-x-1 transition-transform"></i>
+                        <span class="font-semibold text-sm">Contact Us</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuToggle"
+                        class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="Toggle mobile menu"
+                        aria-expanded="false">
+                    <i class="fas fa-bars text-gray-700 text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    {# ================= MOBILE MENU OVERLAY ================= #}
+    <div id="mobileOverlay"
+         class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity duration-300"
+         aria-hidden="true"></div>
+
+    {# ================= MOBILE SIDEBAR MENU ================= #}
+    <div id="mobileSidebar"
+         class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="p-6 h-full flex flex-col">
+            <!-- Mobile Menu Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-3">
+                    <img src="{{ url_for('static', path='images/logo.png') }}"
+                         class="h-10 w-auto"
+                         alt="Logo" />
+                    <span class="text-lg font-bold text-gray-900">Menu</span>
+                </div>
+                <button id="mobileMenuClose"
+                        class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                        aria-label="Close menu">
+                    <i class="fas fa-times text-xl text-gray-700"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Navigation Links -->
+            <div class="flex-1 overflow-y-auto">
+                <nav class="space-y-1">
+                    {% macro mobile_nav_item(name, link, icon) %}
+                        <a href="{{ link }}"
+                           class="flex items-center px-4 py-3.5 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 
+                                  {{ 'bg-blue-50 text-blue-600' if request.url.path == link else '' }}">
+                            <i class="{{ icon }} w-5 text-center mr-3 text-lg"></i>
+                            <span class="font-medium">{{ name }}</span>
+                            {% if request.url.path == link %}
+                                <i class="fas fa-chevron-right ml-auto text-blue-600"></i>
+                            {% endif %}
+                        </a>
+                    {% endmacro %}
+
+                    {{ mobile_nav_item("Home", "/", "fas fa-home") }}
+                    {{ mobile_nav_item("About", "/about", "fas fa-info-circle") }}
+                    {{ mobile_nav_item("Services", "/services", "fas fa-cogs") }}
+                    {{ mobile_nav_item("Projects", "/projects", "fas fa-briefcase") }}
+                    {{ mobile_nav_item("Team", "/team", "fas fa-users") }}
+                    {{ mobile_nav_item("Blog", "/blog", "fas fa-newspaper") }}
+                    {{ mobile_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
+                </nav>
+
+                <!-- Mobile Contact CTA -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <a href="/contact"
+                       class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-3.5 rounded-xl font-semibold shadow-md hover-lift transition-all duration-300">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Contact Us Now
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Footer Info -->
+            <div class="pt-6 border-t border-gray-200 mt-auto">
+                <div class="space-y-3">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-phone-alt text-blue-500 mr-3"></i>
+                        <span class="text-sm">+91 9450891557</span>
+                    </div>
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-envelope text-blue-500 mr-3"></i>
+                        <span class="text-sm">itwebtechinfo@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ================= MAIN CONTENT AREA ================= #}
+    <main class="min-h-screen pt-20 md:pt-24">
+        {% block content %}{% endblock %}
+    </main>
+
+    {# ================= FOOTER ================= #}
+    <footer class="bg-gradient-to-br from-gray-900 to-gray-950 text-white pt-16 pb-10">
+        <div class="container mx-auto px-4 md:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+                <!-- Company Info -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-start space-x-4 mb-6">
+                        <div class="relative">
+                            <img src="{{ url_for('static', path='images/logo-icon.png') }}"
+                                 class="h-14 w-auto"
+                                 alt="AVIGRONIX TECHNOLOGIES Logo"
+                                 loading="lazy" />
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-1">AVIGRONIX TECHNOLOGIES</h3>
+                            <p class="text-blue-300 font-medium">Digital Innovation Partners</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed max-w-xl">
+                        We are a premier technology solutions provider specializing in custom software development, 
+                        responsive web design, mobile applications, and AI-driven automation. Serving businesses 
+                        across Kushinagar, Noida, and throughout India with cutting-edge digital solutions.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                        <i class="fas fa-link mr-2 text-blue-400"></i>
+                        Quick Links
+                    </h4>
+                    <ul class="space-y-3">
+                        {% macro footer_link(name, link, icon) %}
+                            <li>
+                                <a href="{{ link }}" 
+                                   class="text-gray-400 hover:text-white hover:translate-x-1 transition-all duration-200 flex items-center">
+                                    <i class="{{ icon }} mr-3 text-blue-500"></i>
+                                    {{ name }}
+                                </a>
+                            </li>
+                        {% endmacro %}
+
+                        {{ footer_link("Our Services", "/services", "fas fa-cog") }}
+                        {{ footer_link("Projects Portfolio", "/projects", "fas fa-briefcase") }}
+                        {{ footer_link("About Company", "/about", "fas fa-building") }}
+                        {{ footer_link("Team Members", "/team", "fas fa-users") }}
+                        {{ footer_link("Blog Articles", "/blog", "fas fa-newspaper") }}
+                        {{ footer_link("FAQs", "/faq", "fas fa-question-circle") }}
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                        <i class="fas fa-address-book mr-2 text-blue-400"></i>
+                        Contact Info
+                    </h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                                <i class="fas fa-phone text-blue-400"></i>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-sm">Phone</span>
+                                <a href="tel:+919555811092" class="text-white font-medium hover:text-blue-300">
+                                    +91 9450891557
+                                </a>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                                <i class="fas fa-envelope text-blue-400"></i>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-sm">Email</span>
+                                <a href="mailto:itwebtechinfo@gmail.com" class="text-white font-medium hover:text-blue-300">
+                                    itwebtechinfo@gmail.com
+                                </a>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                                <i class="fas fa-map-marker-alt text-blue-400"></i>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-sm">Location</span>
+                                <span class="text-white font-medium">Noida Sector 59, Uttar Pradesh, India</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Social Media -->
+                    <div class="mt-8">
+                        <h5 class="text-sm font-semibold text-gray-400 mb-3">FOLLOW US</h5>
+                        <div class="flex space-x-3">
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-700 transition-colors">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 transition-colors">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="pt-8 border-t border-gray-800">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="text-gray-500 text-sm">
+                        © {{ current_year }} AVIGRONIX TECHNOLOGIES. All Rights Reserved.
+                    </div>
+                    <div class="flex space-x-6 text-sm">
+                        <a href="/privacy-policy" class="text-gray-400 hover:text-white transition-colors">
+                            Privacy Policy
+                        </a>
+                        <a href="/terms-and-conditions" class="text-gray-400 hover:text-white transition-colors">
+                            Terms & Conditions
+                        </a>
+                        <!-- <a href="/sitemap" class="text-gray-400 hover:text-white transition-colors">
+                            Sitemap
+                        </a> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {# ================= JAVASCRIPT ================= #}
+    <script>
+        // Mobile Menu Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.getElementById('mobileMenuToggle');
+            const mobileClose = document.getElementById('mobileMenuClose');
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            const menuIcon = mobileToggle.querySelector('i');
+
+            // Toggle mobile menu
+            function toggleMobileMenu() {
+                const isOpen = mobileSidebar.classList.contains('translate-x-0');
+                
+                if (isOpen) {
+                    // Close menu
+                    mobileSidebar.classList.remove('translate-x-0');
+                    mobileSidebar.classList.add('translate-x-full');
+                    mobileOverlay.classList.add('hidden');
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    menuIcon.className = 'fas fa-bars text-gray-700 text-xl';
+                    document.body.style.overflow = 'auto';
+                } else {
+                    // Open menu
+                    mobileSidebar.classList.remove('translate-x-full');
+                    mobileSidebar.classList.add('translate-x-0');
+                    mobileOverlay.classList.remove('hidden');
+                    mobileToggle.setAttribute('aria-expanded', 'true');
+                    menuIcon.className = 'fas fa-times text-gray-700 text-xl';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            // Event Listeners
+            mobileToggle.addEventListener('click', toggleMobileMenu);
+            mobileClose.addEventListener('click', toggleMobileMenu);
+            mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+            // Close menu on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileSidebar.classList.contains('translate-x-0')) {
+                    toggleMobileMenu();
+                }
+            });
+
+            // Close menu when clicking on a mobile link
+            const mobileLinks = mobileSidebar.querySelectorAll('a');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 1024) { // Only on mobile
+                        toggleMobileMenu();
+                    }
+                });
+            });
+
+            // Update active nav link on scroll
+            function updateActiveNav() {
+                const currentPath = window.location.pathname;
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === currentPath) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            // Initialize
+            updateActiveNav();
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href.startsWith('#') && href.length > 1) {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Add hover effects dynamically
+            const hoverElements = document.querySelectorAll('.hover-lift');
+            hoverElements.forEach(el => {
+                el.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+                el.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+
+        // Current year for copyright
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearElements = document.querySelectorAll('[data-current-year]');
+            const currentYear = new Date().getFullYear();
+            yearElements.forEach(el => {
+                el.textContent = currentYear;
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

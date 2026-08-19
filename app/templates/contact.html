@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Contact Us - AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block description %}Get in touch for software development, mobile apps, AI automation & enterprise digital solutions.{% endblock %}
+
+{% block content %}
+
+<!-- HERO (Minimal Corporate) -->
+<section class="py-20 bg-gradient-to-b from-[#0F1629] to-[#142447] text-white">
+    <div class="container mx-auto px-6 text-center max-w-3xl">
+        <h1 class="text-4xl md:text-5xl font-semibold mb-4 leading-tight">
+            Let's Connect
+        </h1>
+        <p class="text-base md:text-lg text-gray-300 leading-relaxed">
+            Tell us about your project, and our experts will get back to you shortly.
+        </p>
+    </div>
+</section>
+
+<!-- MAIN CONTACT SECTION -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-6 grid lg:grid-cols-3 gap-10">
+
+        <!-- LEFT CONTACT CARDS (Slim + Professional) -->
+        <div class="space-y-6" id="contact-info">
+
+            <!-- Card Component -->
+            {% macro card(icon, title, line1, line2) %}
+                <div class="p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-700 text-xl">
+                            <i class="{{ icon }}"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">{{ title }}</h3>
+                            <p class="text-gray-700 text-sm mt-1">{{ line1 }}</p>
+                            <p class="text-gray-500 text-xs">{{ line2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endmacro %}
+
+            {{ card('fas fa-phone', 'Call Us', '+91 945 089 1557', 'Mon–Fri • 9 AM–6 PM IST') }}
+            {{ card('fas fa-envelope', 'Email Us', 'itwebtechinfo@gmail.com', 'Response within 24 hours') }}
+            {{ card('fas fa-map-marker-alt', 'Office Location', 'Noida Sector 59', 'Uttar Pradesh, India') }}
+
+        </div>
+
+        <!-- RIGHT CONTACT FORM (Slim + Minimal) -->
+        <div class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-8" id="contact-form">
+
+            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Send Us a Message</h3>
+            <p class="text-gray-600 text-sm mb-8">Our team will reach out within 24 hours.</p>
+
+            <form class="space-y-6" id="contactForm">
+
+                <!-- Row 1 -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="clean-group">
+                        <label for="full_name">Full Name *</label>
+                        <input type="text" id="full_name" name="full_name" required>
+                    </div>
+
+                    <div class="clean-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="clean-group">
+                        <label for="phone">Phone *</label>
+                        <input type="text" id="phone" name="phone" required>
+                    </div>
+
+                    <div class="clean-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="clean-group">
+                    <label for="service">Service Interested *</label>
+                    <select id="service" name="service" required>
+                        <option value="">Select a service</option>
+                        <option>Website Development</option>
+                        <option>Mobile App Development</option>
+                        <option>E-commerce Solutions</option>
+                        <option>Cloud & DevOps</option>
+                        <option>AI Automation</option>
+                        <option>UI/UX Design</option>
+                    </select>
+                </div>
+
+                <!-- Message -->
+                <div class="clean-group">
+                    <label for="message">Project Details *</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+
+                <button type="submit"
+                        class="w-full py-3 bg-blue-600 text-white rounded-lg text-base font-medium hover:bg-blue-700 transition"
+                        id="submitBtn">
+                    Send Message
+                </button>
+
+                <p id="formStatus" class="text-sm mt-2"></p>
+
+            </form>
+        </div>
+
+    </div>
+</section>
+
+<!-- FOOTER CTA (Minimal) -->
+<section class="py-16 bg-[#142447] text-white text-center">
+    <h2 class="text-3xl font-semibold mb-3">Ready to Discuss Your Project?</h2>
+    <p class="text-gray-300 text-sm mb-6">We work with global startups & enterprises.</p>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="tel:+919555811092" class="px-6 py-3 bg-white text-blue-700 rounded-lg text-sm font-medium">
+            Call Us
+        </a>
+        <a href="mailto:itwebtechinfo@gmail.com"
+           class="px-6 py-3 border border-white text-white rounded-lg text-sm font-medium hover:bg-white hover:text-blue-700 transition">
+            Email Us
+        </a>
+    </div>
+</section>
+
+<style>
+    .clean-group input,
+    .clean-group select,
+    .clean-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #f9fafb;
+        font-size: 14px;
+    }
+    .clean-group label {
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 6px;
+        display: inline-block;
+    }
+    .social-icon-clean {
+        width: 40px;
+        height: 40px;
+        background: #e5e7eb;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #374151;
+        transition: .2s;
+    }
+    .social-icon-clean:hover {
+        background: #d1d5db;
+    }
+</style>
+
+<script>
+    const form = document.getElementById("contactForm");
+    const statusEl = document.getElementById("formStatus");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const payload = {
+            full_name: form.full_name.value.trim(),
+            email: form.email.value.trim(),
+            phone: form.phone.value.trim(),
+            company: form.company.value.trim(),
+            service: form.service.value,
+            message: form.message.value.trim(),
+        };
+
+        // Basic check
+        if (!payload.full_name || !payload.email || !payload.phone || !payload.service || !payload.message) {
+            statusEl.textContent = "Please fill all required fields.";
+            statusEl.className = "text-red-600 text-sm mt-2";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+        statusEl.textContent = "";
+        statusEl.className = "";
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                statusEl.textContent = "✅ Message sent successfully!";
+                statusEl.className = "text-green-600 text-sm mt-2";
+                form.reset();
+            } else {
+                statusEl.textContent = "❌ " + (data.detail || "Failed to send message.");
+                statusEl.className = "text-red-600 text-sm mt-2";
+            }
+        } catch (err) {
+            statusEl.textContent = "❌ Network error. Please try again.";
+            statusEl.className = "text-red-600 text-sm mt-2";
+            console.error(err);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Message";
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+
+{% block title %}Register Your Business{% endblock %}
+
+{% block content %}
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">🚀 Start Your Online Shop</h1>
+        <p class="text-xl text-gray-600">Get your business online in minutes with a beautiful storefront</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="flex justify-center mb-12">
+        <div class="flex items-center space-x-8">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                <span class="ml-3 font-semibold text-blue-600">Business Details</span>
+            </div>
+            <div class="w-16 h-1 bg-gray-300"></div>
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold">2</div>
+                <span class="ml-3 font-semibold text-gray-500">Preview</span>
+            </div>
+            <div class="w-16 h-1 bg-gray-300"></div>
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold">3</div>
+                <span class="ml-3 font-semibold text-gray-500">Go Live</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- NOTE: action change kar sakta hai: /shop/preview ya /shop/save -->
+        <form action="/shop/preview" method="post" enctype="multipart/form-data" class="p-8 space-y-10">
+            <!-- BASIC INFO + DOMAIN -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🏪 Basic Shop Information</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Shop Name (shopName) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Shop Name *
+                        </label>
+                        <input type="text" name="shopName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                               placeholder="Enter your shop name">
+                    </div>
+
+                    <!-- Domain (domain) / Subdomain helper -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Subdomain / Shop URL *
+                        </label>
+                        <div class="flex items-center">
+                            <input type="text" name="domain" required
+                                   class="flex-1 px-4 py-3 border border-gray-300 rounded-l-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="myshop">
+                            <span class="px-4 py-3 bg-gray-100 border border-l-0 border-gray-300 rounded-r-xl text-gray-600">
+                                .avigronix.com
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Your shop URL: https://<span id="url-preview" class="font-semibold">myshop</span>.avigronix.com
+                        </p>
+                    </div>
+
+                    <!-- About (about) -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            About Your Shop *
+                        </label>
+                        <textarea name="about" required rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                  placeholder="Describe your business, products, and what makes you unique..."></textarea>
+                    </div>
+
+                    <!-- Category (category) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Category *
+                        </label>
+                        <select name="category" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Home & Garden">Home & Garden</option>
+                            <option value="Beauty">Beauty & Cosmetics</option>
+                            <option value="Food">Food & Beverages</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Books">Books & Stationery</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Business Type (businessType) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Business Type *
+                        </label>
+                        <select name="businessType" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Type</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Wholesale">Wholesale</option>
+                            <option value="Service">Service</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BRANDING (logo, banner) -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🎨 Branding</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Logo (logo) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Shop Logo *
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                             onclick="document.getElementById('logo').click()">
+                            <input type="file" id="logo" name="logo" accept="image/*" required class="hidden" onchange="previewLogo(this)">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-600 font-semibold">Click to upload logo</p>
+                            <p class="text-sm text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                            <img id="logo-preview" class="hidden mt-4 mx-auto max-h-32 rounded-lg">
+                        </div>
+                    </div>
+
+                    <!-- Banner (banner) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Shop Banner *
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                             onclick="document.getElementById('banner').click()">
+                            <input type="file" id="banner" name="banner" accept="image/*" required class="hidden" onchange="previewBanner(this)">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+                            <p class="text-gray-600 font-semibold">Click to upload banner</p>
+                            <p class="text-sm text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                            <img id="banner-preview" class="hidden mt-4 mx-auto max-h-32 rounded-lg w-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTACT INFO -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📞 Contact Information</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- contactNumber -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Contact Number *
+                        </label>
+                        <input type="tel" name="contactNumber" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="+91 98765 43210">
+                    </div>
+
+                    <!-- email -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Email *
+                        </label>
+                        <input type="email" name="email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="hello@shop.com">
+                    </div>
+
+                    <!-- supportEmail -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Support Email
+                        </label>
+                        <input type="email" name="supportEmail"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="support@shop.com">
+                    </div>
+
+                    <!-- gstNumber -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            GST Number
+                        </label>
+                        <input type="text" name="gstNumber"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="29ABCDE1234F1Z5">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADDRESS -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📍 Store Address</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- address -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Address *
+                        </label>
+                        <input type="text" name="address" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Street, Area, Landmark">
+                    </div>
+
+                    <!-- city -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            City *
+                        </label>
+                        <input type="text" name="city" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Bangalore">
+                    </div>
+
+                    <!-- state -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            State *
+                        </label>
+                        <input type="text" name="state" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Karnataka">
+                    </div>
+
+                    <!-- pincode -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Pincode *
+                        </label>
+                        <input type="text" name="pincode" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="560001">
+                    </div>
+
+                    <!-- location -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Location (lat,long)
+                        </label>
+                        <input type="text" name="location"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="12.9716,77.5946">
+                    </div>
+                </div>
+            </section>
+
+            <!-- SOCIAL LINKS -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🌐 Social & Online Presence</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- whatsapp -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            WhatsApp Number
+                        </label>
+                        <input type="text" name="whatsapp"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="+919876543210">
+                    </div>
+
+                    <!-- website -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Website
+                        </label>
+                        <input type="text" name="website"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="https://yourshop.avigronix.com">
+                    </div>
+
+                    <!-- instagram -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Instagram
+                        </label>
+                        <input type="text" name="instagram"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="@yourshop">
+                    </div>
+
+                    <!-- facebook -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Facebook
+                        </label>
+                        <input type="text" name="facebook"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="yourshop">
+                    </div>
+
+                    <!-- youtube -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            YouTube
+                        </label>
+                        <input type="text" name="youtube"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="@yourshop">
+                    </div>
+                </div>
+            </section>
+
+            <!-- BANK DETAILS -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">💳 Bank & Payment Details</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- accountHolder -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Account Holder Name
+                        </label>
+                        <input type="text" name="accountHolder"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Rajesh Kumar">
+                    </div>
+
+                    <!-- bankName -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Bank Name
+                        </label>
+                        <input type="text" name="bankName"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="HDFC Bank">
+                    </div>
+
+                    <!-- accountNumber -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Account Number
+                        </label>
+                        <input type="text" name="accountNumber"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="1234567890">
+                    </div>
+
+                    <!-- ifscCode -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            IFSC Code
+                        </label>
+                        <input type="text" name="ifscCode"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="HDFC0000123">
+                    </div>
+
+                    <!-- upiId -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            UPI ID
+                        </label>
+                        <input type="text" name="upiId"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="yourshop@upi">
+                    </div>
+
+                   
+                </div>
+            </section>
+
+            <!-- QR CODES -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🔳 QR Codes</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- paymentQR -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Payment QR (Image)
+                        </label>
+                        <input type="file" name="paymentQR" accept="image/*"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- shopQR -->
+        
+                </div>
+            </section>
+
+           
+
+            <!-- SUBMIT -->
+            <div class="pt-4 border-t border-gray-100 text-center">
+                <button type="submit"
+                        class="bg-blue-600 text-white px-12 py-4 rounded-xl hover:bg-blue-700 transition-colors font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                    <i class="fas fa-eye mr-2"></i>Preview Your Shop
+                </button>
+                <p class="text-gray-500 mt-4">Preview your shop before publishing – data will be processed in next step</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Features (same as before) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto">
+        <div class="text-center p-6 bg-white rounded-2xl shadow-lg">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-bolt text-2xl text-green-600"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Instant Setup</h3>
+            <p class="text-gray-600">Get your shop live in minutes with beautiful templates</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow-lg">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-mobile-alt text-2xl text-blue-600"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Mobile Ready</h3>
+            <p class="text-gray-600">Perfect shopping experience on all devices</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow-lg">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-2">Grow Fast</h3>
+            <p class="text-gray-600">Built-in tools to help your business grow</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // URL Preview (domain -> url-preview)
+    const domainInput = document.querySelector('input[name="domain"]');
+    if (domainInput) {
+        domainInput.addEventListener('input', function (e) {
+            document.getElementById('url-preview').textContent = e.target.value || 'myshop';
+        });
+    }
+
+    // Logo Preview
+    function previewLogo(input) {
+        const preview = document.getElementById('logo-preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Banner Preview
+    function previewBanner(input) {
+        const preview = document.getElementById('banner-preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Simple validation: domain allowed chars
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const domain = document.querySelector('input[name="domain"]').value;
+        if (!/^[a-z0-9-]+$/.test(domain)) {
+            e.preventDefault();
+            alert('Subdomain can only contain lowercase letters, numbers, and hyphens');
+        }
+    });
+</script>
+
+{% endblock %}

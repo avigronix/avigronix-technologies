@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Our Projects – AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block description %}
+Explore premium real-world digital products built by AVIGRONIX TECHNOLOGIES — including case management systems, healthcare ERPs, e-commerce engines, HRMS, LMS, delivery apps, POS billing, analytics dashboards & more.
+{% endblock %}
+
+{% block content %}
+
+<!-- ====================== HERO ====================== -->
+<section class="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-32 text-white overflow-hidden">
+
+    <!-- Light glow backgrounds -->
+    <div class="pointer-events-none absolute inset-0">
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-600/20 blur-3xl rounded-full"></div>
+    </div>
+
+    <div class="relative container mx-auto px-6 text-center max-w-4xl">
+        <p class="text-blue-300 text-xs tracking-[0.25em] font-semibold uppercase mb-4">Our Work</p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+            Products That Deliver <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Real Business Impact</span>
+        </h1>
+        <p class="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
+            Explore mission-critical software we've built across legal tech, healthcare, retail, HR, analytics, and more — 
+            engineered for performance, security, and scale.
+        </p>
+    </div>
+</section>
+
+
+<!-- ====================== PROJECTS ====================== -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6 max-w-7xl">
+
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <p class="text-blue-600 text-xs uppercase tracking-[0.25em] font-semibold mb-3">Portfolio</p>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
+                Featured Projects & Case Studies
+            </h2>
+            <p class="mt-4 text-slate-600 text-sm sm:text-base max-w-3xl mx-auto">
+                A showcase of real systems solving real problems — not templates, not demos.
+            </p>
+        </div>
+
+        <!-- Large Project Cards -->
+        <div class="space-y-20">
+
+            <!-- ========== PROJECT 1 ========== -->
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="inline-block px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600 font-semibold mb-4">
+                        Legal Tech
+                    </span>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-4">Court Case Management System</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        A complete digital platform for managing court cases with automated workflows, document tracking,
+                        hearings scheduling, and real-time notifications for advocates and law firms.
+                    </p>
+
+                    <h4 class="font-semibold text-slate-900 mb-3">Key Features</h4>
+                    <ul class="grid grid-cols-2 gap-2 mb-6 text-sm text-slate-600">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Case Tracking</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Hearing Scheduling</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Document Management</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Real-time Alerts</li>
+                    </ul>
+
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">FastAPI</span>
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-10 rounded-3xl text-center shadow-inner">
+                    <i class="fas fa-balance-scale text-blue-600 text-6xl mb-4"></i>
+                    <p class="text-slate-600">Legal Industry</p>
+                </div>
+            </div>
+
+            <!-- ========== PROJECT 2 ========== -->
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1 bg-green-50 p-10 rounded-3xl text-center shadow-inner">
+                    <i class="fas fa-shopping-cart text-green-600 text-6xl mb-4"></i>
+                    <p class="text-slate-600">E-commerce</p>
+                </div>
+
+                <div class="order-1 md:order-2">
+                    <span class="inline-block px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-semibold mb-4">
+                        E-commerce
+                    </span>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-4">Advanced E-commerce Platform</h3>
+                    <p class="text-slate-600 mb-6 leading-relaxed">
+                        Enterprise-level online store with multi-vendor system, AI product recommendations,
+                        omnichannel sales, and a powerful analytics dashboard.
+                    </p>
+
+                    <h4 class="font-semibold text-slate-900 mb-3">Key Features</h4>
+                    <ul class="grid grid-cols-2 gap-2 mb-6 text-sm text-slate-600">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> AI Recommendations</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Multi-vendor</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Omnichannel</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Analytics</li>
+                    </ul>
+
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="tech-tag">Node.js</span>
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">MongoDB</span>
+                        <span class="tech-tag">AWS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== PROJECT 3 ========== -->
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="inline-block px-3 py-1 text-xs rounded-full bg-purple-50 text-purple-600 font-semibold mb-4">
+                        Healthcare
+                    </span>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-4">Healthcare Management System</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Full medical practice management including Electronic Health Records (EHR),
+                        telemedicine, doctor workflows, billing, and patient portals.
+                    </p>
+
+                    <h4 class="font-semibold text-slate-900 mb-3">Key Features</h4>
+                    <ul class="grid grid-cols-2 gap-2 mb-6 text-sm text-slate-600">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> EHR</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Telemedicine</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Patient Portal</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Billing System</li>
+                    </ul>
+
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Django</span>
+                        <span class="tech-tag">Vue.js</span>
+                        <span class="tech-tag">MySQL</span>
+                    </div>
+                </div>
+
+                <div class="bg-purple-50 p-10 rounded-3xl text-center shadow-inner">
+                    <i class="fas fa-heartbeat text-purple-600 text-6xl mb-4"></i>
+                    <p class="text-slate-600">Healthcare</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Small Projects Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-24">
+
+            <!-- LMS -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-graduation-cap text-orange-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Learning Management System</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    Virtual classrooms, assessments, progress tracking & certificates.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">React</span>
+                    <span class="tech-tag">Node.js</span>
+                    <span class="tech-tag">MongoDB</span>
+                </div>
+            </div>
+
+            <!-- AI Customer Service -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-robot text-red-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">AI Customer Service</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    AI chatbots, multilingual support & automated lead generation.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">TensorFlow</span>
+                    <span class="tech-tag">FastAPI</span>
+                </div>
+            </div>
+
+            <!-- Delivery App -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-truck text-blue-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Local Delivery App</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    Order management, delivery tracking, payments & feedback.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">Flutter</span>
+                    <span class="tech-tag">Firebase</span>
+                    <span class="tech-tag">Node.js</span>
+                </div>
+            </div>
+
+            <!-- POS Billing -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-calculator text-amber-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">POS Billing System</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    Smart POS with barcode scanning, GST & inventory tracking.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">Electron</span>
+                    <span class="tech-tag">SQLite</span>
+                    <span class="tech-tag">Node.js</span>
+                </div>
+            </div>
+
+            <!-- Vendor Management -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-people-carry text-slate-700 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Vendor Management System</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    Retailers, invoices, payments & reporting for distributors.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">Laravel</span>
+                    <span class="tech-tag">Vue.js</span>
+                    <span class="tech-tag">MySQL</span>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+                <i class="fas fa-chart-line text-teal-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Real-time Analytics Dashboard</h3>
+                <p class="text-slate-600 text-sm mb-4">
+                    Live BI dashboards with KPIs, charts & data automation.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="tech-tag">Next.js</span>
+                    <span class="tech-tag">FastAPI</span>
+                    <span class="tech-tag">PostgreSQL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ====================== CTA ====================== -->
+<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+    <div class="container mx-auto px-6 max-w-3xl">
+        <h2 class="text-4xl font-bold mb-4">Have a Project in Mind?</h2>
+        <p class="text-blue-100 text-lg mb-8">
+            Let's design, build, and launch your next big product — with enterprise quality and startup speed.
+        </p>
+        <a href="/contact" class="px-10 py-4 bg-white text-blue-600 font-semibold text-lg rounded-2xl shadow-lg hover:bg-slate-100 transition">
+            Start Your Project
+        </a>
+    </div>
+</section>
+
+{% endblock %}
