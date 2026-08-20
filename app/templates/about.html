@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template %}
 
 {% block title %}About Us – AVIGRONIX TECHNOLOGIES{% endblock %}
 {% block description %}
@@ -56,20 +56,20 @@ AVIGRONIX TECHNOLOGIES is a global software development and digital transformati
                 </p>
             </div>
 
-            <!-- Stats Box -->
+            <!-- Highlights Box -->
             <div class="bg-blue-50 rounded-3xl p-10 shadow-inner">
                 <div class="grid grid-cols-2 gap-8">
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-blue-700 mb-1">50+</div>
-                        <p class="text-slate-600 text-sm">Projects Delivered</p>
+                        <div class="text-blue-700 text-3xl mb-2"><i class="fas fa-layer-group"></i></div>
+                        <p class="text-slate-600 text-sm">Full-Stack Expertise</p>
                     </div>
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-blue-700 mb-1">15+</div>
-                        <p class="text-slate-600 text-sm">Industries Served</p>
+                        <div class="text-blue-700 text-3xl mb-2"><i class="fas fa-user-check"></i></div>
+                        <p class="text-slate-600 text-sm">Direct Engineer Access</p>
                     </div>
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-blue-700 mb-1">98%</div>
-                        <p class="text-slate-600 text-sm">Client Satisfaction</p>
+                        <div class="text-blue-700 text-3xl mb-2"><i class="fas fa-cloud"></i></div>
+                        <p class="text-slate-600 text-sm">Enterprise Cloud Deployment</p>
                     </div>
                     <div class="text-center">
                         <div class="text-4xl font-extrabold text-blue-700 mb-1">24/7</div>
@@ -77,6 +77,52 @@ AVIGRONIX TECHNOLOGIES is a global software development and digital transformati
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ======================= OUR EXPERTISE ======================= -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6 max-w-7xl">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">Technology We Master</h2>
+            <p class="text-slate-600 text-lg max-w-3xl mx-auto">
+                Deep, hands-on engineering expertise across the full stack — from backend
+                architecture to enterprise deployment and data analytics.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            {% macro expertise_card(icon, color, title, items) %}
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-7">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background-color: {{ color }}20;">
+                    <i class="{{ icon }} text-xl" style="color: {{ color }}"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-3">{{ title }}</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">{{ items }}</p>
+            </div>
+            {% endmacro %}
+
+            {{ expertise_card('fas fa-server', '#2563eb', 'Backend Development',
+                'Python, FastAPI, Flask — clean architecture, REST APIs, JWT authentication & role-based access control.') }}
+
+            {{ expertise_card('fas fa-window-restore', '#7c3aed', 'Frontend Development',
+                'React & Next.js interfaces built for performance, responsiveness, and conversion.') }}
+
+            {{ expertise_card('fas fa-database', '#0d9488', 'Databases',
+                'MongoDB as our primary database, with production experience in PostgreSQL, MySQL & Redis.') }}
+
+            {{ expertise_card('fas fa-cloud', '#06b6d4', 'Cloud & Infrastructure',
+                'AWS, GCP, VPS & Contabo deployments — Linux (Ubuntu/RHEL), Nginx, SSL, reverse proxy & secure offline environments.') }}
+
+            {{ expertise_card('fas fa-chart-line', '#c026d3', 'Data & Analytics',
+                'Telecom analytics, Apache NiFi & Kafka data pipelines, dashboards in Superset, Grafana & InfluxDB.') }}
+
+            {{ expertise_card('fas fa-plug', '#ea580c', 'Integrations & Automation',
+                'WhatsApp Cloud API, webhook-driven systems, third-party integrations & AI/SLM automation via Ollama.') }}
+
         </div>
     </div>
 </section>
@@ -201,7 +247,7 @@ AVIGRONIX TECHNOLOGIES is a global software development and digital transformati
 
 
 <!-- ======================= CTA ======================= -->
-<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+<section class="py-20 section-brand-gradient text-white text-center">
     <div class="container mx-auto px-6 max-w-3xl">
         <h2 class="text-4xl font-bold mb-4">Let’s Build Something Amazing Together</h2>
         <p class="text-blue-100 text-lg mb-8">

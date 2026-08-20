@@ -19,53 +19,135 @@
 
 /* Navigation Styles */
 .nav-link {
-    @apply text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300 relative;
+    color: var(--color-slate);
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--color-blue);
 }
 
 .nav-link::after {
     content: '';
-    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-blue);
+    transition: width 0.3s;
 }
 
 .nav-link:hover::after {
-    @apply w-full;
+    width: 100%;
 }
 
 .nav-link-mobile {
-    @apply block py-2 px-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors;
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--color-slate);
+    border-radius: 0.5rem;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link-mobile:hover {
+    background: #eff4fe;
+    color: var(--color-blue);
 }
 
 /* Service Cards */
 .service-card {
-    @apply bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100;
+    background: var(--color-white);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    border: 1px solid #f1f5f9;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.service-card:hover {
+    transform: translateY(-0.5rem);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.12);
 }
 
 .service-icon {
-    @apply w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-2xl;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
 }
 
 /* Technology Items */
 .tech-item {
-    @apply flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--color-white);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tech-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 
 .tech-item span {
-    @apply mt-3 font-semibold text-gray-700;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: var(--color-slate);
 }
 
 /* Testimonial Cards */
 .testimonial-card {
-    @apply bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300;
+    background: var(--color-white);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    border: 1px solid #f1f5f9;
+    transition: box-shadow 0.3s;
+}
+
+.testimonial-card:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.12);
 }
 
 /* Social Icons */
 .social-icon {
-    @apply w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition-colors duration-300;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--color-navy);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    transition: background-color 0.3s;
+}
+
+.social-icon:hover {
+    background: var(--color-blue);
 }
 
 /* Footer Links */
 .footer-link {
-    @apply text-gray-300 hover:text-white transition-colors duration-300 block mb-2;
+    color: var(--color-blue-light);
+    display: block;
+    margin-bottom: 0.5rem;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: var(--color-white);
 }
 
 /* Smooth Scrolling */
@@ -83,28 +165,62 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #3b82f6;
+    background: var(--color-blue-light);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
+    background: var(--color-blue);
 }
 
 /* Form Styles */
 .form-input {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-blue-light);
+    border-color: transparent;
 }
 
 .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-slate);
+    margin-bottom: 0.5rem;
 }
 
 .btn-primary {
-    @apply bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105;
+    background: var(--color-blue);
+    color: var(--color-white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn-primary:hover {
+    background: var(--color-navy);
+    transform: scale(1.05);
 }
 
 /* Loading Animation */
 .loading-spinner {
-    @apply inline-block w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin;
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--color-white);
+    border-top-color: transparent;
+    border-radius: 9999px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template %}
 {% block title %}Contact Us - AVIGRONIX TECHNOLOGIES{% endblock %}
 {% block description %}Get in touch for software development, mobile apps, AI automation & enterprise digital solutions.{% endblock %}
 
@@ -40,7 +40,7 @@
             {% endmacro %}
 
             {{ card('fas fa-phone', 'Call Us', '+91 945 089 1557', 'Mon–Fri • 9 AM–6 PM IST') }}
-            {{ card('fas fa-envelope', 'Email Us', 'itwebtechinfo@gmail.com', 'Response within 24 hours') }}
+            {{ card('fas fa-envelope', 'Email Us', 'avigronix@gmail.com', 'Response within 24 hours') }}
             {{ card('fas fa-map-marker-alt', 'Office Location', 'Noida Sector 59', 'Uttar Pradesh, India') }}
 
         </div>
@@ -52,6 +52,12 @@
             <p class="text-gray-600 text-sm mb-8">Our team will reach out within 24 hours.</p>
 
             <form class="space-y-6" id="contactForm">
+
+                <!-- Honeypot: hidden from real visitors, catches bots that fill every field -->
+                <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+                    <label for="website">Leave this field empty</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
 
                 <!-- Row 1 -->
                 <div class="grid md:grid-cols-2 gap-6">
@@ -119,10 +125,10 @@
     <p class="text-gray-300 text-sm mb-6">We work with global startups & enterprises.</p>
 
     <div class="flex flex-col sm:flex-row justify-center gap-4">
-        <a href="tel:+919555811092" class="px-6 py-3 bg-white text-blue-700 rounded-lg text-sm font-medium">
+        <a href="tel:+919450891557" class="px-6 py-3 bg-white text-blue-700 rounded-lg text-sm font-medium">
             Call Us
         </a>
-        <a href="mailto:itwebtechinfo@gmail.com"
+        <a href="mailto:avigronix@gmail.com"
            class="px-6 py-3 border border-white text-white rounded-lg text-sm font-medium hover:bg-white hover:text-blue-700 transition">
             Email Us
         </a>
@@ -177,6 +183,7 @@
             company: form.company.value.trim(),
             service: form.service.value,
             message: form.message.value.trim(),
+            website: form.website.value,
         };
 
         // Basic check

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template %}
 
 {% block title %}Our Team – AVIGRONIX TECHNOLOGIES{% endblock %}
 {% block description %}
@@ -41,6 +41,25 @@ Meet our world-class development team — expert software engineers, backend spe
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-10">
+
+            <!-- Founder / Featured -->
+            <div class="team-card bg-white border-2 border-blue-200 rounded-3xl p-8 shadow-md hover:shadow-xl hover:-translate-y-2 transition relative lg:col-span-2">
+                <span class="absolute top-5 right-5 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Founder</span>
+                <div class="mx-auto w-20 h-20 rounded-xl flex items-center justify-center mb-6 bg-blue-100">
+                    <i class="fas fa-user-tie text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Founder &amp; Lead Engineer</h3>
+                <p class="text-blue-600 font-semibold mb-3">Backend, Cloud &amp; Data Systems</p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Backend development, enterprise deployments, production support, and telecom
+                    analytics with Python, FastAPI &amp; Flask. Primary database expertise in MongoDB,
+                    with production experience in PostgreSQL, MySQL &amp; Redis. Builds secure REST APIs
+                    with JWT authentication and RBAC, integrates third-party and WhatsApp Cloud APIs
+                    for business automation, and manages enterprise deployments on AWS, GCP, VPS and
+                    Linux (Ubuntu/RHEL) with Nginx. Hands-on with Apache NiFi, Kafka, Superset, Grafana
+                    &amp; InfluxDB for data ingestion and analytics, plus AI/SLM automation via Ollama.
+                </p>
+            </div>
 
             <!-- 1 -->
             <div class="team-card bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition">
@@ -168,7 +187,7 @@ Meet our world-class development team — expert software engineers, backend spe
 
 
 <!-- ===================== CTA ===================== -->
-<section class="py-24 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+<section class="py-24 section-brand-gradient text-white text-center">
     <div class="container mx-auto px-6 max-w-3xl">
 
         <h2 class="text-4xl font-bold mb-4">Want to Work With Our Team?</h2>

@@ -1,0 +1,9 @@
+:root {
+  --color-navy: #0B1B33;        /* primary dark / text / footer bg */
+  --color-blue: #2F6FED;        /* primary brand blue / links / buttons */
+  --color-blue-light: #7FB3FF;  /* gradients, hover states */
+  --color-teal: #14B8A6;        /* accent — CTAs, highlights, active nav state */
+  --color-slate: #64748B;       /* secondary text, taglines */
+  --color-bg: #F8FAFC;          /* page background */
+  --color-white: #FFFFFF;
+}

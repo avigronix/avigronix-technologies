@@ -2,16 +2,21 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, HTMLResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from routers import pages
-from routers.shop_manages import router as shop_manage
+from routers.shop import router as shop_manage
+from render_utils import render_page
+from rate_limit import limiter
 from datetime import datetime
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-from routers.shop_manages import db
+from database import db
 
 from urllib.parse import urlparse
 import json
@@ -26,6 +31,10 @@ app = FastAPI(
     description="Transform Your Business With Our Digital Solutions",
     version="1.0.0"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 
@@ -70,6 +79,7 @@ class ContactForm(BaseModel):
     company: str | None = None
     service: str
     message: str
+    website: str | None = None  # honeypot: real users never see/fill this field
 
 def extract_subdomain(hostname: str) -> str:
     """Extract subdomain safely"""
@@ -158,6 +168,34 @@ async def shop_subdomain_middleware(request: Request, call_next):
 
     return response
 
+
+CSP = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+    "https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com "
+    "https://www.googletagmanager.com; "
+    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+    "img-src 'self' data: https:; "
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; "
+    "frame-ancestors 'none'"
+)
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = CSP
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -166,11 +204,25 @@ templates = Jinja2Templates(directory="templates")
 
 
 templates.env.globals['current_year'] = datetime.now().year
-templates.env.globals['site_url'] = "https://avigronix.com"
+templates.env.globals['site_url'] = os.environ.get("SITE_URL", "https://avigronix.com")
+templates.env.globals['ga_measurement_id'] = os.environ.get("GA_MEASUREMENT_ID", "G-QMZ7RMVX47")
 
 # Include routers
 app.include_router(pages.router)
 app.include_router(shop_manage)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return templates.TemplateResponse("error_404.html", {"request": request}, status_code=404)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    print("Unhandled server error:", exc)
+    return templates.TemplateResponse("error_500.html", {"request": request}, status_code=500)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -190,23 +242,9 @@ async def home(request: Request):
         })
 
     # Otherwise show normal homepage
-    return templates.TemplateResponse("index.html", {"request": request})
-
-# @app.get("/", response_class=HTMLResponse)
-# async def home(request: Request):
-#     return templates.TemplateResponse("index.html", {"request": request})
+    return render_page(request, templates, "index.html")
 
 @app.get("/uploads/{sub_folder}/{filename}")
-async def get_image(sub_folder: str, filename: str):
-
-    file_path = os.path.join("uploads", sub_folder, filename)
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    return FileResponse(file_path)
-
-@app.get("/static/{sub_folder}/{filename}")
 async def get_image(sub_folder: str, filename: str):
 
     file_path = os.path.join("uploads", sub_folder, filename)
@@ -231,7 +269,14 @@ Sitemap: https://avigronix.com/sitemap.xml
     return content.strip()
 
 @app.post("/api/contact")
-async def send_contact_message(data: ContactForm):
+@limiter.limit("5/10minutes")
+async def send_contact_message(request: Request, data: ContactForm):
+
+    # Honeypot: bots fill every field including hidden ones; real visitors
+    # never see this field, so a non-empty value means spam. Pretend success
+    # without actually sending mail, so the bot doesn't learn to look elsewhere.
+    if data.website:
+        return {"status": 200, "msg": "Message sent successfully"}
 
     # -----------------------------
     # 1. ADMIN MAIL
@@ -263,7 +308,7 @@ async def send_contact_message(data: ContactForm):
     """
 
     ok1 = send_email(
-        to="itwebtechinfo@gmail.com",
+        to="avigronix@gmail.com",
         subject=admin_subject,
         body=admin_body
     )
@@ -297,7 +342,7 @@ async def send_contact_message(data: ContactForm):
         <br>
         <p style="color:#666;font-size:14px;">
             You can contact us anytime at 
-            <a href="mailto:itwebtechinfo@gmail.com">itwebtechinfo@gmail.com</a>.
+            <a href="mailto:avigronix@gmail.com">avigronix@gmail.com</a>.
             <br><br>
             — AVIGRONIX TECHNOLOGIES
         </p>

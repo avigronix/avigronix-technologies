@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Not Found</title>
+    <title>Something Went Wrong — AVIGRONIX TECHNOLOGIES</title>
 
+    <link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32" type="image/png"/>
     <link rel="stylesheet" href="/static/css/variables.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -27,116 +28,74 @@
             },
         };
     </script>
-    
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         body {
             font-family: "Inter", sans-serif;
             background: linear-gradient(135deg, #eef2ff, #f8fafc);
         }
-
-        .float {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .float-delayed {
-            animation: float 7s ease-in-out infinite 0.7s;
-        }
-
+        .float { animation: float 6s ease-in-out infinite; }
+        .float-delayed { animation: float 7s ease-in-out infinite 0.7s; }
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-18px); }
             100% { transform: translateY(0px); }
         }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease forwards;
-            opacity: 0;
-        }
-
+        .fade-in { animation: fadeIn 0.8s ease forwards; opacity: 0; }
         @keyframes fadeIn {
             0% { opacity: 0; transform: translateY(20px) scale(.98); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-
         .glass-card {
             backdrop-filter: blur(18px);
             background: rgba(255, 255, 255, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 15px 45px rgba(0,0,0,0.06);
         }
-
-        .teal-blob {
-            background: rgba(20, 184, 166, 0.1); /* var(--color-teal) at 10% opacity */
-        }
-
+        .teal-blob { background: rgba(20, 184, 166, 0.1); }
         .gradient-text-brand {
             background: linear-gradient(90deg, var(--color-navy) 0%, var(--color-blue) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .btn-gradient-brand {
             background: linear-gradient(90deg, var(--color-navy) 0%, var(--color-blue) 100%);
         }
     </style>
 </head>
-
 <body>
-
-    <!-- Floating Decorations -->
     <div class="absolute top-10 left-10 w-24 h-24 bg-blue-500/10 rounded-3xl blur-2xl float"></div>
     <div class="absolute bottom-20 right-16 w-32 h-32 teal-blob rounded-3xl blur-2xl float-delayed"></div>
 
     <div class="min-h-screen flex flex-col justify-center items-center px-6 text-center">
-
-        <!-- Icon -->
         <div class="mb-8 fade-in">
             <div class="w-32 h-32 rounded-3xl bg-white shadow-xl flex items-center justify-center glass-card">
-                <i class="fa-solid fa-shop-slash text-6xl text-red-500"></i>
+                <i class="fa-solid fa-triangle-exclamation text-5xl text-amber-500"></i>
             </div>
         </div>
 
-        <!-- MAIN HEADING -->
         <h1 class="text-4xl md:text-5xl font-extrabold gradient-text-brand fade-in">
-            Shop Not Found
+            Something Went Wrong
         </h1>
 
-        <!-- Subtitle -->
-        <p class="text-gray-600 text-lg mt-4 max-w-xl fade-in delay-100">
-            The shop you are trying to access doesn’t exist, may be removed, or the subdomain is incorrect.
+        <p class="text-gray-600 text-lg mt-4 max-w-xl fade-in">
+            We hit an unexpected error on our end. Our team has been notified — please try again in a moment.
         </p>
 
-        <!-- Error Card -->
-        <div class="glass-card rounded-2xl p-6 mt-8 max-w-md w-full fade-in delay-200">
-            <p class="text-sm text-gray-500 font-semibold">Requested Subdomain</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">{{ subdomain }}</p>
-
-            <p class="text-red-600 font-medium mt-4">
-                {{ msg }}
-            </p>
-        </div>
-
-        <!-- Buttons -->
-        <div class="mt-10 flex flex-col md:flex-row gap-4 fade-in delay-300">
-
-            <a href="https://avigronix.com"
-               class="btn-gradient-brand px-8 py-3 text-lg rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.03] transition">
-               Go to Home
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 fade-in">
+            <a href="/" class="btn-gradient-brand px-8 py-3 text-lg rounded-xl text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.03] transition">
+                Go to Home
             </a>
-
-
+            <a href="/contact" class="px-8 py-3 text-lg rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-white transition">
+                Contact Us
+            </a>
         </div>
 
-        <!-- Footer -->
-        <p class="text-gray-500 text-sm mt-10 fade-in delay-400">
-            Need help? Contact our support team.
+        <p class="text-gray-500 text-sm mt-10 fade-in">
+            AVIGRONIX TECHNOLOGIES — Software, Web, Mobile &amp; AI Development
         </p>
-
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
 </body>
 </html>

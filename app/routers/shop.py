@@ -4,22 +4,21 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
+from pathlib import Path
 from datetime import datetime
 import uuid
 import os
 import shutil
-from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import json
+
+from database import db
+from rate_limit import limiter
+
 # Router for shop endpoints
 router = APIRouter(prefix="/shop", tags=["shop"])
 templates = Jinja2Templates(directory="templates")
-
-# MongoDB configuration
-MONGODB_URL = "mongodb://localhost:27017"
-DATABASE_NAME = "shop_management"
-client = AsyncIOMotorClient(MONGODB_URL)
-db = client[DATABASE_NAME]
+templates.env.globals["current_year"] = datetime.now().year
 
 # Ensure upload directories exist
 os.makedirs("uploads/logos", exist_ok=True)
@@ -77,15 +76,28 @@ class ShopDetailsResponse(BaseModel):
     created_at: datetime
 
 # Utility Functions
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+
+
 async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
-    """Save uploaded file and return file path"""
-    filename = file.filename
-    
+    """Save uploaded file and return file path.
+
+    Uses a generated filename rather than the client-supplied one to avoid
+    path traversal / overwriting other uploads on this pre-auth form.
+    """
+    ext = Path(file.filename or "").suffix.lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type '{ext}'. Allowed: {', '.join(sorted(ALLOWED_IMAGE_EXTENSIONS))}",
+        )
+
+    filename = f"{uuid.uuid4().hex}{ext}"
     file_path = os.path.join(upload_dir, filename)
-    
+
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    
+
     return f"/uploads/{upload_dir.split('/')[-1]}/{filename}"
 
 async def is_subdomain_available(subdomain: str) -> bool:
@@ -108,6 +120,7 @@ async def show_registration_form(request: Request):
 
 import re
 @router.post("/preview", response_class=HTMLResponse)
+@limiter.limit("10/10minutes")
 async def preview_business(
     request: Request,
 
@@ -307,6 +320,7 @@ class ShopRegistration(BaseModel):
     deliveryAvailable: Optional[bool] = None
 
 @router.post("/register-business")
+@limiter.limit("10/10minutes")
 async def register_business(request: Request):
     """Save business to MongoDB - JSON only"""
     try:

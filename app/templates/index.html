@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template %}
 
 {% block title %}AVIGRONIX TECHNOLOGIES — FastAPI, Python & React Specialists for Modern Businesses{% endblock %}
 {% block description %}
@@ -6,50 +6,6 @@ AVIGRONIX TECHNOLOGIES is a premium software development partner for startups, S
 {% endblock %}
 
 {% block content %}
-<!-- Schema.org Enhanced Organization Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "AVIGRONIX TECHNOLOGIES",
-  "url": "https://avigronix.com",
-  "logo": "https://avigronix.com/static/images/logo.svg",
-  "description": "Premium software development company specializing in custom web apps, SaaS platforms, APIs, and digital transformation.",
-  "foundingDate": "2020",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Noida Sector 59",
-    "addressLocality": "Noida",
-    "addressRegion": "Uttar Pradesh",
-    "postalCode": "201301",
-    "addressCountry": "IN"
-  },
-  "contactPoint": [{
-    "@type": "ContactPoint",
-    "telephone": "+91-962-584-8419",
-    "contactType": "customer service",
-    "email": "itwebtechinfo@gmail.com",
-    "areaServed": ["IN", "US", "EU", "AU"],
-    "availableLanguage": ["English", "Hindi"]
-  }],
-  "sameAs": [
-    "https://www.linkedin.com/company/it-web-tech-solutions",
-    "https://twitter.com/itwebtech",
-    "https://www.facebook.com/itwebtechsolutions"
-  ],
-  "knowsAbout": [
-    "Software Development",
-    "Web Applications",
-    "SaaS Platforms",
-    "APIs",
-    "FastAPI",
-    "Python",
-    "React",
-    "Cloud Computing",
-    "Digital Transformation"
-  ]
-}
-</script>
 
 <!-- ========================= HERO ========================= -->
 <section class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-white">
@@ -60,7 +16,7 @@ AVIGRONIX TECHNOLOGIES is a premium software development partner for startups, S
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.15),_transparent_60%)]"></div>
   </div>
 
-  <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+  <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
     <div class="flex flex-col items-center gap-12 lg:flex-row lg:items-center">
       
       <!-- Left: Copy -->
@@ -74,7 +30,7 @@ AVIGRONIX TECHNOLOGIES is a premium software development partner for startups, S
         <!-- Title -->
         <div>
           <h1 class="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-            Build <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">serious products</span><br class="hidden sm:block" />
+            Build <span class="gradient-text-accent">serious products</span><br class="hidden sm:block" />
             with a serious tech team.
           </h1>
           <p class="mt-5 max-w-xl text-base text-slate-300 sm:text-lg">
@@ -109,7 +65,7 @@ AVIGRONIX TECHNOLOGIES is a premium software development partner for startups, S
         <!-- CTAs -->
         <div class="flex flex-col items-start gap-4 pt-2 sm:flex-row sm:items-center">
           <a href="/contact"
-             class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition hover:scale-[1.02] hover:from-blue-600 hover:to-purple-700">
+             class="btn-brand-gradient inline-flex items-center justify-center rounded-2xl px-7 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02]">
             <i class="fas fa-paper-plane mr-2 text-sm"></i>
             Book a free consultation
           </a>
@@ -124,8 +80,8 @@ AVIGRONIX TECHNOLOGIES is a premium software development partner for startups, S
 
         <!-- Mini trust row -->
         <div class="pt-4 text-xs text-slate-400">
-          <span class="font-semibold text-slate-200">50+ projects</span> delivered · 
-          <span class="font-semibold text-emerald-300">98% client satisfaction</span> ·
+          <span class="font-semibold text-slate-200">Full-stack engineering</span> — backend to deployment ·
+          <span class="font-semibold text-emerald-300">Direct engineer access</span> ·
           Serving India, US, EU & more
         </div>
       </div>
@@ -191,28 +147,30 @@ async def health_check():
       </p>
       <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] font-medium text-slate-200">
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">FastAPI</span>
+        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">Flask</span>
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">Python</span>
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">React</span>
-        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">Node.js</span>
-        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">PostgreSQL</span>
+        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">Next.js</span>
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">MongoDB</span>
+        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">PostgreSQL</span>
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">Docker & DevOps</span>
         <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">AWS</span>
+        <span class="px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/70">GCP</span>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ========================= STATS ========================= -->
-<section class="bg-white py-14 sm:py-16">
+<section class="bg-white py-10 sm:py-12">
   <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
     <div class="grid gap-8 md:grid-cols-4">
       <div>
         <p class="text-xs font-semibold tracking-[0.18em] text-blue-600 uppercase mb-3">
-          BY THE NUMBERS
+          WHY WORK WITH US
         </p>
         <h2 class="text-2xl font-bold text-slate-900 sm:text-3xl">
-          Results that speak<br />for themselves.
+          A partner that builds<br />the way you'd build it yourself.
         </h2>
         <p class="mt-3 text-sm text-slate-600">
           We work closely with founders, product owners, and CTOs to ship software that users love and businesses rely on.
@@ -220,15 +178,15 @@ async def health_check():
       </div>
 
       <div class="flex flex-col items-start rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-        <span class="text-3xl font-bold text-blue-600 sm:text-4xl">50+</span>
-        <p class="mt-1 text-sm font-semibold text-slate-800">Projects shipped</p>
-        <p class="mt-1 text-xs text-slate-500">B2B, B2C, SaaS, marketplaces, internal tools & more.</p>
+        <div class="text-blue-600 text-2xl mb-1"><i class="fas fa-layer-group"></i></div>
+        <p class="mt-1 text-sm font-semibold text-slate-800">Full-stack expertise</p>
+        <p class="mt-1 text-xs text-slate-500">Backend, frontend, cloud & data engineering under one roof.</p>
       </div>
 
       <div class="flex flex-col items-start rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-        <span class="text-3xl font-bold text-emerald-600 sm:text-4xl">98%</span>
-        <p class="mt-1 text-sm font-semibold text-slate-800">Client satisfaction</p>
-        <p class="mt-1 text-xs text-slate-500">Transparent communication, predictable delivery.</p>
+        <div class="text-emerald-600 text-2xl mb-1"><i class="fas fa-user-check"></i></div>
+        <p class="mt-1 text-sm font-semibold text-slate-800">Direct engineer access</p>
+        <p class="mt-1 text-xs text-slate-500">You work with the engineer building your product — not an account manager.</p>
       </div>
 
       <div class="flex flex-col items-start rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
@@ -241,7 +199,7 @@ async def health_check():
 </section>
 
 <!-- ========================= SERVICES / SOLUTIONS ========================= -->
-<section id="solutions" class="bg-slate-50 py-16 sm:py-20">
+<section id="solutions" class="bg-slate-50 py-12 sm:py-16">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-3xl mx-auto">
       <p class="text-xs font-semibold tracking-[0.18em] text-blue-600 uppercase mb-3">
@@ -317,7 +275,7 @@ async def health_check():
 </section>
 
 <!-- REGISTER YOUR BUSINESS SECTION -->
-<section class="py-20 bg-gradient-to-br from-blue-50 to-blue-100 mt-20">
+<section class="py-12 sm:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
     <div class="container mx-auto px-6">
         <div class="text-center max-w-3xl mx-auto mb-12">
             <h2 class="text-4xl font-bold text-gray-900">
@@ -364,22 +322,52 @@ async def health_check():
 </section>
 
 
-<!-- ========================= INDUSTRIES ========================= -->
-<!-- ========================= REAL PROJECTS ========================= -->
-<section class="bg-white py-16 sm:py-20">
+<!-- ========================= HOW WE WORK ========================= -->
+<section class="bg-white py-12 sm:py-16">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-14">
+      <p class="text-xs font-semibold tracking-[0.18em] text-blue-600 uppercase mb-3">HOW WE WORK</p>
+      <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">A clear, predictable process.</h2>
+      <p class="mt-3 text-sm sm:text-base text-slate-600">
+        No black boxes — here's exactly what happens after you reach out.
+      </p>
+    </div>
+
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {% for step, name, desc in [
+        (1, "Discover", "We understand your goals, users, and constraints through a discovery call."),
+        (2, "Plan", "You get a clear technical architecture, timeline, and milestone plan before any code is written."),
+        (3, "Build", "Agile delivery cycles with regular check-ins, so you always know where things stand."),
+        (4, "Launch & Support", "We deploy, optimize, and stay on for ongoing monitoring and support.")
+      ] %}
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
+          {{ step }}
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">{{ name }}</h3>
+        <p class="text-slate-600 text-sm">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ========================= WHAT WE BUILD ========================= -->
+<section class="bg-white py-12 sm:py-16">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
     <!-- Section Header -->
     <div class="text-center max-w-3xl mx-auto mb-14">
       <p class="text-xs font-semibold tracking-[0.18em] text-blue-600 uppercase mb-3">
-        REAL PROJECTS
+        WHAT WE BUILD
       </p>
       <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
-        Built for real businesses,<br/>not just demo projects.
+        Solutions engineered for<br/>real business problems.
       </h2>
       <p class="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed">
-        We build complete end-to-end digital systems that solve real business problems—designed for scale, security,
-        and long-term growth.
+        From legal tech to healthcare to retail — these are the kinds of complete, end-to-end
+        systems we build: designed for scale, security, and long-term growth.
       </p>
     </div>
 
@@ -586,84 +574,131 @@ async def health_check():
   </div>
 </section>
 
+<!-- ========================= SECURITY & TRUST ========================= -->
+<section class="bg-slate-50 py-10 border-y border-slate-200">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+      <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <i class="fas fa-lock text-blue-600"></i> HTTPS Everywhere
+      </div>
+      <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <i class="fas fa-user-shield text-blue-600"></i> JWT &amp; RBAC Security
+      </div>
+      <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <i class="fas fa-server text-blue-600"></i> Enterprise Deployment Practices
+      </div>
+      <div class="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <i class="fas fa-cloud text-blue-600"></i> AWS &amp; GCP Cloud Infrastructure
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ========================= TESTIMONIALS ========================= -->
-<section class="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-16 sm:py-20 text-white">
+<section class="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-12 sm:py-16 text-white">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-3xl mx-auto mb-12">
       <p class="text-xs font-semibold tracking-[0.18em] text-blue-300 uppercase mb-3">
-        CLIENT STORIES
+        WHY BUSINESSES CHOOSE US
       </p>
       <h2 class="text-3xl font-bold sm:text-4xl">
-        Teams that trusted us, shipped faster.
+        A long-term technology partner,<br class="hidden sm:block" />not just a one-time vendor.
       </h2>
       <p class="mt-4 text-sm sm:text-base text-slate-300">
-        We act as a long-term technology partner — not just a one-time vendor.
+        Here's what working with us actually looks like.
       </p>
     </div>
 
     <div class="grid gap-8 md:grid-cols-3">
       <article class="flex flex-col rounded-3xl border border-slate-700/60 bg-slate-900/70 p-6">
-        <div class="mb-3 text-amber-300 text-sm">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/15">
+          <i class="fas fa-user-check text-blue-300 text-xl"></i>
         </div>
-        <p class="text-sm text-slate-200">
-          “Our legal case management platform went from idea to production in months, not years. 
-          AVIGRONIX TECHNOLOGIES handled everything from architecture to deployment and support.”
+        <h3 class="text-lg font-semibold text-white mb-2">You talk to the engineer</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          No account managers relaying messages. You work directly with the person architecting
+          and building your system, end to end.
         </p>
-        <div class="mt-5 flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
-            <i class="fas fa-user text-blue-200 text-sm"></i>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-white">Rajesh Kumar</p>
-            <p class="text-xs text-slate-400">Director, LegalTech Solutions</p>
-          </div>
-        </div>
       </article>
 
       <article class="flex flex-col rounded-3xl border border-slate-700/60 bg-slate-900/70 p-6">
-        <div class="mb-3 text-amber-300 text-sm">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15">
+          <i class="fas fa-shield-halved text-emerald-300 text-xl"></i>
         </div>
-        <p class="text-sm text-slate-200">
-          “They rebuilt our e-commerce stack with React & FastAPI. Page speed improved, UX improved, and 
-          we saw a significant uplift in sales and repeat customers.”
+        <h3 class="text-lg font-semibold text-white mb-2">Production-grade from day one</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Secure REST APIs, JWT authentication &amp; RBAC, and enterprise deployment practices —
+          not prototype code that needs a rewrite before it can ship.
         </p>
-        <div class="mt-5 flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-            <i class="fas fa-user text-emerald-200 text-sm"></i>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-white">Priya Sharma</p>
-            <p class="text-xs text-slate-400">Founder, StyleCart India</p>
-          </div>
-        </div>
       </article>
 
       <article class="flex flex-col rounded-3xl border border-slate-700/60 bg-slate-900/70 p-6">
-        <div class="mb-3 text-amber-300 text-sm">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/15">
+          <i class="fas fa-comments text-purple-300 text-xl"></i>
         </div>
-        <p class="text-sm text-slate-200">
-          “Our clinic’s operations are now digital and structured. The team designed an intuitive system for doctors, 
-          staff, and patients — with proper security and reporting.”
+        <h3 class="text-lg font-semibold text-white mb-2">Transparent, honest scope</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Clear timelines, honest estimates, and no scope surprises — you'll always know exactly
+          where your project stands.
         </p>
-        <div class="mt-5 flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/20">
-            <i class="fas fa-user text-purple-200 text-sm"></i>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-white">Dr. Amit Patel</p>
-            <p class="text-xs text-slate-400">Medical Director, HealthPlus Clinic</p>
-          </div>
-        </div>
       </article>
     </div>
   </div>
 </section>
 
+<!-- ========================= FAQ TEASER ========================= -->
+<section class="bg-slate-50 py-12 sm:py-16">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-10">
+      <p class="text-xs font-semibold tracking-[0.18em] text-blue-600 uppercase mb-3">COMMON QUESTIONS</p>
+      <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Before you reach out.</h2>
+    </div>
+
+    <div class="space-y-4">
+      <details class="group border border-slate-200 rounded-2xl p-5 bg-white">
+        <summary class="flex items-center justify-between cursor-pointer list-none">
+          <span class="text-base sm:text-lg font-semibold text-slate-900">What is your typical project timeline?</span>
+          <i class="fas fa-chevron-down text-slate-500 text-sm transition-transform duration-300 group-open:rotate-180"></i>
+        </summary>
+        <div class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Depends on scope — small websites take 2–4 weeks, custom web apps 4–12 weeks, mobile apps
+          8–20 weeks, and enterprise solutions 12+ weeks. A detailed timeline is shared after discovery.
+        </div>
+      </details>
+
+      <details class="group border border-slate-200 rounded-2xl p-5 bg-white">
+        <summary class="flex items-center justify-between cursor-pointer list-none">
+          <span class="text-base sm:text-lg font-semibold text-slate-900">What is your pricing model?</span>
+          <i class="fas fa-chevron-down text-slate-500 text-sm transition-transform duration-300 group-open:rotate-180"></i>
+        </summary>
+        <div class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Fixed price for clearly defined scope, time &amp; material for evolving requirements, or a
+          dedicated team for ongoing work — whichever fits your project best.
+        </div>
+      </details>
+
+      <details class="group border border-slate-200 rounded-2xl p-5 bg-white">
+        <summary class="flex items-center justify-between cursor-pointer list-none">
+          <span class="text-base sm:text-lg font-semibold text-slate-900">How do I get started?</span>
+          <i class="fas fa-chevron-down text-slate-500 text-sm transition-transform duration-300 group-open:rotate-180"></i>
+        </summary>
+        <div class="mt-4 text-slate-600 text-sm leading-relaxed">
+          Share your requirement via our <a href="/contact" class="text-blue-600 font-semibold">contact page</a>,
+          we schedule a free consultation call, define scope &amp; timeline, and once approved, we kick off.
+        </div>
+      </details>
+    </div>
+
+    <div class="text-center mt-10">
+      <a href="/faq" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
+        View all FAQs <i class="fas fa-arrow-right ml-2 text-sm"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ========================= FINAL CTA ========================= -->
-<section class="bg-gradient-to-r from-blue-600 to-purple-600 py-16 sm:py-20 text-white">
+<section class="section-brand-gradient py-12 sm:py-16 text-white">
   <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
     <h2 class="text-3xl font-bold sm:text-4xl">
       Ready to ship your next product with confidence?
@@ -679,7 +714,7 @@ async def health_check():
         <i class="fas fa-calendar-check mr-2 text-sm"></i>
         Book a discovery call
       </a>
-      <a href="tel:+919555811092"
+      <a href="tel:+919450891557"
          class="inline-flex items-center justify-center rounded-2xl border border-white/70 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
         <i class="fas fa-phone-alt mr-2 text-sm"></i>
         +91 945 089 1557

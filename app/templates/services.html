@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template %}
 
 {% block title %}Our Services – AVIGRONIX TECHNOLOGIES{% endblock %}
 {% block description %}
@@ -74,12 +74,26 @@ Explore world-class software development, mobile apps, e-commerce systems, DevOp
                 'fas fa-code',
                 '#2563eb',
                 'Custom Web Development',
-                'High-performance, scalable web applications using modern tech stacks like FastAPI, Python, React & Node.js.',
+                'Full-stack web applications built on FastAPI, Flask, React & Next.js — engineered for performance, scalability and clean architecture.',
                 [
-                    'FastAPI Backend',
-                    'Responsive UI/UX',
+                    'FastAPI & Flask Backend',
+                    'React / Next.js Frontend',
                     'Real-time Features',
                     'API-first Architecture'
+                ]
+            ) }}
+
+            <!-- Backend & Database Engineering -->
+            {{ service(
+                'fas fa-database',
+                '#0d9488',
+                'Backend & Database Engineering',
+                'Secure, production-ready backend systems with MongoDB & PostgreSQL — from schema design to query optimization.',
+                [
+                    'MongoDB & PostgreSQL',
+                    'REST API Development',
+                    'JWT Auth & RBAC',
+                    'Redis Caching'
                 ]
             ) }}
 
@@ -116,12 +130,26 @@ Explore world-class software development, mobile apps, e-commerce systems, DevOp
                 'fas fa-cloud',
                 '#06b6d4',
                 'Cloud & DevOps Solutions',
-                'Cloud infrastructure, CI/CD pipelines, containerization, microservices & automation.',
+                'Cloud infrastructure, CI/CD pipelines, containerization, and enterprise deployment across AWS, GCP & VPS environments.',
                 [
-                    'AWS / GCP Setup',
-                    'Docker & Kubernetes',
+                    'AWS / GCP / VPS Setup',
+                    'Linux & Nginx Administration',
                     'CI/CD Pipelines',
-                    'Auto Scaling'
+                    'Enterprise Deployments'
+                ]
+            ) }}
+
+            <!-- Data Analytics & Business Intelligence -->
+            {{ service(
+                'fas fa-chart-line',
+                '#c026d3',
+                'Data Analytics & Business Intelligence',
+                'Enterprise data ingestion and reporting pipelines — including telecom analytics — built on Apache NiFi, Kafka & Superset.',
+                [
+                    'Apache NiFi & Kafka',
+                    'Superset & Grafana Dashboards',
+                    'Telecom Analytics',
+                    'Real-time Reporting'
                 ]
             ) }}
 
@@ -130,12 +158,26 @@ Explore world-class software development, mobile apps, e-commerce systems, DevOp
                 'fas fa-brain',
                 '#e11d48',
                 'AI & Intelligent Automation',
-                'Chatbots, LLM integrations, predictive analytics & automation tools for modern businesses.',
+                'Chatbots, LLM/SLM integrations, predictive analytics & automation tools for modern businesses.',
                 [
                     'AI Chatbots',
-                    'Machine Learning',
+                    'SLM Integration (Ollama)',
                     'Process Automation',
                     'Data Insights'
+                ]
+            ) }}
+
+            <!-- API Integration & Business Automation -->
+            {{ service(
+                'fas fa-plug',
+                '#ea580c',
+                'API Integration & Business Automation',
+                'Webhook-driven backend systems and third-party integrations — including WhatsApp Cloud API — for notifications and automated workflows.',
+                [
+                    'WhatsApp Cloud API',
+                    'Webhook-driven Systems',
+                    'Third-party API Integration',
+                    'Workflow Automation'
                 ]
             ) }}
 
@@ -201,7 +243,7 @@ Explore world-class software development, mobile apps, e-commerce systems, DevOp
 
 
 <!-- ======================= CTA ======================= -->
-<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+<section class="py-20 section-brand-gradient text-white text-center">
     <div class="container mx-auto px-6 max-w-3xl">
         <h2 class="text-4xl font-bold mb-4">Let’s Build Your Next Digital Product</h2>
         <p class="text-blue-100 text-lg mb-8">

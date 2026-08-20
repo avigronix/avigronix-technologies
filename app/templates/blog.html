@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends base_template %}
 
 {% block title %}Blog & Insights - AVIGRONIX TECHNOLOGIES{% endblock %}
-{% block description %}Stay updated with the latest trends in technology, software development, and digital transformation from AVIGRONIX TECHNOLOGIES experts.{% endblock %}
+{% block description %}Engineering notes from AVIGRONIX TECHNOLOGIES — practical guidance on FastAPI, cloud migration, backend security, and database performance.{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -9,7 +9,7 @@
     <div class="container mx-auto px-6 text-center">
         <h1 class="text-5xl font-bold text-gray-900 mb-6">Blog & Insights</h1>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Stay updated with the latest trends, technologies, and best practices in software development and digital transformation.
+            Practical engineering notes from our own projects — backend architecture, cloud deployment, security, and database performance.
         </p>
     </div>
 </section>
@@ -18,220 +18,38 @@
 <section class="py-20 bg-white">
     <div class="container mx-auto px-6">
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Blog Post 1 -->
+            {% for post in posts %}
             <article class="blog-card">
-                <div class="blog-image bg-blue-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-bolt text-blue-600 text-4xl"></i>
+                <div class="blog-image bg-{{ post.color }}-100 rounded-t-2xl h-48 flex items-center justify-center">
+                    <i class="{{ post.icon }} text-{{ post.color }}-600 text-4xl"></i>
                 </div>
                 <div class="p-6">
                     <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>March 15, 2024</span>
+                        <span>{{ post.date }}</span>
                         <span class="mx-2">•</span>
-                        <span>5 min read</span>
+                        <span>{{ post.read_time }}</span>
                     </div>
                     <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/fastapi-best-practices" class="hover:text-blue-600 transition-colors">
-                            Building Scalable APIs with FastAPI: Best Practices
+                        <a href="/blog/{{ post.slug }}" class="hover:text-blue-600 transition-colors">
+                            {{ post.title }}
                         </a>
                     </h2>
                     <p class="text-gray-600 mb-4">
-                        Learn how to build high-performance, scalable APIs using FastAPI with proper architecture patterns, 
-                        authentication, and deployment strategies.
+                        {{ post.excerpt }}
                     </p>
                     <div class="flex items-center justify-between">
-                        <a href="/blog/fastapi-best-practices" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
+                        <a href="/blog/{{ post.slug }}" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
                             Read More <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                         <div class="flex space-x-2">
-                            <span class="blog-tag">FastAPI</span>
-                            <span class="blog-tag">Python</span>
+                            {% for tag in post.tags %}
+                            <span class="blog-tag">{{ tag }}</span>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </article>
-
-            <!-- Blog Post 2 -->
-            <article class="blog-card">
-                <div class="blog-image bg-green-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-cloud text-green-600 text-4xl"></i>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>March 10, 2024</span>
-                        <span class="mx-2">•</span>
-                        <span>7 min read</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/cloud-migration-strategy" class="hover:text-blue-600 transition-colors">
-                            Cloud Migration Strategy for Enterprises: A Complete Guide
-                        </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">
-                        Comprehensive guide to planning and executing successful cloud migration strategies 
-                        for enterprises looking to modernize their infrastructure.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <a href="/blog/cloud-migration-strategy" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
-                            Read More <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <div class="flex space-x-2">
-                            <span class="blog-tag">Cloud</span>
-                            <span class="blog-tag">AWS</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Blog Post 3 -->
-            <article class="blog-card">
-                <div class="blog-image bg-purple-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-mobile-alt text-purple-600 text-4xl"></i>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>March 5, 2024</span>
-                        <span class="mx-2">•</span>
-                        <span>6 min read</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/react-native-performance" class="hover:text-blue-600 transition-colors">
-                            Optimizing React Native App Performance
-                        </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">
-                        Essential techniques and best practices for optimizing React Native applications 
-                        to deliver smooth user experiences across iOS and Android platforms.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <a href="/blog/react-native-performance" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
-                            Read More <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <div class="flex space-x-2">
-                            <span class="blog-tag">React Native</span>
-                            <span class="blog-tag">Mobile</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Blog Post 4 -->
-            <article class="blog-card">
-                <div class="blog-image bg-orange-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-orange-600 text-4xl"></i>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>February 28, 2024</span>
-                        <span class="mx-2">•</span>
-                        <span>8 min read</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/cybersecurity-best-practices" class="hover:text-blue-600 transition-colors">
-                            Cybersecurity Best Practices for Web Applications
-                        </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">
-                        Essential security measures every web application should implement to protect 
-                        against common vulnerabilities and cyber threats.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <a href="/blog/cybersecurity-best-practices" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
-                            Read More <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <div class="flex space-x-2">
-                            <span class="blog-tag">Security</span>
-                            <span class="blog-tag">Web Dev</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Blog Post 5 -->
-            <article class="blog-card">
-                <div class="blog-image bg-red-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-chart-line text-red-600 text-4xl"></i>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>February 20, 2024</span>
-                        <span class="mx-2">•</span>
-                        <span>5 min read</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/digital-transformation-trends" class="hover:text-blue-600 transition-colors">
-                            Top Digital Transformation Trends in 2024
-                        </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">
-                        Explore the key digital transformation trends shaping businesses in 2024, 
-                        from AI integration to cloud-native architectures and beyond.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <a href="/blog/digital-transformation-trends" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
-                            Read More <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <div class="flex space-x-2">
-                            <span class="blog-tag">Trends</span>
-                            <span class="blog-tag">Digital</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Blog Post 6 -->
-            <article class="blog-card">
-                <div class="blog-image bg-indigo-100 rounded-t-2xl h-48 flex items-center justify-center">
-                    <i class="fas fa-database text-indigo-600 text-4xl"></i>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-3">
-                        <span>February 15, 2024</span>
-                        <span class="mx-2">•</span>
-                        <span>7 min read</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-3">
-                        <a href="/blog/database-optimization" class="hover:text-blue-600 transition-colors">
-                            Database Optimization Techniques for High-Traffic Applications
-                        </a>
-                    </h2>
-                    <p class="text-gray-600 mb-4">
-                        Learn advanced database optimization techniques to ensure your applications 
-                        perform efficiently under heavy load and scale effectively.
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <a href="/blog/database-optimization" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
-                            Read More <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <div class="flex space-x-2">
-                            <span class="blog-tag">Database</span>
-                            <span class="blog-tag">Performance</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </div>
-
-        <!-- Load More Button -->
-        <div class="text-center mt-12">
-            <button class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Load More Articles
-            </button>
-        </div>
-    </div>
-</section>
-
-<!-- Newsletter Section -->
-<section class="py-20 bg-gray-50">
-    <div class="container mx-auto px-6 text-center">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Stay Updated</h2>
-        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Subscribe to our newsletter and never miss the latest insights and updates from our experts.
-        </p>
-        <div class="max-w-md mx-auto flex">
-            <input type="email" placeholder="Enter your email" class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <button class="bg-blue-600 text-white px-6 py-3 rounded-r-lg font-semibold hover:bg-blue-700 transition-colors">
-                Subscribe
-            </button>
+            {% endfor %}
         </div>
     </div>
 </section>

@@ -15,26 +15,26 @@
 
     <meta name="description"
           content="{% block meta_description %}
-              {{ seo_description or 'AVIGRONIX TECHNOLOGIES is a India-based software development, website, mobile app and AI automation company serving clients across Kushinagar, Noida and pan India.' }}
+              {{ seo_description or 'AVIGRONIX TECHNOLOGIES is a Noida, India-based software development company delivering backend engineering, web & mobile apps, cloud infrastructure, and data analytics to clients across India, the US, Europe, and the Middle East.' }}
           {% endblock %}">
 
     <meta name="keywords"
           content="{% block meta_keywords %}
-              {{ seo_keywords or 'software company Kushinagar, website development India, mobile app development Noida, AI automation India, AVIGRONIX TECHNOLOGIES' }}
+              {{ seo_keywords or 'software development company India, backend development FastAPI Flask, web development Noida, mobile app development India, cloud DevOps AWS GCP, data analytics, AVIGRONIX TECHNOLOGIES' }}
           {% endblock %}">
 
     <meta name="author" content="AVIGRONIX TECHNOLOGIES" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#2F6FED">
 
     {# ---------- CANONICAL URL ---------- #}
     <link rel="canonical" href="{{ canonical_url or request.url }}"/>
 
-    {# ---------- GEO / LOCAL SEO (KUSHINAGAR / INDIA) ---------- #}
+    {# ---------- GEO / LOCAL SEO (NOIDA, INDIA) ---------- #}
     <meta name="geo.region" content="IN-UP">
-    <meta name="geo.placename" content="Kushinagar">
-    <meta name="geo.position" content="26.7398;83.8870">
-    <meta name="ICBM" content="26.7398, 83.8870">
+    <meta name="geo.placename" content="Noida">
+    <meta name="geo.position" content="28.5892;77.3563">
+    <meta name="ICBM" content="28.5892, 77.3563">
 
     {# ---------- OPEN GRAPH (FACEBOOK / LINKEDIN) ---------- #}
     <meta property="og:site_name" content="AVIGRONIX TECHNOLOGIES"/>
@@ -57,35 +57,85 @@
           content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
 
     {# ---------- FAVICON ---------- #}
-    <link rel="icon" href="{{ url_for('static', path='images/favicon.png') }}" type="image/png"/>
-    <link rel="apple-touch-icon" href="{{ url_for('static', path='images/favicon.png') }}">
+    <link rel="icon" href="{{ url_for('static', path='images/favicon-32x32.png') }}" sizes="32x32" type="image/png"/>
+    <link rel="icon" href="{{ url_for('static', path='images/favicon-16x16.png') }}" sizes="16x16" type="image/png"/>
+    <link rel="apple-touch-icon" href="{{ url_for('static', path='images/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', path='manifest.json') }}">
 
-    {# ---------- TAILWIND + FONTAWESOME ---------- #}
-    <script src="https://cdn.tailwindcss.com"></script>
+    {# ---------- BRAND PALETTE (single source of truth) ---------- #}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/variables.css') }}" />
+
+    {# ---------- FONTS ---------- #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    {# ---------- TAILWIND (brand palette) + FONTAWESOME ---------- #}
+    {# The CDN script must load BEFORE the config assignment below — it creates
+       the global `tailwind` object that `.config` is then set on. #}
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        heading: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    // Existing blue/indigo/gray utility classes across the templates now
+                    // resolve to Avigronix brand colors instead of Tailwind's stock palette
+                    // (kept as remapped stock names, not a custom "brand" namespace, since
+                    // the CDN's runtime JIT does not reliably resolve custom nested color
+                    // tokens used inside gradient utilities).
+                    colors: {
+                        blue: {
+                            50: '#F5F9FF', 100: '#E5F0FF', 200: '#CCE1FF', 300: '#ACCEFF',
+                            400: '#7FB3FF', 500: '#538EF5', 600: '#2F6FED', 700: '#285EC8',
+                            800: '#1F4999', 900: '#153367', 950: '#0B1B33',
+                        },
+                        indigo: {
+                            50: '#ECF4FF', 100: '#CCE1FF', 200: '#73A9FC', 300: '#5F98F8',
+                            400: '#4783F2', 500: '#2D6BE4', 600: '#2960CC', 700: '#214FA6',
+                            800: '#193D7D', 900: '#112A54', 950: '#0B1B33',
+                        },
+                        gray: {
+                            50: '#F8FAFC', 100: '#ECEFF3', 200: '#E0E3E8', 300: '#C1C7D1',
+                            400: '#9AA5B4', 500: '#64748B', 600: '#57677E', 700: '#405068',
+                            800: '#2A3A52', 900: '#0B1B33', 950: '#071221',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}" />
+
+    {# ---------- HTMX (instant navigation) ---------- #}
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 
     {# ---------- GLOBAL STYLES ---------- #}
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMZ7RMVX47"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-QMZ7RMVX47');
+        gtag('config', '{{ ga_measurement_id }}');
     </script>
 
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --bg-white: #ffffff;
-            --bg-gray-50: #f9fafb;
+            --primary-color: var(--color-blue);
+            --primary-hover: var(--color-blue-light);
+            --text-primary: var(--color-navy);
+            --text-secondary: var(--color-slate);
+            --bg-white: var(--color-white);
+            --bg-gray-50: var(--color-bg);
         }
 
         * {
@@ -101,6 +151,11 @@
             overflow-x: hidden;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 600;
         }
 
         /* Smooth scrolling */
@@ -146,11 +201,28 @@
         }
 
         .nav-link.active {
-            color: var(--primary-color);
+            color: var(--color-teal);
             font-weight: 600;
         }
 
+        .mobile-nav-link .chevron {
+            display: none;
+            margin-left: auto;
+            color: var(--color-teal);
+        }
+
+        .mobile-nav-link.active {
+            background: #eff4fe;
+            color: var(--color-teal);
+            font-weight: 600;
+        }
+
+        .mobile-nav-link.active .chevron {
+            display: inline-block;
+        }
+
         .nav-link.active::after {
+            background: var(--color-teal);
             width: 80%;
         }
 
@@ -208,10 +280,66 @@
 
         /* Gradient text */
         .gradient-text {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-blue) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .gradient-text-accent {
+            background: linear-gradient(90deg, var(--color-blue-light) 0%, var(--color-blue) 55%, var(--color-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Brand CTA gradients (kept as plain CSS, not Tailwind utilities, since the
+           CDN's runtime JIT doesn't reliably resolve custom nested color tokens
+           inside gradient utility classes) */
+        .btn-brand-gradient {
+            background: linear-gradient(90deg, var(--color-blue) 0%, var(--color-teal) 100%);
+            transition: background 0.3s;
+        }
+
+        .btn-brand-gradient:hover {
+            background: linear-gradient(90deg, var(--color-navy) 0%, var(--color-teal) 100%);
+        }
+
+        .section-brand-gradient {
+            background: linear-gradient(90deg, var(--color-navy) 0%, var(--color-teal) 100%);
+        }
+
+        /* HTMX navigation loading indicator */
+        .htmx-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            z-index: 60;
+            opacity: 0;
+            overflow: hidden;
+            transition: opacity 0.15s ease;
+        }
+
+        .htmx-indicator.htmx-request {
+            opacity: 1;
+        }
+
+        .htmx-indicator-bar {
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, var(--color-blue), var(--color-teal));
+            animation: htmx-bar-slide 1s ease-in-out infinite;
+        }
+
+        @keyframes htmx-bar-slide {
+            0% { margin-left: -40%; }
+            100% { margin-left: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .htmx-indicator-bar { animation: none; }
         }
 
         /* Responsive typography */
@@ -243,303 +371,320 @@
         "name": "AVIGRONIX TECHNOLOGIES",
         "url": "{{ site_url or 'https://avigronix.com' }}",
         "logo": "{{ site_logo or url_for('static', path='images/logo.png') }}",
-        "description": "Leading software development, website, mobile app and AI automation company in India",
+        "description": "Backend engineering, web & mobile development, cloud infrastructure, and data analytics company serving clients across India, the US, Europe, and the Middle East",
         "address": {
             "@type": "PostalAddress",
             "streetAddress": "Sector 59",
-            "addressLocality": "Kushinagar",
+            "addressLocality": "Noida",
             "addressRegion": "Uttar Pradesh",
-            "postalCode": "274409",
+            "postalCode": "201301",
             "addressCountry": "IN"
         },
         "contactPoint": [{
             "@type": "ContactPoint",
             "telephone": "+91-9450891557",
+            "email": "avigronix@gmail.com",
             "contactType": "customer service",
-            "areaServed": "IN",
+            "areaServed": ["IN", "US", "Europe", "Middle East"],
             "availableLanguage": ["English", "Hindi"]
         }],
-        "sameAs": [
-            "https://facebook.com/itwebtechsolutions",
-            "https://twitter.com/itwebtech",
-            "https://linkedin.com/company/itwebtechsolutions"
+        "knowsAbout": [
+            "Backend Development", "FastAPI", "Flask", "Python",
+            "React", "Next.js", "MongoDB", "PostgreSQL",
+            "REST API Development", "Cloud & DevOps", "AWS", "GCP",
+            "Data Analytics", "Business Automation"
         ]
     }
     </script>
 </head>
 
 <body class="bg-white text-gray-900 antialiased">
-    {# ================= NAVIGATION BAR ================= #}
-    <nav class="glass-nav fixed top-0 left-0 w-full z-50 py-3">
-        <div class="container mx-auto px-4 md:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <!-- Logo Section -->
-                <a href="/" class="flex items-center space-x-3 group">
-                    <div class="relative">
-                        <img src="{{ url_for('static', path='images/logo.png') }}"
-                             class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
-                             alt="AVIGRONIX TECHNOLOGIES Logo"
-                             loading="eager"
-                             width="auto"
-                             height="auto" />
-                        <div class="absolute -inset-1 bg-blue-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                   
-                </a>
-
-                <!-- Desktop Navigation -->
-                <div class="hidden lg:flex items-center space-x-1">
-                    {% set current_path = request.url.path %}
-                    
-                    {% macro desktop_nav_item(name, link, icon) %}
-                        <a href="{{ link }}"
-                           class="nav-link flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 
-                                  {{ 'active' if current_path == link else '' }}
-                                  hover:bg-blue-50">
-                            <i class="{{ icon }} mr-2 text-blue-600 text-sm"></i>
-                            <span class="font-medium text-sm tracking-wide">{{ name }}</span>
-                        </a>
-                    {% endmacro %}
-
-                    {{ desktop_nav_item("Home", "/", "fas fa-home") }}
-                    {{ desktop_nav_item("About", "/about", "fas fa-info-circle") }}
-                    {{ desktop_nav_item("Services", "/services", "fas fa-cogs") }}
-                    {{ desktop_nav_item("Projects", "/projects", "fas fa-briefcase") }}
-                    {{ desktop_nav_item("Team", "/team", "fas fa-users") }}
-                    {{ desktop_nav_item("Blog", "/blog", "fas fa-newspaper") }}
-                    {{ desktop_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
-
-                    <!-- Contact CTA Button -->
-                    <a href="/contact"
-                       class="ml-4 flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg shadow-md hover-lift transition-all duration-300 group">
-                        <i class="fas fa-paper-plane mr-2 transform group-hover:translate-x-1 transition-transform"></i>
-                        <span class="font-semibold text-sm">Contact Us</span>
-                    </a>
+{# ================= NAVIGATION BAR ================= #}
+<nav class="glass-nav fixed top-0 left-0 w-full z-50 py-3">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+            <!-- Logo Section -->
+            <a href="/" hx-get="/" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator" class="flex items-center space-x-3 group">
+                <div class="relative">
+                    <img src="{{ url_for('static', path='images/logo.png') }}"
+                         class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
+                         alt="AVIGRONIX TECHNOLOGIES Logo"
+                         loading="eager"
+                         width="auto"
+                         height="auto" />
+                    <div class="absolute -inset-1 bg-blue-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobileMenuToggle"
-                        class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        aria-label="Toggle mobile menu"
-                        aria-expanded="false">
-                    <i class="fas fa-bars text-gray-700 text-xl"></i>
-                </button>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center space-x-1">
+                {% set current_path = request.url.path %}
+
+                {% macro desktop_nav_item(name, link, icon) %}
+                    <a href="{{ link }}"
+                       hx-get="{{ link }}" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                       class="nav-link flex items-center px-4 py-2.5 rounded-lg transition-all duration-200
+                              {{ 'active' if current_path == link else '' }}
+                              hover:bg-blue-50">
+                        <i class="{{ icon }} mr-2 text-blue-600 text-sm"></i>
+                        <span class="font-medium text-sm tracking-wide">{{ name }}</span>
+                    </a>
+                {% endmacro %}
+
+                {{ desktop_nav_item("Home", "/", "fas fa-home") }}
+                {{ desktop_nav_item("About", "/about", "fas fa-info-circle") }}
+                {{ desktop_nav_item("Services", "/services", "fas fa-cogs") }}
+                {{ desktop_nav_item("Projects", "/projects", "fas fa-briefcase") }}
+                {{ desktop_nav_item("Team", "/team", "fas fa-users") }}
+                {{ desktop_nav_item("Blog", "/blog", "fas fa-newspaper") }}
+                {{ desktop_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
+
+                <!-- Contact CTA Button -->
+                <a href="/contact"
+                   hx-get="/contact" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                   class="ml-4 flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg shadow-md hover-lift transition-all duration-300 group">
+                    <i class="fas fa-paper-plane mr-2 transform group-hover:translate-x-1 transition-transform"></i>
+                    <span class="font-semibold text-sm">Contact Us</span>
+                </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuToggle"
+                    class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    aria-label="Toggle mobile menu"
+                    aria-expanded="false">
+                <i class="fas fa-bars text-gray-700 text-xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+{# ================= MOBILE MENU OVERLAY ================= #}
+<div id="mobileOverlay"
+     class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity duration-300"
+     aria-hidden="true"></div>
+
+{# ================= MOBILE SIDEBAR MENU ================= #}
+<div id="mobileSidebar"
+     class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out">
+    <div class="p-6 h-full flex flex-col">
+        <!-- Mobile Menu Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-3">
+                <img src="{{ url_for('static', path='images/logo.png') }}"
+                     class="h-10 w-auto"
+                     alt="Logo" />
+                <span class="text-lg font-bold text-gray-900">Menu</span>
+            </div>
+            <button id="mobileMenuClose"
+                    class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    aria-label="Close menu">
+                <i class="fas fa-times text-xl text-gray-700"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Links -->
+        <div class="flex-1 overflow-y-auto">
+            <nav class="space-y-1">
+                {% macro mobile_nav_item(name, link, icon) %}
+                    <a href="{{ link }}"
+                       hx-get="{{ link }}" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                       class="mobile-nav-link flex items-center px-4 py-3.5 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200
+                              {{ 'active' if request.url.path == link else '' }}">
+                        <i class="{{ icon }} w-5 text-center mr-3 text-lg"></i>
+                        <span class="font-medium">{{ name }}</span>
+                        <i class="chevron fas fa-chevron-right ml-auto"></i>
+                    </a>
+                {% endmacro %}
+
+                {{ mobile_nav_item("Home", "/", "fas fa-home") }}
+                {{ mobile_nav_item("About", "/about", "fas fa-info-circle") }}
+                {{ mobile_nav_item("Services", "/services", "fas fa-cogs") }}
+                {{ mobile_nav_item("Projects", "/projects", "fas fa-briefcase") }}
+                {{ mobile_nav_item("Team", "/team", "fas fa-users") }}
+                {{ mobile_nav_item("Blog", "/blog", "fas fa-newspaper") }}
+                {{ mobile_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
+            </nav>
+
+            <!-- Mobile Contact CTA -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <a href="/contact"
+                   hx-get="/contact" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                   class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-3.5 rounded-xl font-semibold shadow-md hover-lift transition-all duration-300">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Contact Us Now
+                </a>
             </div>
         </div>
-    </nav>
 
-    {# ================= MOBILE MENU OVERLAY ================= #}
-    <div id="mobileOverlay"
-         class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity duration-300"
-         aria-hidden="true"></div>
-
-    {# ================= MOBILE SIDEBAR MENU ================= #}
-    <div id="mobileSidebar"
-         class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="p-6 h-full flex flex-col">
-            <!-- Mobile Menu Header -->
-            <div class="flex items-center justify-between mb-8">
-                <div class="flex items-center space-x-3">
-                    <img src="{{ url_for('static', path='images/logo.png') }}"
-                         class="h-10 w-auto"
-                         alt="Logo" />
-                    <span class="text-lg font-bold text-gray-900">Menu</span>
+        <!-- Mobile Footer Info -->
+        <div class="pt-6 border-t border-gray-200 mt-auto">
+            <div class="space-y-3">
+                <div class="flex items-center text-gray-600">
+                    <i class="fas fa-phone-alt text-blue-500 mr-3"></i>
+                    <span class="text-sm">+91 945 089 1557</span>
                 </div>
-                <button id="mobileMenuClose"
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                        aria-label="Close menu">
-                    <i class="fas fa-times text-xl text-gray-700"></i>
-                </button>
-            </div>
-
-            <!-- Mobile Navigation Links -->
-            <div class="flex-1 overflow-y-auto">
-                <nav class="space-y-1">
-                    {% macro mobile_nav_item(name, link, icon) %}
-                        <a href="{{ link }}"
-                           class="flex items-center px-4 py-3.5 rounded-xl text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 
-                                  {{ 'bg-blue-50 text-blue-600' if request.url.path == link else '' }}">
-                            <i class="{{ icon }} w-5 text-center mr-3 text-lg"></i>
-                            <span class="font-medium">{{ name }}</span>
-                            {% if request.url.path == link %}
-                                <i class="fas fa-chevron-right ml-auto text-blue-600"></i>
-                            {% endif %}
-                        </a>
-                    {% endmacro %}
-
-                    {{ mobile_nav_item("Home", "/", "fas fa-home") }}
-                    {{ mobile_nav_item("About", "/about", "fas fa-info-circle") }}
-                    {{ mobile_nav_item("Services", "/services", "fas fa-cogs") }}
-                    {{ mobile_nav_item("Projects", "/projects", "fas fa-briefcase") }}
-                    {{ mobile_nav_item("Team", "/team", "fas fa-users") }}
-                    {{ mobile_nav_item("Blog", "/blog", "fas fa-newspaper") }}
-                    {{ mobile_nav_item("FAQ", "/faq", "fas fa-question-circle") }}
-                </nav>
-
-                <!-- Mobile Contact CTA -->
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <a href="/contact"
-                       class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-3.5 rounded-xl font-semibold shadow-md hover-lift transition-all duration-300">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Contact Us Now
-                    </a>
-                </div>
-            </div>
-
-            <!-- Mobile Footer Info -->
-            <div class="pt-6 border-t border-gray-200 mt-auto">
-                <div class="space-y-3">
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-phone-alt text-blue-500 mr-3"></i>
-                        <span class="text-sm">+91 9450891557</span>
-                    </div>
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-envelope text-blue-500 mr-3"></i>
-                        <span class="text-sm">itwebtechinfo@gmail.com</span>
-                    </div>
+                <div class="flex items-center text-gray-600">
+                    <i class="fas fa-envelope text-blue-500 mr-3"></i>
+                    <span class="text-sm">avigronix@gmail.com</span>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+    {# ================= HTMX LOADING INDICATOR ================= #}
+    <div id="htmx-indicator" class="htmx-indicator" aria-hidden="true">
+        <div class="htmx-indicator-bar"></div>
+    </div>
 
     {# ================= MAIN CONTENT AREA ================= #}
-    <main class="min-h-screen pt-20 md:pt-24">
+    <main id="content" class="min-h-screen pt-20 md:pt-24">
         {% block content %}{% endblock %}
     </main>
 
-    {# ================= FOOTER ================= #}
-    <footer class="bg-gradient-to-br from-gray-900 to-gray-950 text-white pt-16 pb-10">
-        <div class="container mx-auto px-4 md:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
-                <!-- Company Info -->
-                <div class="lg:col-span-2">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="relative">
-                            <img src="{{ url_for('static', path='images/logo-icon.png') }}"
-                                 class="h-14 w-auto"
-                                 alt="AVIGRONIX TECHNOLOGIES Logo"
-                                 loading="lazy" />
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold mb-1">AVIGRONIX TECHNOLOGIES</h3>
-                            <p class="text-blue-300 font-medium">Digital Innovation Partners</p>
-                        </div>
+{# ================= FOOTER ================= #}
+<footer class="bg-gradient-to-br from-gray-900 to-gray-950 text-white pt-16 pb-10">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+            <!-- Company Info -->
+            <div class="lg:col-span-2">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="relative">
+                        <img src="{{ url_for('static', path='images/logo-icon.png') }}"
+                             class="h-14 w-auto"
+                             alt="AVIGRONIX TECHNOLOGIES Logo"
+                             loading="lazy" />
                     </div>
-                    <p class="text-gray-300 leading-relaxed max-w-xl">
-                        We are a premier technology solutions provider specializing in custom software development, 
-                        responsive web design, mobile applications, and AI-driven automation. Serving businesses 
-                        across Kushinagar, Noida, and throughout India with cutting-edge digital solutions.
-                    </p>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
-                        <i class="fas fa-link mr-2 text-blue-400"></i>
-                        Quick Links
-                    </h4>
-                    <ul class="space-y-3">
-                        {% macro footer_link(name, link, icon) %}
-                            <li>
-                                <a href="{{ link }}" 
-                                   class="text-gray-400 hover:text-white hover:translate-x-1 transition-all duration-200 flex items-center">
-                                    <i class="{{ icon }} mr-3 text-blue-500"></i>
-                                    {{ name }}
-                                </a>
-                            </li>
-                        {% endmacro %}
-
-                        {{ footer_link("Our Services", "/services", "fas fa-cog") }}
-                        {{ footer_link("Projects Portfolio", "/projects", "fas fa-briefcase") }}
-                        {{ footer_link("About Company", "/about", "fas fa-building") }}
-                        {{ footer_link("Team Members", "/team", "fas fa-users") }}
-                        {{ footer_link("Blog Articles", "/blog", "fas fa-newspaper") }}
-                        {{ footer_link("FAQs", "/faq", "fas fa-question-circle") }}
-                    </ul>
-                </div>
-
-                <!-- Contact Info -->
-                <div>
-                    <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
-                        <i class="fas fa-address-book mr-2 text-blue-400"></i>
-                        Contact Info
-                    </h4>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
-                                <i class="fas fa-phone text-blue-400"></i>
-                            </div>
-                            <div>
-                                <span class="block text-gray-400 text-sm">Phone</span>
-                                <a href="tel:+919555811092" class="text-white font-medium hover:text-blue-300">
-                                    +91 9450891557
-                                </a>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
-                                <i class="fas fa-envelope text-blue-400"></i>
-                            </div>
-                            <div>
-                                <span class="block text-gray-400 text-sm">Email</span>
-                                <a href="mailto:itwebtechinfo@gmail.com" class="text-white font-medium hover:text-blue-300">
-                                    itwebtechinfo@gmail.com
-                                </a>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
-                                <i class="fas fa-map-marker-alt text-blue-400"></i>
-                            </div>
-                            <div>
-                                <span class="block text-gray-400 text-sm">Location</span>
-                                <span class="text-white font-medium">Noida Sector 59, Uttar Pradesh, India</span>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <!-- Social Media -->
-                    <div class="mt-8">
-                        <h5 class="text-sm font-semibold text-gray-400 mb-3">FOLLOW US</h5>
-                        <div class="flex space-x-3">
-                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition-colors">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 transition-colors">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-700 transition-colors">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 transition-colors">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-1">AVIGRONIX TECHNOLOGIES</h3>
+                        <p class="text-blue-300 font-medium">Backend, Cloud &amp; Data Engineering Partners</p>
                     </div>
+                </div>
+                <p class="text-gray-300 leading-relaxed max-w-xl">
+                    We build custom backend systems, web &amp; mobile applications, cloud infrastructure,
+                    and data-driven automation — serving clients across India, the US, Europe, and the
+                    Middle East with production-grade engineering and enterprise deployment expertise.
+                </p>
+                <div class="mt-6 flex items-center text-gray-400 text-sm">
+                    <i class="fas fa-clock mr-2 text-blue-400"></i>
+                    Mon–Fri • 9 AM–6 PM IST
                 </div>
             </div>
 
-            <!-- Copyright -->
-            <div class="pt-8 border-t border-gray-800">
-                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div class="text-gray-500 text-sm">
-                        © {{ current_year }} AVIGRONIX TECHNOLOGIES. All Rights Reserved.
-                    </div>
-                    <div class="flex space-x-6 text-sm">
-                        <a href="/privacy-policy" class="text-gray-400 hover:text-white transition-colors">
-                            Privacy Policy
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                    <i class="fas fa-link mr-2 text-blue-400"></i>
+                    Quick Links
+                </h4>
+                <ul class="space-y-3">
+                    {% macro footer_link(name, link, icon) %}
+                        <li>
+                            <a href="{{ link }}"
+                               hx-get="{{ link }}" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                               class="text-gray-400 hover:text-white hover:translate-x-1 transition-all duration-200 flex items-center">
+                                <i class="{{ icon }} mr-3 text-blue-500"></i>
+                                {{ name }}
+                            </a>
+                        </li>
+                    {% endmacro %}
+
+                    {{ footer_link("Our Services", "/services", "fas fa-cog") }}
+                    {{ footer_link("Projects Portfolio", "/projects", "fas fa-briefcase") }}
+                    {{ footer_link("About Company", "/about", "fas fa-building") }}
+                    {{ footer_link("Team Members", "/team", "fas fa-users") }}
+                    {{ footer_link("Blog Articles", "/blog", "fas fa-newspaper") }}
+                    {{ footer_link("FAQs", "/faq", "fas fa-question-circle") }}
+                    {{ footer_link("Contact Us", "/contact", "fas fa-paper-plane") }}
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div>
+                <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                    <i class="fas fa-address-book mr-2 text-blue-400"></i>
+                    Contact Info
+                </h4>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                            <i class="fas fa-phone text-blue-400"></i>
+                        </div>
+                        <div>
+                            <span class="block text-gray-400 text-sm">Phone</span>
+                            <a href="tel:+919450891557" class="text-white font-medium hover:text-blue-300">
+                                +91 945 089 1557
+                            </a>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                            <i class="fas fa-envelope text-blue-400"></i>
+                        </div>
+                        <div>
+                            <span class="block text-gray-400 text-sm">Email</span>
+                            <a href="mailto:avigronix@gmail.com" class="text-white font-medium hover:text-blue-300">
+                                avigronix@gmail.com
+                            </a>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
+                            <i class="fas fa-map-marker-alt text-blue-400"></i>
+                        </div>
+                        <div>
+                            <span class="block text-gray-400 text-sm">Location</span>
+                            <span class="text-white font-medium">Noida Sector 59, Uttar Pradesh, India</span>
+                        </div>
+                    </li>
+                </ul>
+
+                {# ---------- SOCIAL MEDIA (commented out until real profile URLs are available; still placeholder href="#" links) ----------
+                <div class="mt-8">
+                    <h5 class="text-sm font-semibold text-gray-400 mb-3">FOLLOW US</h5>
+                    <div class="flex space-x-3">
+                        <a href="#" aria-label="Follow AVIGRONIX TECHNOLOGIES on Facebook" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition-colors">
+                            <i class="fab fa-facebook-f" aria-hidden="true"></i>
                         </a>
-                        <a href="/terms-and-conditions" class="text-gray-400 hover:text-white transition-colors">
-                            Terms & Conditions
+                        <a href="#" aria-label="Follow AVIGRONIX TECHNOLOGIES on Twitter" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 transition-colors">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
                         </a>
-                        <!-- <a href="/sitemap" class="text-gray-400 hover:text-white transition-colors">
-                            Sitemap
-                        </a> -->
+                        <a href="#" aria-label="Follow AVIGRONIX TECHNOLOGIES on LinkedIn" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" aria-label="Follow AVIGRONIX TECHNOLOGIES on Instagram" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 transition-colors">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
                     </div>
+                </div>
+                #}
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="pt-8 border-t border-gray-800">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div class="text-gray-500 text-sm">
+                    © {{ current_year }} AVIGRONIX TECHNOLOGIES. All Rights Reserved.
+                </div>
+                <div class="flex space-x-6 text-sm">
+                    <a href="/privacy-policy"
+                       hx-get="/privacy-policy" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                       class="text-gray-400 hover:text-white transition-colors">
+                        Privacy Policy
+                    </a>
+                    <a href="/terms-and-conditions"
+                       hx-get="/terms-and-conditions" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator"
+                       class="text-gray-400 hover:text-white transition-colors">
+                        Terms & Conditions
+                    </a>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
 
     {# ================= JAVASCRIPT ================= #}
     <script>
@@ -649,9 +794,57 @@
                 el.textContent = currentYear;
             });
         });
+
+        // ---------- HTMX: keep <title> and active nav state in sync on navigation ----------
+        // (also handles browser back/forward: htmx restores those from its local
+        // history cache without a server round-trip, so the HX-Trigger title never
+        // fires for that path — a small per-URL title cache covers it instead)
+        function avxTitleCacheSet(path, title) {
+            try { sessionStorage.setItem('avx-title:' + path, title); } catch (e) {}
+        }
+        function avxTitleCacheGet(path) {
+            try { return sessionStorage.getItem('avx-title:' + path); } catch (e) { return null; }
+        }
+        avxTitleCacheSet(window.location.pathname, document.title);
+
+        function avxSyncChrome() {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-link[hx-get], .mobile-nav-link[hx-get]').forEach(function (link) {
+                link.classList.toggle('active', link.getAttribute('hx-get') === currentPath);
+            });
+            const cachedTitle = avxTitleCacheGet(currentPath);
+            if (cachedTitle) {
+                document.title = cachedTitle;
+            }
+        }
+
+        document.body.addEventListener('pageTitleUpdate', function (evt) {
+            if (evt.detail && evt.detail.value) {
+                document.title = evt.detail.value;
+            }
+        });
+
+        // htmx:pushedIntoHistory fires with the exact path just pushed, decoupled
+        // from window.location.pathname timing (which raced the pageTitleUpdate
+        // handler above and caused titles to cache one navigation behind).
+        document.body.addEventListener('htmx:pushedIntoHistory', function (evt) {
+            const path = evt.detail && evt.detail.path;
+            if (path) {
+                setTimeout(function () { avxTitleCacheSet(path, document.title); }, 0);
+            }
+        });
+
+        document.body.addEventListener('htmx:afterSettle', function (evt) {
+            avxSyncChrome();
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        });
+
+        document.body.addEventListener('htmx:historyRestore', avxSyncChrome);
+        window.addEventListener('popstate', avxSyncChrome);
     </script>
 
     {% block extra_js %}{% endblock %}
 
 </body>
+
 </html>
