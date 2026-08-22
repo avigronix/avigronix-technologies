@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, HTMLResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -173,11 +173,12 @@ CSP = (
     "default-src 'self'; "
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
     "https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com "
-    "https://www.googletagmanager.com; "
+    "https://www.googletagmanager.com https://static.cloudflareinsights.com; "
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
     "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
     "img-src 'self' data: https:; "
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; "
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com "
+    "https://cloudflareinsights.com; "
     "frame-ancestors 'none'"
 )
 
@@ -254,17 +255,57 @@ async def get_image(sub_folder: str, filename: str):
     
     return FileResponse(file_path)
 
+@app.get("/google217adffd4029d326.html", include_in_schema=False, response_class=PlainTextResponse)
+def google_site_verification():
+    return "google-site-verification: google217adffd4029d326.html"
+
 @app.get("/sitemap.xml", include_in_schema=False)
 def sitemap():
-    return FileResponse("static/sitemap.xml", media_type="application/xml")
+    from blog_content import list_posts
+
+    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    static_pages = [
+        ("/", "weekly", "1.0"),
+        ("/about", "monthly", "0.8"),
+        ("/services", "weekly", "0.9"),
+        ("/projects", "weekly", "0.8"),
+        ("/team", "monthly", "0.6"),
+        ("/blog", "weekly", "0.7"),
+        ("/faq", "monthly", "0.5"),
+        ("/contact", "monthly", "0.7"),
+        ("/privacy-policy", "yearly", "0.3"),
+        ("/terms-and-conditions", "yearly", "0.3"),
+    ]
+
+    urls = [
+        f"<url><loc>{site}{path}</loc><changefreq>{freq}</changefreq><priority>{priority}</priority></url>"
+        for path, freq, priority in static_pages
+    ]
+    for post in list_posts():
+        urls.append(
+            f"<url><loc>{site}/blog/{post['slug']}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>"
+        )
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls)
+        + "\n</urlset>\n"
+    )
+    return Response(content=xml, media_type="application/xml")
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
-    content = """
+    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    content = f"""
 User-agent: *
 Allow: /
+Disallow: /shop/register
+Disallow: /shop/preview
+Disallow: /shop/register-business
+Disallow: /shop/api/
 
-Sitemap: https://avigronix.com/sitemap.xml
+Sitemap: {site}/sitemap.xml
 """
     return content.strip()
 

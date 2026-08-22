@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="google-site-verification" content="OI8l4XZ4vhqHcpA07QPapDAEXYvXAeSlyltpQ7hRgvY" />
 
     {# ---------- SEO TITLE + DESCRIPTION (OVERRIDABLE) ---------- #}
     <title>
@@ -396,6 +397,33 @@
         ]
     }
     </script>
+
+    {% if request.url.path != '/' %}
+    {# ---------- BREADCRUMB SCHEMA (derived from the page's own title block) ---------- #}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ site_url or 'https://avigronix.com' }}/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": {{ (self.title() | trim).split('|')[0].strip() | tojson }},
+                "item": "{{ site_url or 'https://avigronix.com' }}{{ request.url.path }}"
+            }
+        ]
+    }
+    </script>
+    {% endif %}
+
+    {# ---------- PER-PAGE STRUCTURED DATA (FAQPage, BlogPosting, etc.) ---------- #}
+    {% block structured_data %}{% endblock %}
 </head>
 
 <body class="bg-white text-gray-900 antialiased">
@@ -474,7 +502,7 @@
             <div class="flex items-center space-x-3">
                 <img src="{{ url_for('static', path='images/logo.png') }}"
                      class="h-10 w-auto"
-                     alt="Logo" />
+                     alt="AVIGRONIX TECHNOLOGIES Logo" />
                 <span class="text-lg font-bold text-gray-900">Menu</span>
             </div>
             <button id="mobileMenuClose"

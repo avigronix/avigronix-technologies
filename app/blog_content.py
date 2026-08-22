@@ -230,9 +230,18 @@ BLOG_POSTS = {
 }
 
 
+def _iso_date(human_date: str) -> str:
+    from datetime import datetime
+
+    return datetime.strptime(human_date, "%B %d, %Y").strftime("%Y-%m-%d")
+
+
 def get_post(slug: str) -> dict | None:
-    return BLOG_POSTS.get(slug)
+    post = BLOG_POSTS.get(slug)
+    if post is None:
+        return None
+    return {**post, "iso_date": _iso_date(post["date"])}
 
 
 def list_posts() -> list[dict]:
-    return [{"slug": slug, **post} for slug, post in BLOG_POSTS.items()]
+    return [{"slug": slug, **post, "iso_date": _iso_date(post["date"])} for slug, post in BLOG_POSTS.items()]

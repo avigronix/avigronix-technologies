@@ -1,7 +1,123 @@
 {% extends base_template %}
 
-{% block title %}Frequently Asked Questions - AVIGRONIX TECHNOLOGIES{% endblock %}
-{% block description %}Find answers to common questions about our services, project timelines, pricing, technologies, and support.{% endblock %}
+{% block title %}FAQ | Pricing, Timelines & Process{% endblock %}
+{% block description %}Answers to common questions about AVIGRONIX TECHNOLOGIES' software development services — pricing models, project timelines, technologies, and support.{% endblock %}
+{% block meta_keywords %}software development pricing, project timeline questions, custom software FAQ, FastAPI development cost{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What services does AVIGRONIX TECHNOLOGIES offer?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer Backend & Database Engineering (FastAPI, Flask, MongoDB, PostgreSQL), Custom Web Development (React, Next.js), Mobile App Development, E-commerce Platforms, Cloud & DevOps Solutions (AWS, GCP, VPS), Data Analytics & Business Intelligence, API Integration & Business Automation, AI & Intelligent Automation, SEO & Digital Marketing, and UI/UX Design."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What industries do you work with?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We have experience across LegalTech & Court Case Management, Healthcare & Clinics, E-commerce & Retail, Education & LMS Platforms, Restaurants & Hospitality, Enterprise & SMEs, and startups across various sectors."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Do you work with startups and small businesses?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, we regularly work with startups and growing businesses, helping them validate and build MVPs, scale from MVP to full product, optimize costs with the right tech choices, and plan long-term product roadmaps."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is your typical project timeline?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Timelines depend on complexity and scope: small websites take 2-4 weeks, custom web apps 4-12 weeks, e-commerce platforms 6-16 weeks, mobile apps 8-20 weeks, and enterprise solutions 12+ weeks. A detailed timeline is shared after the discovery phase."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is your development process?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We follow an agile, transparent process: Discovery (understanding requirements & goals), Design (UX flows, UI design & architecture), Development (iterative builds in sprints), Testing (QA, UAT & performance checks), Deployment (production rollout & monitoring), and Support (maintenance, updates & improvements)."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do you share project progress?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We keep you updated via weekly progress calls & demos, access to project management tools, regular sprint reviews, and direct communication with the project manager or lead developer."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is your pricing model?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer Fixed Price (for clearly defined scope), Time & Material (for evolving requirements), Dedicated Team (long-term ongoing work), and Hybrid (a custom mix based on your needs)."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Do you offer maintenance and support?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, we provide flexible maintenance packages including bug fixes & monitoring, security updates, performance optimization, and feature enhancements."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Are there any hidden costs?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. All costs are discussed transparently in the proposal, including development cost, third-party tools (if required), cloud/hosting charges, and maintenance & support options."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What technologies do you specialize in?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Backend: Python (FastAPI, Flask), REST APIs, JWT & RBAC. Frontend: React, Next.js, Tailwind CSS. Databases: MongoDB (primary), PostgreSQL, MySQL, Redis. Cloud & DevOps: AWS, GCP, VPS, Linux, Nginx, Docker, CI/CD. Mobile: Flutter, React Native. Data & Analytics: Apache NiFi, Kafka, Superset, Grafana, InfluxDB."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Do you work with existing codebases?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, we can audit and review existing code, refactor and optimize performance, add new features or modules, and migrate to modern stacks where needed."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What kind of support do you provide after launch?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer bug fixes & incident support, performance monitoring, updates & enhancements, and security & compliance updates."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I get started with my project?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Share your idea or requirement via our contact page, we schedule a free consultation call, define scope, features & timelines, you receive a detailed proposal, and on approval we kick off the project."
+            }
+        }
+    ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 

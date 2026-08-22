@@ -1,8 +1,30 @@
 {% extends base_template %}
 
-{% block title %}Our Services – AVIGRONIX TECHNOLOGIES{% endblock %}
-{% block description %}
-Explore world-class software development, mobile apps, e-commerce systems, DevOps, cloud solutions, AI automation, SEO, and digital transformation services delivered by AVIGRONIX TECHNOLOGIES.
+{% block title %}Services | Backend, Web, Cloud & Data Engineering{% endblock %}
+{% block description %}Backend development (FastAPI, Flask), web & mobile apps, cloud & DevOps (AWS, GCP), database engineering (MongoDB, PostgreSQL), data analytics, and API integration services.{% endblock %}
+{% block meta_keywords %}backend development services, FastAPI development, Flask development company, MongoDB development services, cloud DevOps services, API integration services, data analytics services, custom web development, database engineering services{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+        {"@type": "Service", "position": 1, "name": "Custom Web Development", "description": "Full-stack web applications built on FastAPI, Flask, React & Next.js.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 2, "name": "Backend & Database Engineering", "description": "Secure, production-ready backend systems with MongoDB & PostgreSQL.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 3, "name": "E-commerce Development", "description": "AI-powered online stores, multi-vendor systems, and payment gateway integrations.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 4, "name": "Mobile App Development", "description": "Cross-platform mobile applications for iOS & Android.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 5, "name": "Cloud & DevOps Solutions", "description": "Cloud infrastructure and enterprise deployment across AWS, GCP & VPS.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 6, "name": "Data Analytics & Business Intelligence", "description": "Enterprise data ingestion and reporting pipelines built on Apache NiFi, Kafka & Superset.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 7, "name": "AI & Intelligent Automation", "description": "Chatbots, LLM/SLM integrations, and predictive analytics.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 8, "name": "API Integration & Business Automation", "description": "Webhook-driven backend systems and WhatsApp Cloud API integration.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 9, "name": "SEO & Digital Marketing", "description": "Result-focused SEO, paid ads, and performance marketing.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 10, "name": "UI/UX & Product Design", "description": "User experience and interface design focused on clarity and conversion.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 11, "name": "ERP & Enterprise Development", "description": "Custom ERP systems, HRMS, CRM, and workflow automation.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
+        {"@type": "Service", "position": 12, "name": "Support & Maintenance", "description": "24/7 monitoring, enhancements, and long-term support.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}}
+    ]
+}
+</script>
 {% endblock %}
 
 {% block content %}

@@ -1,7 +1,40 @@
 {% extends base_template %}
 
-{% block title %}{{ post.title }} - AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block title %}{{ post.title }} | AVIGRONIX TECHNOLOGIES{% endblock %}
 {% block description %}{{ post.excerpt }}{% endblock %}
+{% block meta_keywords %}{{ post.tags | join(', ') }}, {{ post.title | lower }}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": {{ post.title | tojson }},
+    "description": {{ post.excerpt | tojson }},
+    "datePublished": "{{ post.iso_date }}",
+    "dateModified": "{{ post.iso_date }}",
+    "author": {
+        "@type": "Organization",
+        "name": "AVIGRONIX TECHNOLOGIES",
+        "url": "{{ site_url or 'https://avigronix.com' }}"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "AVIGRONIX TECHNOLOGIES",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ url_for('static', path='images/logo.png') }}"
+        }
+    },
+    "image": "{{ url_for('static', path='images/og-banner.png') }}",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ site_url or 'https://avigronix.com' }}/blog/{{ slug }}"
+    },
+    "keywords": {{ post.tags | join(', ') | tojson }}
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
