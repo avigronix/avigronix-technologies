@@ -338,10 +338,10 @@
     <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
             <!-- Logo and Brand Name -->
-            <div class="flex items-center gap-4">
-                <img src="{{ shop_data.logo }}" alt="{{ shop_data.shopName }}" class="w-14 h-14 rounded-xl object-cover shadow-md">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ shop_data.shopName }}</h1>
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <img src="{{ shop_data.logo }}" alt="{{ shop_data.shopName }}" class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl object-cover shadow-md">
+                <div class="min-w-0">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 truncate">{{ shop_data.shopName }}</h1>
                     <p class="text-sm text-gray-600">{{ shop_data.category }}</p>
                 </div>
             </div>
@@ -538,7 +538,7 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500 uppercase font-semibold">Email Address</p>
-                            <p class="text-lg font-bold text-gray-900">{{ shop_data.email }}</p>
+                            <p class="text-lg font-bold text-gray-900 break-all">{{ shop_data.email }}</p>
                         </div>
                     </div>
 
