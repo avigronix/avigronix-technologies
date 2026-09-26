@@ -93,24 +93,71 @@ Not touched in this pass (still open, tracked below): A2/H2 (`register-business`
 
 **Full CSP + flow test results:** loaded all 12 static/marketing pages, the custom 404 page, 4 htmx-navigated page transitions, the cookie-consent banner (fresh visit → visible, Accept → Consent Mode `update` fires, hidden), the contact form (honeypot-triggered, no real email sent), and the complete shop flow end-to-end — all in a real headless-Chromium browser with a `securitypolicyviolation` listener attached throughout. **Zero CSP violations, zero failed resource loads, one console message (an expected 404 from deliberately testing a nonexistent page).**
 
+
+### Round 5 (2026-09-26) — automated tests, CI, and safe improvements
+
+**Part 1 — automated test suite** (`tests/`, `pytest.ini`, `requirements-dev.txt`). 165 tests covering every static page (full and htmx partial), 404, sitemap/robots, security headers, the full shop flow end-to-end (preview → register → `/shop/{subdomain}` → subdomain root), the empty-optional-file regression (A10) for `paymentQR`/`bankQR`/`shopQR` sent exactly as a browser sends them, upload size/type limits with no files left behind, reserved/malformed/duplicate subdomains (including the unique-index race), the public JSON API never exposing private fields, admin auth (no key / wrong key / key unset / correct key / invalid status), the contact form (HTML escaping, ack email not reflecting the message, CR/LF header injection, over-length fields, honeypot, rate limit, SMTP failure), JSON-LD validity, RSS, `/health`, orphan cleanup, and transactional registration. Safety built into the harness: a throwaway `avigronix_test_<random>` database (in-memory by default, or real MongoDB via `TEST_MONGODB_URL`, dropped afterwards, refuses any other name), SMTP replaced by a recorder, and an isolated `uploads/` directory. Verified against mongomock, a real replica set, and a standalone server (the CI setup); the live `shop_management` data and `app/uploads/` were confirmed untouched after every run.
+
+Writing the tests surfaced **four real bugs, all fixed**: **G11** (critical path traversal serving the app's source code), **A11** (registration API skipped the subdomain format rule), **A12a** (files from a failed preview left on disk), and — during Part 3 — **H7** (`ADMIN_API_KEY` in `.env` never loaded).
+
+**Part 2 — CI** (`.github/workflows/ci.yml`): on every push and pull request, one job installs both requirement files and runs `pytest -v` against a MongoDB 8 service container; a second runs `pip-audit -r requirements.txt`. Simulated locally step-for-step (fresh venv, standalone MongoDB, pip-audit: no known vulnerabilities). It has not run on GitHub yet — it starts with the next push.
+
+**Part 3 — safe improvements**, all without changing the shop flow or the design:
+
+| Item | Status | What changed |
+|---|---|---|
+| C1 + **C2 (new)** | ✅ | One canonical URL (`SITE_URL` + path, no query string) for `rel=canonical` and `og:url`. Found that every page's own meta description was being ignored (block-name mismatch) — now rendered, and reused for `og:`/`twitter:` title and description. |
+| B1 | ✅ | `register_business.html` description, taken from existing homepage copy. |
+| Structured data | ✅ | Service schema already existed; now in Google's `ItemList → ListItem → Service` shape, generated with `tojson`, and tested to match the 12 service cards on the page exactly. BreadcrumbList already existed on inner pages; blog posts now get Home › Blog › Post, and the last item uses the canonical URL. Every page's JSON-LD is parsed in tests. |
+| RSS | ✅ | `/blog/rss.xml` (RSS 2.0, from `blog_content.py`, registered before `/blog/{slug}` so it isn't swallowed), linked in `<head>`. Sitemap already listed every post — now tested. |
+| Orphaned uploads (A12b) | ✅ | Unpublished preview uploads older than 24 h deleted at startup and every 6 h; files of any registered shop are never deleted; nothing is deleted if the DB can't be read. |
+| A7 | ✅ | Transaction on replica sets, rollback of the first insert otherwise. Both paths tested. |
+| F2 | ⚠️ partial | Measured by pixel sampling in a real browser. FAQ CTA fixed (4.55). Brand-gradient CTAs improved (3.35 → 3.86 desktop) but **cannot reach 4.5 by text colour alone** — needs a gradient tweak, proposal **P6**. |
+| E2 | ✅ | Both phone placeholders `+919876543210`. |
+| D5 | ✅ | Lossless `logo.webp` via `<picture>` (pixel-identical, 29 % smaller). `og-banner.png` isn't shown on any page, so it stays PNG only. |
+| `/health` | ✅ | 200 / 503 with DB ping, no error details, not rate limited, not in sitemap, `Disallow`ed in robots.txt. |
+| Rate limiting | ✅ documented | README now states the in-memory limiter is correct only with one worker (the default command), and `RATE_LIMIT_STORAGE_URI` (new, optional, default `memory://`) switches to a shared store for multi-worker setups. |
+| Privacy policy date | ✅ | "Last updated" moved to September 2026 — the content changed in Round 3 and the policy itself promises the date reflects changes. |
+
+After each part: full test suite green, and a real-browser run of the shop flow (Payment QR left empty) against an isolated database and uploads folder — **PASS, no console errors, no CSP violations** every time.
+
+
+### Round 6 (2026-09-26) — G11 exposure analysis, EXIF stripping, API docs off
+
+**What G11 exposed on the old code** (tested against the last committed version on a local server with harmless sentinel files at every level — never against production, and without reading any real secret):
+
+| Location | Readable through the bug? |
+|---|---|
+| Any file **directly inside `app/`** — `main.py`, `database.py`, `rate_limit.py`, `render_utils.py`, `blog_content.py`, `__init__.py`, `.DS_Store`, and **an `app/.env` if one existed on the server** | **Yes** — via `/uploads/../X`, `%2e%2e`, `%2E%2E`, `.%2e`, `%2e.` |
+| Project root — `.env`, `requirements.txt`, `.git/config`, README | **No** — every variant 404 |
+| Sub-folders of `app/` — `routers/*.py`, `templates/`, `static/` | **No** — reaching them needs a second path segment, which the route can't match |
+| Double encoding (`%252e`), backslashes (`%5c`, `%255c`), encoded slashes (`%2f`) | **No** — all 404 |
+| Directory names (`/uploads/%2e%2e/templates`) | 500 error, no content |
+
+The exposed source files contain **no credentials in any of the 10 commits** (checked every commit; `.env` was never committed). They do reveal the app's logic plus values that are already public (GA ID, Google verification file, contact email, default local DB name). **The one open question only you can answer:** whether the production server has *any other file directly inside `app/`* (a `.env`, a backup, a log, a database dump) — anything there was downloadable.
+
+**Fix verified:** the same variants (100 combinations of 13 encodings × 8 targets plus extras) all return 404 on the new code, and legitimate uploads still return 200. The `/static` mount was checked with the same variants (Starlette blocks them). Tests now cover every variant — through a normal client and through a raw ASGI request, since httpx silently normalises literal `../` — and 19 of them fail on the old code, proving they test the right thing.
+
+**Also done:** G12 (EXIF/GPS stripping, plus a script for existing files) and P7.2 (`/docs`, `/redoc`, `/openapi.json` off unless `ENABLE_API_DOCS=true`). Pillow 12.3.0 added to `requirements.txt`; `pip-audit` still reports no known vulnerabilities. Tests: 291 passed on a replica set; 288 passed + 3 skipped on mongomock and on a standalone server (CI). Real-browser shop flow with Payment QR empty: PASS, no console errors or CSP violations, `/openapi.json` 404.
+
 ---
 
 ## 1. Executive Summary
 
-### Overall health: ~~52~~ → **82 / 100**, after four rounds of fixes on 2026-09-25
+### Overall health: ~~52~~ → ~~82~~ → **86 / 100** after Round 5 (automated tests, CI, and the safe improvements below)
 
 The original 52/100 (below) reflected the site as first audited. Since then, four rounds of fixes in this same session closed every CRITICAL and HIGH security finding (G1–G5, G7–G10), the Tailwind-CDN-in-production issue (D1) plus the CSP/SRI hardening that followed it (D4, `unsafe-eval` removal), the missing cookie consent/Consent Mode v2 (I1), the privacy-policy gap (I2), the dead-link and code-quality issues (A2, A3, A9, H2–H5), image/accessibility basics (D2, F1), a startup crash bug, and — found only once real-browser end-to-end testing was actually done in Round 4 — **a critical, pre-existing bug (A10) that broke shop registration for every visitor who left the optional Payment QR field empty**, i.e. nearly everyone. Scores below are updated to reflect that; see [§0](#0-fixes-applied-2026-09-25) for exactly what changed and how each was verified. What's genuinely still open: **G6** (rotate the `.env` SMTP password — a manual action, not a code fix), the functional gaps in A4/A5/A7 (no shop-edit flow, dead QR-generation code, no DB transaction), minor items B1/C1/E1/E2/H6, and F2 (color-contrast — still needs a real accessibility tool run, see §4).
 
 | Area | Score /100 |
 |---|---|
-| A. Functionality & broken things | ~~55~~ → 85 |
-| B. Content quality | 85 |
-| C. SEO | 82 |
-| D. Performance | ~~55~~ → 85 |
-| E. Responsive design & UI/UX | 75 |
-| F. Accessibility | ~~60~~ → 72 |
-| G. Security | ~~18~~ → **82** (G6 — rotate the `.env` password — is the one item left, and it's a manual action) |
-| H. Code quality & maintainability | ~~55~~ → 85 |
+| A. Functionality & broken things | ~~55~~ → **88** (open: A4, A5, A13 — all need flow decisions, see §7) |
+| B. Content quality | ~~85~~ → 88 |
+| C. SEO | ~~82~~ → **92** (C1, C2 fixed; RSS; structured data validated) |
+| D. Performance | ~~55~~ → 88 |
+| E. Responsive design & UI/UX | ~~75~~ → 78 (E1 open) |
+| F. Accessibility | ~~60~~ → 76 (F2 partial — needs the P6 gradient decision) |
+| G. Security | ~~18~~ → **85** (G11 fixed; G6 password rotation is the one item left, and it's manual) |
+| H. Code quality & maintainability | ~~55~~ → **92** (165 automated tests + CI + dependency audit) |
 | I. Legal, analytics & trust | ~~55~~ → 85 |
 
 ### Top 10 most urgent problems
@@ -231,16 +278,19 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 | A4 | HIGH | [routers/shop.py:108-113](app/routers/shop.py#L108-L113) and [templates/register_business.html](app/templates/register_business.html) | `generate_shop_qr_code()` is defined but never called anywhere, and the registration form has no `shopQR`/`bankQR` file inputs even though the backend accepts them (`shopQR: UploadFile | None`, `bankQR: UploadFile | None`). | The homepage explicitly advertises "**UPI & Business QR** — Accept payments directly using QR & UPI IDs" ([index.html:298](app/templates/index.html#L298)), but a shop owner going through the actual registration form has no way to attach a shop QR, and the auto-generation code that could fill the gap is dead. | Either wire `generate_shop_qr_code()` into `register_business` (auto-generate from `shop_url`) or add the missing file inputs to the form — pick one and remove the other's dead code. |
 | A5 | HIGH | Whole shop feature ([routers/shop.py](app/routers/shop.py), [templates/preview_business.html:364,390](app/templates/preview_business.html#L364)) | There is no way to edit a shop after registration. The "Edit" links on the preview/live pages point at `/shop/register` — a **blank** form — and re-submitting with the same subdomain is rejected as "already taken" ([shop.py:187-191](app/routers/shop.py#L187-L191)). No update endpoint exists for shop details, and the `Product`/`Banner`/`ShopDetails`/`ShopDetailsResponse` Pydantic models defined at [shop.py:31-76](app/routers/shop.py#L31-L76) are never used by any route — there's also no way to add products to a shop after creation. | Once a customer registers, they are permanently stuck with whatever they entered — a major usability gap for a product whose whole pitch is "run your shop." | Build a real `PUT /shop/{subdomain}` (owner-authenticated) that updates the stored document, and a products/banners management endpoint using the models that already exist. |
 | A6 | ~~MEDIUM~~ ✅ **FIXED** | [routers/shop.py:103-106](app/routers/shop.py#L103-L106) + [shop.py:337-339](app/routers/shop.py#L337-L339) | Subdomain uniqueness is enforced only by an app-level `find_one` check before insert — there is no unique index on `shops.subdomain` in MongoDB (no index-creation code anywhere in the repo). | Classic TOCTOU race: two concurrent registrations for the same subdomain can both pass the availability check and both insert, leaving two shops mapped to one subdomain. | **Fixed:** unique index on `subdomain` created at startup ([main.py](app/main.py)); `DuplicateKeyError` on insert now returns the same "Subdomain already taken" message. |
-| A7 | MEDIUM | [routers/shop.py:394-405](app/routers/shop.py#L394-L405) | Registration does two separate inserts (`shops`, then `subdomains`) with no transaction. | If the second insert fails, you get an orphaned shop with no subdomain mapping and no rollback. | Wrap both writes in a Mongo transaction (requires a replica set) or make the second write idempotent/retryable and reconcile on read. |
+| A7 | ~~MEDIUM~~ ✅ **FIXED** | [routers/shop.py](app/routers/shop.py) `_insert_shop_with_mapping` | Registration does two separate inserts (`shops`, then `subdomains`) with no transaction. | If the second insert fails, you get an orphaned shop with no subdomain mapping and no rollback. | **Fixed (Round 5):** one multi-document transaction when the server is a replica set (detected from `hello`); otherwise the shop insert is rolled back if the mapping write fails. Tested both ways (`tests/test_data_integrity.py`). |
 | A8 | ~~LOW~~ ✅ **FIXED** | [static/js/main.js:52-72](app/static/js/main.js#L52-L72) | This file's contact-form handler is a `setTimeout` that shows a fake "Thank you" alert and never calls `/api/contact` — but the file itself is never `<script src>`-included by any template, so it never runs. | Not a live bug, but dead/misleading code — a future developer could wire this file in by mistake and silently break the real contact flow (which is correctly implemented inline in [contact.html:172-228](app/templates/contact.html#L172-L228)). | **Fixed:** `main.js` and `image-loader.js` deleted — see H3. |
 | A9 | ~~LOW~~ ✅ **FIXED** | [templates/public_shop.html:479](app/templates/public_shop.html#L479) | Shop "website" social link is built as `https://{{ shop_data.social_media.website }}` — if the owner already typed `https://example.com`, this becomes `https://https://example.com`. | Broken outbound link if the owner includes the scheme (a very likely thing for a non-technical shop owner to do). | **Fixed:** now strips any leading `http://`/`https://` before re-adding `https://`. Same fix applied to the equivalent link in `preview_business.html`. |
 | A10 | ~~CRITICAL~~ ✅ **FIXED** | [routers/shop.py:257-267](app/routers/shop.py#L257-L267) (`preview_business`) | `if bankQR:` / `if paymentQR:` / `if shopQR:` are always truthy for these optional `UploadFile` parameters — a real browser sends a part for every `<input type="file">` even when left empty (`filename=""`), which FastAPI parses into a real (truthy) `UploadFile`, not `None`. | **This broke shop registration for every real visitor who left the optional Payment QR field empty** — i.e. almost every first-time signup — with a `400 "Unsupported file type ''"` on `/shop/preview`. Not caught by any earlier round's curl/`fetch()`-based flow tests in this project, since those never sent an empty-but-present file part; only found by driving the actual page in a real browser (see [§0 Round 4](#0-fixes-applied-2026-09-25) for the full root-cause bisection). | **Fixed:** changed to `if bankQR and bankQR.filename:` (and the same for `paymentQR`, `shopQR`) — matches the "is this really a file" check `save_uploaded_file` itself already uses correctly. |
+| A11 *(new, Round 5)* | ~~MEDIUM~~ ✅ **FIXED** | [routers/shop.py](app/routers/shop.py) `register_business` | `/shop/preview` enforced the `^[a-z0-9-]+$` subdomain rule, but `/shop/register-business` didn't — a direct API call could store subdomains like `Upper Case!` that can never be reached. | Unreachable, malformed shops in the database. | **Fixed:** both endpoints share one `SUBDOMAIN_PATTERN`. Tested with 6 malformed values on both endpoints. |
+| A12 *(new, Round 5)* | ~~MEDIUM~~ ✅ **FIXED** | [routers/shop.py](app/routers/shop.py) `preview_business`, `cleanup_orphaned_uploads` | (a) If a later file in a preview failed (e.g. banner > 5 MB), files already saved earlier in the same request (the logo) stayed on disk. (b) Preview uploads never followed by *Publish* were never removed (Top-10 item 6). | Disk slowly filling with abandoned images. | **Fixed:** (a) a failed preview deletes everything it saved; (b) unpublished uploads older than 24 h are removed at startup and every 6 h — files referenced by any registered shop (active or deactivated) are never touched, and nothing is deleted if the database can't be read. Checked against the live database before shipping: all 3 current files belong to the `tellme` shop, so nothing existing would be removed. |
+| A13 *(new, Round 5 — not fixed, see P2)* | MEDIUM | [routers/shop.py](app/routers/shop.py) `register_business` | Registration trusts the `logo`/`banner`/QR paths the browser sends back from the preview page; a direct API call can register a shop pointing at any string (another shop's image, an external URL). | Not a data leak, but lets someone register without uploading and reuse others' images. | Covered by proposal **P2** (signed preview token) — needs a small flow change, so not implemented. |
 
 ### B. Content quality
 
 | # | Severity | File:Line | Issue | Why it matters | Recommended fix |
 |---|---|---|---|---|---|
-| B1 | LOW | [templates/register_business.html:3](app/templates/register_business.html#L3) | No `{% block description %}` for this page (unlike every other extending template). | Minor SEO gap, though this route is `Disallow`'d in `robots.txt` anyway so it won't be indexed — low real-world impact. | Add a description block for consistency/future-proofing. |
+| B1 | ~~LOW~~ ✅ **FIXED** | [templates/register_business.html:3](app/templates/register_business.html#L3) | No `{% block description %}` for this page (unlike every other extending template). | Minor SEO gap, though this route is `Disallow`'d in `robots.txt` anyway so it won't be indexed — low real-world impact. | **Fixed (Round 5):** added, worded from the homepage's existing "Launch Your Online Business" copy (no new claims). |
 | — | — | — | No lorem ipsum, "TODO"/"FIXME", dummy testimonials, fake client logos, or placeholder images were found anywhere in `app/templates/`. | (Positive finding, not a defect.) | — |
 | — | — | — | Company phone (`+91 945 089 1557` / `+919450891557`), email (`avigronix@gmail.com`), and address (Noida Sector 59, UP, India) are consistent across every page that shows them ([base.html](app/templates/base.html), [contact.html](app/templates/contact.html), [privacy_policy.html](app/templates/privacy_policy.html), [terms.html](app/templates/terms.html), [index.html](app/templates/index.html)). | (Positive finding.) | — |
 | — | — | — | Blog content ([blog_content.py](app/blog_content.py)) is real, original, dated content, not filler. Copyright year uses `{{ current_year }}` (computed server-side), not a hardcoded year. | (Positive finding.) | — |
@@ -249,8 +299,9 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 
 | # | Severity | File:Line | Issue | Why it matters | Recommended fix |
 |---|---|---|---|---|---|
-| C1 | MEDIUM | [templates/base.html:46](app/templates/base.html#L46) | `og:url` is set to `{{ request.url }}`, which includes any query string (e.g. `?utm_source=...`), while `rel=canonical` correctly uses `canonical_url or request.url`. | Sharing a page with tracking params produces a different `og:url` than the canonical URL, which can fragment social-share counts and confuses scrapers that treat `og:url` as canonical. | Reuse the same `canonical_url` value for `og:url`. |
-| — | — | — | Every content page has exactly one `<h1>`, a unique `<title>` and `<meta description>`, `rel=canonical`, full Open Graph + Twitter Card tags, and JSON-LD `Organization`/`PostalAddress` structured data ([base.html:372-383](app/templates/base.html#L372-L383)). `sitemap.xml` and `robots.txt` are both generated server-side and correctly `Disallow` the shop-management routes. | (Positive finding — this is notably better than average for a small business site.) | — |
+| C1 | ~~MEDIUM~~ ✅ **FIXED** | [templates/base.html](app/templates/base.html) | `og:url` is set to `{{ request.url }}`, which includes any query string (e.g. `?utm_source=...`), while `rel=canonical` correctly uses `canonical_url or request.url`. | Sharing a page with tracking params produces a different `og:url` than the canonical URL, which can fragment social-share counts and confuses scrapers that treat `og:url` as canonical. | **Fixed (Round 5):** one `page_canonical_url` (`SITE_URL` + path, no query string) feeds both `rel=canonical` and `og:url`. See also C2. |
+| C2 *(new, Round 5)* | ~~HIGH~~ ✅ **FIXED** | [templates/base.html](app/templates/base.html) | Every page defines `{% block description %}…`, but `base.html` rendered a block named `meta_description` — so **every page's own description was silently ignored** and all pages served the same generic default. `og:title`/`og:description`/`twitter:*` used `seo_*` variables no route ever passes, so they were also always the defaults. The original audit wrongly listed descriptions as unique. | Search results and social previews showed the same text for every page. | **Fixed:** base.html renders `{% block description %}`; `og:`/`twitter:` title and description now reuse the page's own `title`/`description` blocks. Tested per page (`tests/test_seo_and_ops.py`). |
+| — | — | — | ~~Every content page has … a unique `<title>` and `<meta description>`~~ **Correction (Round 5):** the unique descriptions were never actually rendered — see **C2**. The rest stands: one `<h1>` per page, unique `<title>`, `rel=canonical`, Open Graph + Twitter tags, JSON-LD `Organization` data, server-generated `sitemap.xml`/`robots.txt`. | — | — |
 
 ### D. Performance
 
@@ -260,7 +311,7 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 | D2 | ~~MEDIUM~~ ✅ **FIXED** | All `<img>` tags across every template (0 of them) | No `<img>` anywhere has `width`/`height` attributes or `loading="lazy"`. | Missing intrinsic dimensions cause layout shift (CLS) as images load; missing lazy-loading means below-the-fold images (shop logos/banners) load eagerly. | **Fixed:** all 12 `<img>` tags now have `width`/`height` matching their real aspect ratio; `loading="lazy"` added to the 3 genuinely off-screen ones, hero banners and header logos left eager. |
 | D3 | ~~MEDIUM~~ ✅ **PARTIALLY FIXED** | [main.py:36-37](app/main.py#L36-L37) and route decorators | No `max_fields`/`max_part_size`/request body size limit is configured anywhere, and (per §2.4) the Starlette/python-multipart versions involved have known unbounded-buffering bugs. | Combines with A6/A4's missing file-size check: a small number of large/crafted multipart requests to `/shop/preview` can consume significant memory/CPU before the 10-requests/10-minutes rate limit even engages. | **Fixed:** `save_uploaded_file` now caps each uploaded file at 5 MB. **Still open:** library-level `max_part_size`/version upgrade (see G7). |
 | D4 | ~~LOW~~ ✅ **FIXED** | [templates/base.html:120](app/templates/base.html#L120) etc. | Third-party scripts (`cdn.tailwindcss.com`, `unpkg.com/htmx.org@1.9.12`, `cdnjs.cloudflare.com`) are loaded with no Subresource Integrity (`integrity=`) attribute. | If any of those CDNs were ever compromised, the injected script would run with full page privileges, no browser-side guard. | **Fixed:** `integrity`/`crossorigin`/`referrerpolicy` added to all 8 pinned third-party `<script>`/`<link>` tags repo-wide (htmx + Font Awesome in its 2 pinned versions). `cdn.tailwindcss.com` itself is gone (D1). See [§0 Round 4](#0-fixes-applied-2026-09-25). |
-| D5 | LOW | [static/images/og-banner.png](app/static/images/og-banner.png) (119 KB), [logo.png](app/static/images/logo.png) (107 KB) | The two largest static images are PNG, not WebP/AVIF. | Modest savings available; overall image weight on this site is already small (<1 MB total), so this is a minor win, not a priority. | Convert to WebP with a PNG fallback via `<picture>`, or just re-export at a lower size — low urgency given current total footprint. |
+| D5 | ~~LOW~~ ✅ **FIXED** | [static/images/logo.png](app/static/images/logo.png) (107 KB), og-banner.png | The two largest static images are PNG, not WebP/AVIF. | Modest savings available. | **Fixed (Round 5):** `logo.webp` (lossless, 76 KB, pixel-identical to the PNG on light and dark backgrounds) served via `<picture>` with the PNG as fallback, in the nav and mobile menu. `og-banner.png` is **not displayed on any page** — only in `og:image`/`twitter:image`/JSON-LD, where PNG stays deliberately — so no WebP was created for it (it would be an unused file). |
 
 ### E. Responsive design & UI/UX
 
@@ -268,14 +319,14 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 |---|---|---|---|---|---|
 | — | — | — | This area had several concrete bugs (unresponsive CTA buttons, unwrapped tag rows causing horizontal page scroll on `/blog`, oversized headings/padding on mobile, shop-header overflow on long names) that were identified and **already fixed earlier in this same session**, covering [index.html](app/templates/index.html), [about.html](app/templates/about.html), [projects.html](app/templates/projects.html), [services.html](app/templates/services.html), [team.html](app/templates/team.html), [faq.html](app/templates/faq.html), [blog.html](app/templates/blog.html), [blog_detail.html](app/templates/blog_detail.html), [register_business.html](app/templates/register_business.html), [public_shop.html](app/templates/public_shop.html), and [preview_business.html](app/templates/preview_business.html). This score reflects the code as it stands now, post-fix. | — | — |
 | E1 | LOW | [templates/about.html:60](app/templates/about.html#L60) | The "Highlights" stat box uses `grid grid-cols-2` with no mobile-specific override (4 items, 2 per row, at all widths). | On very narrow phones (≤360px) each cell is tight for the icon + two lines of text, though it does not overflow. | Consider `grid-cols-1 sm:grid-cols-2` for a one-per-row layout below ~360px, or reduce icon/text size at that breakpoint. |
-| E2 | LOW | [templates/register_business.html:341](app/templates/register_business.html#L341) | Placeholder phone number for the *shop's* contact field is `1234567890` (10 raw digits, no `+91`/formatting hint), inconsistent with the WhatsApp field's placeholder (`+919876543210`) two sections later. | Minor UX inconsistency for a non-technical shop owner filling the form. | Standardize all phone placeholders to the same format. |
+| E2 | ~~LOW~~ ✅ **FIXED** | [templates/register_business.html](app/templates/register_business.html) | The two phone fields used different placeholder formats (`contactNumber`: `+91 98765 43210`, `whatsapp`: `+919876543210`). *(Correction: the original row called `1234567890` a phone placeholder — it is the bank **account number** field.)* | Minor UX inconsistency. The WhatsApp value is put straight into a `wa.me/<number>` link, where spaces break it. | **Fixed (Round 5):** both now `+919876543210` (no spaces, works in both `tel:` and `wa.me` links). |
 
 ### F. Accessibility (WCAG 2.1 AA)
 
 | # | Severity | File:Line | Issue | Why it matters | Recommended fix |
 |---|---|---|---|---|---|
 | F1 | ~~MEDIUM~~ ✅ **FIXED** | [templates/base.html](app/templates/base.html) (whole file) | No "skip to content" link before the nav. | Keyboard/screen-reader users must tab through the entire header/nav on every page before reaching the actual content — WCAG 2.4.1 (Bypass Blocks). | **Fixed:** added as the first element in `<body>`, `sr-only` until focused; verified it's the first Tab stop on the page. |
-| F2 | LOW | [templates/base.html:658-670](app/templates/base.html#L658-L670) (footer gradient sections generally) | Several sections use light text (`text-blue-100`, `text-gray-400`) on medium-blue/dark backgrounds; exact contrast ratios weren't computationally verified in this review. | Potential WCAG 1.4.3 contrast failures on decorative CTA sections (e.g. [services.html:271](app/templates/services.html#L271), [team.html:194](app/templates/team.html#L194), [projects.html:247](app/templates/projects.html#L247) all use `text-blue-100` on a blue gradient). | Run an automated contrast check (axe/Lighthouse) on these sections specifically — see §4. |
+| F2 | ⚠️ **PARTIALLY FIXED** | CTA sections on [index.html](app/templates/index.html), [about.html](app/templates/about.html), [services.html](app/templates/services.html), [projects.html](app/templates/projects.html), [team.html](app/templates/team.html), [faq.html](app/templates/faq.html) | Light `text-blue-100` text on gradient backgrounds. Measured in Round 5 in a real browser by sampling every background pixel under the text (the correct method for gradients): FAQ CTA **3.95**; the five `section-brand-gradient` CTAs **3.12–3.35** desktop / **2.46** mobile (WCAG AA needs 4.5). `text-gray-400` (footer) passes everywhere. | Hard-to-read text for low-vision visitors; accessibility compliance. | **Fixed where text colour alone can fix it:** FAQ CTA → `text-white` = **4.55 ✅**. On the navy→teal brand gradient even pure white reaches only **3.86 desktop / 2.83 mobile**, because the teal end (`#14B8A6`) is too light — no text shade can pass there. Switched those to `text-white` anyway (best achievable, visually almost identical to `blue-100`). A real fix needs the gradient's teal end darkened — measured: `#0F766E` gives **7.34 / 6.00** — see proposal **P6** in §7 (design change, needs your approval). |
 | — | — | — | Mobile-menu toggle/close buttons have `aria-label`s ([base.html:483,510](app/templates/base.html#L483)); every standalone HTML document (`error_404.html`, `error_500.html`, `not_found.html`, shop pages) has `lang="en"`; no non-semantic `<div onclick>` clickable elements were found — real interactions use `<a>`/`<button>`. | (Positive finding.) | — |
 
 ### G. Security
@@ -292,6 +343,8 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 | G8 | ~~MEDIUM~~ ✅ **FIXED** | [main.py:130-138](app/main.py#L130-L138) | The `OPTIONS` (CORS preflight) branch reflects **any** `Origin` header back as `Access-Control-Allow-Origin` with `Access-Control-Allow-Credentials: true` and `Access-Control-Allow-Methods: *`, unconditionally — while the real (non-OPTIONS) response a few lines later correctly restricts this reflection to `localhost`/`127.0.0.1` only ([main.py:165-167](app/main.py#L165-L167)). | Inconsistent CORS policy: the preflight response alone doesn't grant a browser access (the actual response's headers still gate it), so real-world exploitability is limited today, but this is exactly the kind of inconsistency that turns into a real hole the next time someone "fixes" the actual-response branch to match the preflight one. `Access-Control-Allow-Methods: "*"` is also spec-invalid when combined with `Allow-Credentials: true` (wildcards are ignored once credentials are involved). | **Fixed:** both branches now call one shared `_is_allowed_cors_origin()` helper; methods list is now the explicit `"GET, POST, PUT, OPTIONS"`. |
 | G9 | ~~MEDIUM~~ ✅ **FIXED** | [templates/public_shop.html:452,460,468,476,484](app/templates/public_shop.html#L452) and [:613](app/templates/public_shop.html#L613), [templates/preview_business.html:752](app/templates/preview_business.html#L752) | Every `target="_blank"` link on the public shop pages (social icons, "Developed by AVIGRONIX" footer credit) is missing `rel="noopener noreferrer"`. | Classic reverse-tabnabbing: the opened page can access `window.opener` and redirect the original tab. Low severity here since the destinations are the shop owner's own social profiles / the company's own site, but it's a one-line fix applied inconsistently (other parts of the codebase don't have this pattern to begin with). | **Fixed:** `rel="noopener noreferrer"` added to all 6 occurrences, plus the newly-real links added under A3. |
 | G10 | ~~LOW~~ ✅ **FIXED** | [routers/shop.py](app/routers/shop.py) multiple `except Exception as e: raise HTTPException(500, detail=f"...{str(e)}")` blocks (lines [274-278](app/routers/shop.py#L274-L278), [419-421](app/routers/shop.py#L419-L421), [459-461](app/routers/shop.py#L459-L461), [477-478](app/routers/shop.py#L477-L478), [493-494](app/routers/shop.py#L493-L494), [514-516](app/routers/shop.py#L514-L516)) | Raw exception text (which can include internal field names, driver error strings, etc.) is returned to the client in the HTTP response body. | Minor information disclosure that makes reconnaissance easier for an attacker probing these endpoints. | **Fixed:** all six now `logger.error(...)` the real exception and return a fixed generic message to the client. |
+| G11 *(new, Round 5)* | ~~CRITICAL~~ ✅ **FIXED** | [main.py](app/main.py) `GET /uploads/{sub_folder}/{filename}` | **Path traversal:** `/uploads/%2e%2e/main.py` and `/uploads/../database.py` resolved to `uploads/../<file>` and served the application's own source code (the app runs from `app/`). Reproduced with `curl --path-as-is` against a real server. Found while writing the Round 5 tests; the original audit missed it. | Anyone could read the server-side source, including configuration logic and any secrets ever hard-coded in it. (`.env` itself sits one level higher and was not reachable.) | **Fixed:** only the five known upload folders are served, the filename must be a plain name, and the resolved path must stay inside that folder. Verified: source files now 404, real shop images still 200. Regression-tested with 5 traversal encodings. |
+| G12 *(new, Round 6)* | ~~HIGH~~ ✅ **FIXED** | [app/image_sanitize.py](app/image_sanitize.py), `save_uploaded_file` | Uploaded images were stored byte-for-byte and served publicly, keeping EXIF (camera, timestamps, **GPS coordinates**), XMP and PNG text chunks. Any image content was accepted as long as the extension matched. | A phone photo used as a shop logo could reveal where the owner lives. | **Fixed:** every upload is decoded and re-encoded (orientation applied first, transparency kept, 40-MP decompression-bomb limit, stored in the format its extension claims); non-images rejected. `scripts/strip_upload_metadata.py` cleans files uploaded earlier (dry-run first). All 3 current local uploads carry EXIF + XMP (no GPS). |
 | — | — | — | `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, a real `Content-Security-Policy`, and conditional HSTS are all already configured globally in [main.py:186-197](app/main.py#L186-L197); the contact form has a working honeypot field plus IP-based rate limiting; uploaded files are saved under a server-generated UUID name rather than the client-supplied filename ([shop.py:82-101](app/routers/shop.py#L82-L101), specifically to avoid path traversal); the real SMTP password was never committed to git. | (Positive findings — the baseline security posture for the *marketing site* itself is well above average; the critical issues above are concentrated entirely in the shop feature's JSON API and the contact-mail flow.) | — |
 
 ### H. Code quality & maintainability
@@ -304,6 +357,7 @@ There is no lint, type-check, or build tooling configured (no `pyproject.toml`, 
 | H4 | ~~LOW~~ ✅ **FIXED** | Throughout [main.py](app/main.py) and [routers/shop.py](app/routers/shop.py) | `print(...)` is used for logging/debugging in production code paths (e.g. [main.py:72](app/main.py#L72), [main.py:124](app/main.py#L124), [main.py:225](app/main.py#L225), [shop.py:264](app/routers/shop.py#L264) commented-out, [shop.py:331](app/routers/shop.py#L331), [shop.py:420](app/routers/shop.py#L420)), including one that logs every single request's Host/Origin/subdomain unconditionally. | No log levels, no structured logging, noisy stdout in production, harder to wire into any real log aggregation later. | **Fixed:** every remaining active `print()` (send_email's error, the per-request subdomain log, plus the ones already converted under G10) is now `logger.error(...)`/`logger.debug(...)`/`logger.warning(...)` as appropriate; the per-request log is `debug`-level specifically so it stays quiet by default, per this row's own original suggestion. |
 | H5 | ~~LOW~~ ✅ **FIXED** | [routers/shop.py:12](app/routers/shop.py#L12) | `from bson import ObjectId` is imported but never used. | Dead import. | **Fixed:** removed, along with several more unused imports found via an AST-based scan of every `.py` file in the project (`FastAPI`, `StaticFiles`, `EmailStr`, `JSONResponse`, `Dict`, `Any` in `routers/shop.py`; a duplicate `HTMLResponse` and a dead `import json` in `main.py`) and an entire redundant re-import block partway through `routers/shop.py`. |
 | H6 | LOW | [routers/shop.py:352,366](app/routers/shop.py#L352) | `shop_document["shop_status"]` is set to `"active"` at line 352 and then immediately overwritten by `json_data.get('shopStatus') or "active"` at line 366 — the first assignment is pointless, and the second lets the client set `shop_status` to any arbitrary string (not restricted to `"active"`/`"inactive"`). | Dead assignment plus unchecked value that flows into the subdomain middleware's `{"shop_status": "active"}` filter. | Remove the first assignment; validate `shopStatus` against an enum if it's meant to be settable at registration at all. |
+| H7 *(new, Round 5)* | ~~MEDIUM~~ ✅ **FIXED** | [main.py](app/main.py) | `load_dotenv()` ran *after* `routers.shop` and `rate_limit` were imported, and those read settings at import time — so **`ADMIN_API_KEY` placed in `.env` (as the README instructs) was never loaded**; the admin endpoints silently always returned 401. Reproduced in an isolated copy. | Documented configuration didn't work (failed closed, so not a security hole). | **Fixed:** `load_dotenv()` is now the first thing `main.py` does. Regression test checks the import order. |
 
 ### I. Legal, analytics & trust
 
@@ -376,6 +430,101 @@ A professional software-services company site at this stage would typically also
 - **A CAPTCHA or equivalent (e.g. Cloudflare Turnstile) as a second layer behind the honeypot** for the contact form, especially now that it's identified as an abuse vector (G4).
 - **A status/uptime page or SLA statement**, common trust signals for a company selling backend/cloud engineering services.
 - **Company registration / legal entity details** (CIN/GST number, if applicable) in the footer or an "About" section — international B2B buyers often look for this before engaging.
-- **A blog RSS/Atom feed** — the blog already has clean structured content in `blog_content.py`, an RSS feed is a small addition with real SEO/distribution value.
+- ~~**A blog RSS/Atom feed**~~ ✅ done in Round 5 (`/blog/rss.xml`). — the blog already has clean structured content in `blog_content.py`, an RSS feed is a small addition with real SEO/distribution value.
 - **Structured data beyond `Organization`**: `Service` schema per service offered, and `BreadcrumbList` on inner pages, would strengthen the already-good SEO baseline further.
 - **A dedicated admin/owner dashboard for the shop feature** (login, edit shop, manage products/orders) — right now the shop product is registration-only with no lifecycle beyond that, which is the single biggest functional gap found in this review.
+
+---
+
+## 7. Proposals (not implemented — for your decision)
+
+Each proposal lists what it is, why it helps, the exact changes, effort, and whether it changes the current open shop flow. Nothing here has been built.
+
+### P1 — Edit a shop after registration without adding login (A5)
+
+**What:** at registration, email the owner a private *edit link*. Opening it shows the same registration form pre-filled; saving updates the shop. Anyone who has lost the email can request a fresh link, which is only ever sent to the address already on the shop.
+
+**Why:** today a shop can never be changed after publishing — a typo in a phone number or UPI ID is permanent, and the "Edit" buttons lead to a blank form that rejects the existing subdomain.
+
+**Changes:**
+1. `register_business`: create `token = secrets.token_urlsafe(32)`; store only `sha256(token)` plus `edit_token_created_at` on the shop document (never the token itself).
+2. Send the owner an email with `https://avigronix.com/shop/edit/<token>` (reuse `send_email`; fixed server text, like the contact acknowledgment).
+3. New `GET /shop/edit/{token}` → look up by hash, render `register_business.html` pre-filled (subdomain shown read-only).
+4. New `POST /shop/edit/{token}` → validate with the same `ShopRegistration` model, reuse the preview upload handling for replaced images, update the document; **rotate the token** (invalidate the old link, email a new one).
+5. New `POST /shop/edit-link` taking just a subdomain → if it exists, email a new link to *the stored email*; always respond "if this shop exists, we've emailed its owner" (no enumeration).
+6. Point the existing "Edit" buttons at a small "email me my edit link" page instead of `/shop/register`.
+
+**Security considerations:** token stored hashed (a DB leak doesn't grant edit access); `secrets.compare_digest` lookup; 32-byte random tokens; rate limit both new endpoints; links sent only to the email already on file, so an attacker can't redirect them; tokens never logged and never put in analytics (add `Referrer-Policy: no-referrer` on the edit page so the token can't leak via `Referer`); the subdomain can't be changed through edit; changes to bank/UPI details trigger a notification email to the owner. **Known gap:** email ownership isn't verified at registration today, so a typo'd email means the owner can't get a link — pair this with a "confirm your email" link sent at registration. Anyone with access to the owner's inbox can edit the shop; that's the accepted trade-off of login-free editing.
+
+**Effort:** medium. **Changes the shop flow:** registration itself is unchanged; it adds an email after publishing and new edit pages.
+
+### P2 — Tie registration to its own preview (A13)
+
+**What:** `/shop/preview` returns an HMAC-signed token (secret from env) covering the subdomain and the exact file paths it saved; `/shop/register-business` rejects a request whose token doesn't match.
+**Why:** registration currently trusts whatever image paths the browser sends back, so a direct API call can register a shop using another shop's images or arbitrary strings, skipping upload validation.
+**Changes:** sign in `preview_business` (`hmac.new(SECRET, json.dumps([domain, paths]), sha256)`), add one hidden field to `preview_business.html`'s `shopData`, verify in `register_business`, plus tests. **Effort:** small. **Flow change:** none visible to users.
+
+### P3 — Auto-generated shop QR code (A4)
+
+**What:** generate a QR code of the shop URL on the server at registration (e.g. the `qrcode` Python package) and save it under `uploads/shop_qr/`, instead of the unused `generate_shop_qr_code()` that points at a third-party QR service (`api.qrserver.com`, which would receive every shop URL and is an external dependency).
+**Where it appears:** (a) the registration success toast/redirect could link "Download your shop QR"; (b) optionally a small "Scan to visit this shop" card on the public shop page.
+**Changes:** add `qrcode[pil]` to `requirements.txt`; create the PNG in `register_business`; store its path in `shop_qr`; delete the dead `generate_shop_qr_code`; tests. **Effort:** small. **Flow change:** registration unchanged; (b) **adds a visible element to the public shop page** — a design change, so only with your approval. (a) alone changes nothing on the public page.
+
+### P4 — Cloudflare Turnstile behind the honeypot
+
+**What:** Turnstile (free, privacy-friendly, usually invisible) on the contact form and on the shop registration form's *Preview* submit.
+**Why:** the honeypot stops naive bots; Turnstile stops scripted ones that read the DOM, without CAPTCHA puzzles for real visitors.
+**Changes:** site key + secret key from you (env vars `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`); add the widget script and a `<div class="cf-turnstile">` to both forms; server-side verification against `https://challenges.cloudflare.com/turnstile/v0/siteverify` before sending email / saving uploads; CSP additions: `script-src https://challenges.cloudflare.com`, `frame-src https://challenges.cloudflare.com`; one line in the privacy policy; tests with the siteverify call mocked. Decide in advance whether a Cloudflare outage should block submissions (fail-closed) or fall back to the honeypot (fail-open — recommended for a lead form).
+**Effort:** small–medium. **Flow change:** no new fields; visitors normally see nothing.
+
+### P5 — Error monitoring and backups
+
+**Error monitoring:** Sentry (`sentry-sdk[fastapi]`, DSN via env var) initialised in `main.py` with `send_default_pii=False`, a low `traces_sample_rate` (e.g. 0.05), and a `before_send` hook dropping form bodies (contact messages and bank details must never leave the server). Point an uptime monitor (UptimeRobot, Better Stack…) at the new `/health`. **Effort:** small.
+
+**Backups — two things need backing up, not one:**
+1. **MongoDB.** If on MongoDB Atlas: enable continuous backup / point-in-time restore. If self-hosted: nightly `mongodump --gzip --archive` copied **off the server** (S3, Backblaze B2, Google Drive), keeping 7 daily / 4 weekly / 12 monthly.
+2. **`app/uploads/`** — shop logos, banners and QR images live on the server's disk, not in the database. Sync them to the same off-site storage nightly (`rclone sync`), or move them to object storage.
+Test a restore into a scratch database once a quarter — an untested backup isn't one. **Effort:** small (scripts + cron). **Flow change:** none.
+
+### P6 — Make the brand-gradient CTA text readable (finishes F2)
+
+**What:** change only the *end colour* of `.section-brand-gradient` (in `base.html`) from teal `#14B8A6` to `#0F766E` (Tailwind teal-700). Teal stays everywhere else it's used as an accent.
+**Why:** measured in Round 5: with the current gradient, even pure white text reaches only 3.86:1 (desktop) / 2.83:1 (mobile) on five CTA sections — below WCAG AA's 4.5:1 — and no text colour can fix that. With `#0F766E`: **7.34 / 6.00** (measured the same way). `#0D9488` (teal-600) is a softer option but only reaches 4.23 on mobile.
+**Changes:** one CSS value; re-run the contrast script. **Effort:** tiny. **Flow change:** none — but it's a visible colour change (the right end of those banners becomes a deeper teal), so it needs your sign-off.
+
+### P7 — Other improvements worth considering
+
+| # | What | Why | Effort | Flow change |
+|---|---|---|---|---|
+| ~~P7.1~~ ✅ done in Round 6 | **Strip EXIF metadata from uploaded images** (re-encode with Pillow; also verifies the file really is an image, not just named `.png`) | Verified in Round 5: a phone photo uploaded as a logo keeps its EXIF, **including GPS coordinates**, and is served publicly on the shop page — it can reveal where the owner lives. | small | none |
+| ~~P7.2~~ ✅ done in Round 6 | **Hide `/docs`, `/redoc`, `/openapi.json` in production** (`FastAPI(docs_url=None, redoc_url=None, openapi_url=None)` unless an env flag is set) | They're public today and list every endpoint including the admin ones (still key-protected, but no reason to advertise them). | tiny | none |
+| P7.3 | **Unknown shop subdomain → real 404 status** | `unknown.avigronix.com` shows the "shop not found" page with status **200** (a "soft 404" search engines may index). | tiny | none |
+| P7.4 | **Serve the logo at its display size** (`srcset` with a ~220 px-wide variant) | `logo.png`/`.webp` are 640 px wide but displayed ~105 px wide; a right-sized file would be several times smaller. | small | none (pixel-identical at display size) |
+| P7.5 | **Save contact-form submissions to MongoDB as well as emailing them** | If Gmail SMTP fails the visitor sees an error and the lead is lost; a stored copy means nothing is lost. | small | none |
+| P7.6 | **Let shop owners choose whether bank/UPI details are public** (checkbox, default = today's behaviour) | Payment details are public by design (and now disclosed in the privacy policy), but some owners may only want the UPI QR shown. | small | adds one optional checkbox to the form |
+| P7.7 | **Run CI's MongoDB as a single-node replica set** (a `docker run … --replSet rs0` step + `rs.initiate()`) | The three transaction-path tests currently skip in CI (standalone service container); they pass locally against your replica set. | small | none |
+| P7.8 | **Domain-based sending email** (e.g. `hello@avigronix.com`) with SPF, DKIM and DMARC records | A Gmail address looks less established to B2B clients and hurts deliverability of the acknowledgment emails. | small (DNS) | none |
+| P7.9 | **`/.well-known/security.txt`** with a security contact | Standard way for researchers to report issues like G11 privately. | tiny | none |
+| P7.10 | **Accessibility + performance checks in CI** (axe-core and Lighthouse CI against the test server) | Catches contrast/label/performance regressions automatically, the way the test suite now catches functional ones. | medium | none |
+| P7.11 | **Real case studies, client testimonials, and social profile links** | Biggest remaining trust gap for a B2B services site. **Needs real content from you** — nothing should be invented. | depends on content | none |
+
+---
+
+## 8. Needs from Owner
+
+Things only you can provide or decide. Nothing below was filled in or guessed.
+
+1. **Rotate the Gmail app password** in `.env` (G6) — Google Account → Security → App passwords — then update `.env` on the server.
+2. **Set `ADMIN_API_KEY`** in the server's `.env` if you want to use the admin endpoints (it now actually loads from `.env` — H7).
+3. **Push this work to GitHub** so CI runs for the first time, and (optionally) enable *Require status checks to pass* under Settings → Branches.
+4. **Decide on P6** (darker teal end of the CTA gradient) — the only way to finish the contrast fix.
+5. **Decide on P1–P5 and P7** (which to build, and in what order).
+6. **Confirm the Google Analytics ID** `G-QMZ7RMVX47` is yours (it's the default in the code).
+7. **Confirm the address and postcode in the structured data** (`Sector 59, Noida, Uttar Pradesh, 201301`) and the phone/email shown site-wide.
+8. **Real social-media profile URLs** (the footer block is commented out until they exist).
+9. **Legal entity details, if you want them shown** — registered company name, CIN, GST number, registered office. None have been added.
+10. **Case studies, testimonials, client logos** — only real ones, with the client's permission.
+11. **Hosting details** — where it runs, how it's started (one worker or several — see README "Rate limiting and workers"), whether a reverse proxy/Cloudflare sits in front (needed for HSTS via `--proxy-headers`), and whether MongoDB is a replica set / Atlas (backups, P5).
+12. **Turnstile keys** (if P4 is approved) and a **Sentry DSN** (if P5 is approved).
+13. **A legal review of the Privacy Policy and Terms** — they were extended during this work (shop data, public payment details, cookies), but they haven't been reviewed by a lawyer.
+

@@ -1,0 +1,7 @@
+# Development / CI-only dependencies. Production installs use requirements.txt only.
+-r requirements.txt
+pytest==9.1.1
+pytest-asyncio==1.4.0
+httpx==0.28.1
+mongomock-motor==0.0.36
+pip-audit==2.10.1

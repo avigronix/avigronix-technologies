@@ -14,10 +14,12 @@
         {% endblock %}
     </title>
 
+    {# Pages set {% block description %}; base.html used to render a differently
+       named block here, so every page's own description was silently ignored. #}
     <meta name="description"
-          content="{% block meta_description %}
+          content="{% filter striptags %}{% block description %}
               {{ seo_description or 'AVIGRONIX TECHNOLOGIES is a Noida, India-based software development company delivering backend engineering, web & mobile apps, cloud infrastructure, and data analytics to clients across India, the US, Europe, and the Middle East.' }}
-          {% endblock %}">
+          {% endblock %}{% endfilter %}">
 
     <meta name="keywords"
           content="{% block meta_keywords %}
@@ -28,8 +30,9 @@
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#2F6FED">
 
-    {# ---------- CANONICAL URL ---------- #}
-    <link rel="canonical" href="{{ canonical_url or request.url }}"/>
+    {# ---------- CANONICAL URL (also used for og:url) ---------- #}
+    {% set page_canonical_url = canonical_url or ((site_url or 'https://avigronix.com') ~ request.url.path) %}
+    <link rel="canonical" href="{{ page_canonical_url }}"/>
 
     {# ---------- GEO / LOCAL SEO (NOIDA, INDIA) ---------- #}
     <meta name="geo.region" content="IN-UP">
@@ -40,10 +43,9 @@
     {# ---------- OPEN GRAPH (FACEBOOK / LINKEDIN) ---------- #}
     <meta property="og:site_name" content="AVIGRONIX TECHNOLOGIES"/>
     <meta property="og:type" content="website"/>
-    <meta property="og:title" content="{{ seo_title or 'AVIGRONIX TECHNOLOGIES | Digital Excellence in India' }}"/>
-    <meta property="og:description"
-          content="{{ seo_description or 'Enterprise-grade software development, websites, mobile apps & AI solutions for businesses across India.' }}"/>
-    <meta property="og:url" content="{{ request.url }}"/>
+    <meta property="og:title" content="{{ self.title()|striptags }}"/>
+    <meta property="og:description" content="{{ self.description()|striptags }}"/>
+    <meta property="og:url" content="{{ page_canonical_url }}"/>
     <meta property="og:image"
           content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
     <meta property="og:image:width" content="1200">
@@ -51,9 +53,8 @@
 
     {# ---------- TWITTER CARD ---------- #}
     <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content="{{ seo_title or 'AVIGRONIX TECHNOLOGIES' }}"/>
-    <meta name="twitter:description"
-          content="{{ seo_description or 'Modern IT solutions, web, mobile & AI services from India.' }}"/>
+    <meta name="twitter:title" content="{{ self.title()|striptags }}"/>
+    <meta name="twitter:description" content="{{ self.description()|striptags }}"/>
     <meta name="twitter:image"
           content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
 
@@ -62,6 +63,8 @@
     <link rel="icon" href="{{ url_for('static', path='images/favicon-16x16.png') }}" sizes="16x16" type="image/png"/>
     <link rel="apple-touch-icon" href="{{ url_for('static', path='images/apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', path='manifest.json') }}">
+    <link rel="alternate" type="application/rss+xml" title="AVIGRONIX TECHNOLOGIES Blog"
+          href="{{ site_url or 'https://avigronix.com' }}/blog/rss.xml">
 
     {# ---------- BRAND PALETTE (single source of truth) ---------- #}
     <link rel="stylesheet" href="{{ url_for('static', path='css/variables.css') }}" />
@@ -399,12 +402,27 @@
                 "name": "Home",
                 "item": "{{ site_url or 'https://avigronix.com' }}/"
             },
+            {% if post is defined and post %}
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "{{ site_url or 'https://avigronix.com' }}/blog"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": {{ post.title | tojson }},
+                "item": {{ page_canonical_url | tojson }}
+            }
+            {% else %}
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": {{ (self.title() | trim).split('|')[0].strip() | tojson }},
-                "item": "{{ site_url or 'https://avigronix.com' }}{{ request.url.path }}"
+                "item": {{ page_canonical_url | tojson }}
             }
+            {% endif %}
         ]
     }
     </script>
@@ -427,12 +445,15 @@
             <!-- Logo Section -->
             <a href="/" hx-get="/" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator" class="flex items-center space-x-3 group">
                 <div class="relative">
-                    <img src="{{ url_for('static', path='images/logo.png') }}"
-                         class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
-                         alt="AVIGRONIX TECHNOLOGIES Logo"
-                         loading="eager"
-                         width="640"
-                         height="340" />
+                    <picture class="block">
+                        <source srcset="{{ url_for('static', path='images/logo.webp') }}" type="image/webp">
+                        <img src="{{ url_for('static', path='images/logo.png') }}"
+                             class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
+                             alt="AVIGRONIX TECHNOLOGIES Logo"
+                             loading="eager"
+                             width="640"
+                             height="340" />
+                    </picture>
                     <div class="absolute -inset-1 bg-blue-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
@@ -493,12 +514,15 @@
         <!-- Mobile Menu Header -->
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center space-x-3">
-                <img src="{{ url_for('static', path='images/logo.png') }}"
-                     class="h-10 w-auto"
-                     alt="AVIGRONIX TECHNOLOGIES Logo"
-                     width="640"
-                     height="340"
-                     loading="lazy" />
+                <picture class="block">
+                    <source srcset="{{ url_for('static', path='images/logo.webp') }}" type="image/webp">
+                    <img src="{{ url_for('static', path='images/logo.png') }}"
+                         class="h-10 w-auto"
+                         alt="AVIGRONIX TECHNOLOGIES Logo"
+                         width="640"
+                         height="340"
+                         loading="lazy" />
+                </picture>
                 <span class="text-lg font-bold text-gray-900">Menu</span>
             </div>
             <button id="mobileMenuClose"

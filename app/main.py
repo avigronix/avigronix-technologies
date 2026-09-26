@@ -1,3 +1,10 @@
+# Load .env before importing any app module: routers.shop, rate_limit and
+# database read their settings (ADMIN_API_KEY, MONGODB_URL, ...) at import
+# time, so loading it later meant values set in .env were silently ignored.
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -7,18 +14,15 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from routers import pages
-from routers.shop import router as shop_manage
+from routers.shop import router as shop_manage, cleanup_orphaned_uploads
 from render_utils import render_page
 from rate_limit import limiter
 from datetime import datetime
 import os
 import html
+import asyncio
 import logging
 from contextlib import asynccontextmanager
-from dotenv import load_dotenv
-
-load_dotenv()
-
 logger = logging.getLogger("avigronix")
 logging.basicConfig(level=logging.INFO)
 
@@ -29,6 +33,19 @@ from pydantic import BaseModel, EmailStr, Field
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+
+
+UPLOAD_CLEANUP_INTERVAL_SECONDS = 6 * 60 * 60
+
+
+async def _periodic_upload_cleanup():
+    """Remove abandoned preview uploads at startup and every few hours."""
+    while True:
+        try:
+            await cleanup_orphaned_uploads()
+        except Exception as e:
+            logger.warning("Orphaned-upload cleanup skipped (%s)", e)
+        await asyncio.sleep(UPLOAD_CLEANUP_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
@@ -54,7 +71,11 @@ async def lifespan(app: FastAPI):
             e,
         )
 
+    cleanup_task = asyncio.create_task(_periodic_upload_cleanup())
+
     yield
+
+    cleanup_task.cancel()
 
     # Shutdown: release the MongoDB connection pool cleanly. There was no
     # shutdown handler before this (confirmed: no @app.on_event("shutdown")
@@ -64,11 +85,18 @@ async def lifespan(app: FastAPI):
     mongo_client.close()
 
 
+# Interactive API docs list every endpoint (including the admin ones), so
+# they're off unless explicitly enabled, e.g. on a developer machine.
+API_DOCS_ENABLED = os.environ.get("ENABLE_API_DOCS", "").strip().lower() == "true"
+
 app = FastAPI(
     title="AVIGRONIX TECHNOLOGIES",
     description="Transform Your Business With Our Digital Solutions",
     version="1.0.0",
     lifespan=lifespan,
+    docs_url="/docs" if API_DOCS_ENABLED else None,
+    redoc_url="/redoc" if API_DOCS_ENABLED else None,
+    openapi_url="/openapi.json" if API_DOCS_ENABLED else None,
 )
 
 app.state.limiter = limiter
@@ -305,15 +333,35 @@ async def home(request: Request):
     # Otherwise show normal homepage
     return render_page(request, templates, "index.html")
 
+UPLOAD_SUBFOLDERS = {"logos", "banners", "bank_qr", "payment_qr", "shop_qr"}
+
+
 @app.get("/uploads/{sub_folder}/{filename}")
 async def get_image(sub_folder: str, filename: str):
-
-    file_path = os.path.join("uploads", sub_folder, filename)
-    
-    if not os.path.exists(file_path):
+    # Only serve regular files from the known upload folders. Without these
+    # checks, "/uploads/%2e%2e/main.py" resolved to uploads/../main.py and
+    # served the app's own source code (the app runs from app/).
+    if sub_folder not in UPLOAD_SUBFOLDERS or filename in ("", ".", "..") or "/" in filename or "\\" in filename:
         raise HTTPException(status_code=404, detail="Image not found")
-    
+
+    base = os.path.realpath(os.path.join("uploads", sub_folder))
+    file_path = os.path.realpath(os.path.join(base, filename))
+    if os.path.dirname(file_path) != base or not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+
     return FileResponse(file_path)
+
+@app.get("/health", include_in_schema=False)
+@limiter.exempt
+async def health():
+    """Uptime-monitor endpoint: 200 when the app and MongoDB are reachable,
+    503 when the database isn't. Never exposes error details."""
+    try:
+        await db.command("ping")
+    except Exception as e:
+        logger.warning("Health check: database unreachable (%s)", e)
+        return JSONResponse({"status": "degraded", "database": "unreachable"}, status_code=503)
+    return {"status": "ok", "database": "ok"}
 
 @app.get("/google217adffd4029d326.html", include_in_schema=False, response_class=PlainTextResponse)
 def google_site_verification():
@@ -364,6 +412,7 @@ Disallow: /shop/register
 Disallow: /shop/preview
 Disallow: /shop/register-business
 Disallow: /shop/api/
+Disallow: /health
 
 Sitemap: {site}/sitemap.xml
 """

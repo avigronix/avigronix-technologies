@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
+from datetime import datetime, timezone
+from email.utils import format_datetime
+from xml.sax.saxutils import escape
+import os
 
 from render_utils import render_page
 from blog_content import get_post, list_posts
@@ -31,6 +35,47 @@ async def projects(request: Request):
 @router.get("/blog", response_class=HTMLResponse)
 async def blog(request: Request):
     return render_page(request, templates, "blog.html", {"posts": list_posts()})
+
+# Must be registered before /blog/{slug}, which would otherwise match "rss.xml".
+@router.get("/blog/rss.xml", include_in_schema=False)
+async def blog_rss():
+    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    posts = sorted(list_posts(), key=lambda p: p["iso_date"], reverse=True)
+
+    def rfc822(iso_date: str) -> str:
+        return format_datetime(datetime.strptime(iso_date, "%Y-%m-%d").replace(tzinfo=timezone.utc))
+
+    items = []
+    for post in posts:
+        url = f"{site}/blog/{post['slug']}"
+        categories = "".join(f"<category>{escape(tag)}</category>" for tag in post.get("tags", []))
+        items.append(
+            "<item>"
+            f"<title>{escape(post['title'])}</title>"
+            f"<link>{escape(url)}</link>"
+            f"<guid isPermaLink=\"true\">{escape(url)}</guid>"
+            f"<pubDate>{rfc822(post['iso_date'])}</pubDate>"
+            f"<description>{escape(post['excerpt'])}</description>"
+            f"{categories}"
+            "</item>"
+        )
+
+    last_build = rfc822(posts[0]["iso_date"]) if posts else format_datetime(datetime.now(timezone.utc))
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">'
+        "<channel>"
+        "<title>AVIGRONIX TECHNOLOGIES Blog</title>"
+        f"<link>{escape(site)}/blog</link>"
+        f'<atom:link href="{escape(site)}/blog/rss.xml" rel="self" type="application/rss+xml"/>'
+        "<description>Engineering notes from AVIGRONIX TECHNOLOGIES — practical guidance on FastAPI, "
+        "cloud migration, backend security, and database performance.</description>"
+        "<language>en</language>"
+        f"<lastBuildDate>{last_build}</lastBuildDate>"
+        + "".join(items)
+        + "</channel></rss>\n"
+    )
+    return Response(content=xml, media_type="application/rss+xml")
 
 @router.get("/blog/{slug}", response_class=HTMLResponse)
 async def blog_detail(request: Request, slug: str):

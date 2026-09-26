@@ -7,9 +7,14 @@ from pathlib import Path
 from datetime import datetime
 import uuid
 import os
+import re
+import time
 import secrets
 import logging
 from pymongo.errors import DuplicateKeyError
+from starlette.concurrency import run_in_threadpool
+
+from image_sanitize import InvalidImageError, strip_metadata
 
 from database import db
 from rate_limit import limiter
@@ -22,11 +27,53 @@ templates = Jinja2Templates(directory="templates")
 templates.env.globals["current_year"] = datetime.now().year
 
 # Ensure upload directories exist
-os.makedirs("uploads/logos", exist_ok=True)
-os.makedirs("uploads/banners", exist_ok=True)
-os.makedirs("uploads/bank_qr", exist_ok=True)
-os.makedirs("uploads/payment_qr", exist_ok=True)
-os.makedirs("uploads/shop_qr", exist_ok=True)
+UPLOAD_SUBDIRS = ("logos", "banners", "bank_qr", "payment_qr", "shop_qr")
+for _sub in UPLOAD_SUBDIRS:
+    os.makedirs(os.path.join("uploads", _sub), exist_ok=True)
+
+# Preview uploads are saved straight into uploads/ and only become "owned"
+# once the visitor publishes. Ones never followed by a registration are
+# removed after this long.
+ORPHAN_UPLOAD_MAX_AGE_SECONDS = 24 * 60 * 60
+
+
+async def _referenced_upload_paths() -> set:
+    """Every uploads/... path any registered shop (active or not) points to."""
+    refs = set()
+    projection = {"logo": 1, "banner": 1, "shop_qr": 1, "payment_info.bank_qr": 1, "payment_info.payment_qr": 1}
+    async for shop in db.shops.find({}, projection):
+        payment = shop.get("payment_info") or {}
+        for value in (shop.get("logo"), shop.get("banner"), shop.get("shop_qr"),
+                      payment.get("bank_qr"), payment.get("payment_qr")):
+            if isinstance(value, str) and value.lstrip("/").startswith("uploads/"):
+                refs.add(value.lstrip("/"))
+    return refs
+
+
+async def cleanup_orphaned_uploads(max_age_seconds: int = ORPHAN_UPLOAD_MAX_AGE_SECONDS) -> list:
+    """Delete upload files older than `max_age_seconds` that no shop
+    references. If the shop lookup fails, nothing is deleted."""
+    referenced = await _referenced_upload_paths()
+    cutoff = time.time() - max_age_seconds
+    removed = []
+    for sub in UPLOAD_SUBDIRS:
+        folder = os.path.join("uploads", sub)
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            rel_path = f"uploads/{sub}/{name}"
+            if name.startswith(".") or rel_path in referenced or not os.path.isfile(rel_path):
+                continue
+            try:
+                if os.path.getmtime(rel_path) > cutoff:
+                    continue
+                os.remove(rel_path)
+                removed.append(rel_path)
+            except OSError:
+                pass  # another worker got there first, or it vanished
+    if removed:
+        logger.info("Removed %d orphaned preview upload(s)", len(removed))
+    return removed
 
 # ---------------------------------------------------------------------------
 # Admin auth for the internal/admin shop APIs (list-all-shops, status toggle).
@@ -128,8 +175,9 @@ async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
 
     Uses a generated filename rather than the client-supplied one to avoid
     path traversal / overwriting other uploads on this pre-auth form.
-    Streams the upload in chunks and aborts (deleting the partial file) if
-    it exceeds MAX_UPLOAD_SIZE, so a single request can't fill the disk.
+    Reads the upload in chunks and aborts as soon as it exceeds
+    MAX_UPLOAD_SIZE, then re-encodes the image so no EXIF/GPS or other
+    metadata is ever written to disk (the files are served publicly).
     """
     ext = Path(file.filename or "").suffix.lower()
     if ext not in ALLOWED_IMAGE_EXTENSIONS:
@@ -138,23 +186,78 @@ async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
             detail=f"Unsupported file type '{ext}'. Allowed: {', '.join(sorted(ALLOWED_IMAGE_EXTENSIONS))}",
         )
 
+    data = bytearray()
+    while chunk := await file.read(1024 * 1024):
+        data += chunk
+        if len(data) > MAX_UPLOAD_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"'{file.filename}' is too large. Maximum allowed size is 5 MB.",
+            )
+
+    try:
+        clean = await run_in_threadpool(strip_metadata, bytes(data), ext)
+    except InvalidImageError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"'{file.filename}' is not a valid image file.",
+        )
+
     filename = f"{uuid.uuid4().hex}{ext}"
     file_path = os.path.join(upload_dir, filename)
-
-    size = 0
     with open(file_path, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):
-            size += len(chunk)
-            if size > MAX_UPLOAD_SIZE:
-                buffer.close()
-                os.remove(file_path)
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"'{file.filename}' is too large. Maximum allowed size is 5 MB.",
-                )
-            buffer.write(chunk)
+        buffer.write(clean)
 
     return f"/uploads/{upload_dir.split('/')[-1]}/{filename}"
+
+SUBDOMAIN_PATTERN = re.compile(r"^[a-z0-9-]+$")
+
+
+def _discard_uploads(url_paths: list) -> None:
+    """Delete files saved earlier in a request that then failed, so a
+    rejected submission never leaves orphans on disk."""
+    for url_path in url_paths:
+        try:
+            os.remove(url_path.lstrip("/"))
+        except OSError:
+            pass
+
+
+_transactions_supported: Optional[bool] = None
+
+
+async def _supports_transactions() -> bool:
+    """Multi-document transactions need a replica set (or mongos). Detected
+    once from the server's `hello` reply; any error means "no"."""
+    global _transactions_supported
+    if _transactions_supported is None:
+        try:
+            hello = await db.client.admin.command("hello")
+            _transactions_supported = bool(hello.get("setName")) or hello.get("msg") == "isdbgrid"
+        except Exception:
+            _transactions_supported = False
+    return _transactions_supported
+
+
+async def _insert_shop_with_mapping(shop_document: dict, make_mapping) -> object:
+    """Insert the shop and its subdomain mapping so that either both exist
+    or neither does: one transaction where the server supports it,
+    otherwise remove the shop again if the second write fails."""
+    if await _supports_transactions():
+        async with await db.client.start_session() as session:
+            async with session.start_transaction():
+                result = await db.shops.insert_one(shop_document, session=session)
+                await db.subdomains.insert_one(make_mapping(result.inserted_id), session=session)
+        return result
+
+    result = await db.shops.insert_one(shop_document)
+    try:
+        await db.subdomains.insert_one(make_mapping(result.inserted_id))
+    except Exception:
+        await db.shops.delete_one({"_id": result.inserted_id})
+        raise
+    return result
+
 
 async def is_subdomain_available(subdomain: str) -> bool:
     """Check if subdomain is available"""
@@ -176,7 +279,6 @@ async def show_registration_form(request: Request):
     """Show business registration form"""
     return templates.TemplateResponse(request, "register_business.html")
 
-import re
 @router.post("/preview", response_class=HTMLResponse)
 @limiter.limit("10/10minutes")
 async def preview_business(
@@ -231,11 +333,12 @@ async def preview_business(
     deliveryAvailable: str = Form(None),
 ):
     """Preview business before saving to database"""
+    saved = []
     try:
         # -------------------------
         # Validate subdomain
         # -------------------------
-        if not re.match(r"^[a-z0-9-]+$", domain):
+        if not SUBDOMAIN_PATTERN.match(domain):
             raise HTTPException(
                 status_code=400,
                 detail="Subdomain can contain only lowercase letters, numbers, and hyphens."
@@ -252,7 +355,9 @@ async def preview_business(
         # Save uploaded files
         # -------------------------
         logo_path = await save_uploaded_file(logo, "uploads/logos")
+        saved.append(logo_path)
         banner_path = await save_uploaded_file(banner, "uploads/banners")
+        saved.append(banner_path)
 
         # A browser sends a part for every <input type="file"> in the form
         # even when the visitor leaves it empty — that comes through as a
@@ -264,14 +369,17 @@ async def preview_business(
         bank_qr_path = None
         if bankQR and bankQR.filename:
             bank_qr_path = await save_uploaded_file(bankQR, "uploads/bank_qr")
+            saved.append(bank_qr_path)
 
         payment_qr_path = None
         if paymentQR and paymentQR.filename:
             payment_qr_path = await save_uploaded_file(paymentQR, "uploads/payment_qr")
+            saved.append(payment_qr_path)
 
         shop_qr_path = None
         if shopQR and shopQR.filename:
             shop_qr_path = await save_uploaded_file(shopQR, "uploads/shop_qr")
+            saved.append(shop_qr_path)
 
         # -------------------------
         # Prepare data for preview
@@ -334,9 +442,11 @@ async def preview_business(
         )
 
     except HTTPException:
+        _discard_uploads(saved)
         raise
 
     except Exception as e:
+        _discard_uploads(saved)
         logger.error("Error processing shop preview: %s", e)
         raise HTTPException(
             status_code=500,
@@ -394,6 +504,12 @@ async def register_business(request: Request, data: ShopRegistration):
     match exactly what preview_business.html's `shopData` object sends.
     """
     try:
+        if not SUBDOMAIN_PATTERN.match(data.domain):
+            raise HTTPException(
+                status_code=400,
+                detail="Subdomain can contain only lowercase letters, numbers, and hyphens."
+            )
+
         # Validate subdomain availability
         if not await is_subdomain_available(data.domain):
             raise HTTPException(status_code=400, detail="Subdomain already taken")
@@ -451,22 +567,22 @@ async def register_business(request: Request, data: ShopRegistration):
         # Remove None values
         shop_document = {k: v for k, v in shop_document.items() if v is not None}
 
-        # Insert into MongoDB (unique index on `subdomain` created at startup
-        # catches the race the pre-check above can't)
+        def subdomain_mapping(shop_id):
+            return {
+                "subdomain": data.domain,
+                "shop_id": str(shop_id),
+                "target_url": f"/shop/{data.domain}",
+                "active": True,
+                "created_at": datetime.now()
+            }
+
+        # Insert shop + subdomain mapping together (unique index on
+        # `subdomain` created at startup catches the race the pre-check
+        # above can't)
         try:
-            result = await db.shops.insert_one(shop_document)
+            result = await _insert_shop_with_mapping(shop_document, subdomain_mapping)
         except DuplicateKeyError:
             raise HTTPException(status_code=400, detail="Subdomain already taken")
-
-        # Create subdomain mapping
-        subdomain_doc = {
-            "subdomain": data.domain,
-            "shop_id": str(result.inserted_id),
-            "target_url": f"/shop/{data.domain}",
-            "active": True,
-            "created_at": datetime.now()
-        }
-        await db.subdomains.insert_one(subdomain_doc)
 
         return {
             "success": True,

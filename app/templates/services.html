@@ -5,23 +5,47 @@
 {% block meta_keywords %}backend development services, FastAPI development, Flask development company, MongoDB development services, cloud DevOps services, API integration services, data analytics services, custom web development, database engineering services{% endblock %}
 
 {% block structured_data %}
+{# One schema.org Service per service card on this page, wrapped in ListItem
+   (the ItemList shape Google documents). Built with tojson so the output is
+   always well-formed JSON. #}
+{% set services_schema = [
+        ("Custom Web Development", "Full-stack web applications built on FastAPI, Flask, React & Next.js."),
+        ("Backend & Database Engineering", "Secure, production-ready backend systems with MongoDB & PostgreSQL."),
+        ("E-commerce Development", "AI-powered online stores, multi-vendor systems, and payment gateway integrations."),
+        ("Mobile App Development", "Cross-platform mobile applications for iOS & Android."),
+        ("Cloud & DevOps Solutions", "Cloud infrastructure and enterprise deployment across AWS, GCP & VPS."),
+        ("Data Analytics & Business Intelligence", "Enterprise data ingestion and reporting pipelines built on Apache NiFi, Kafka & Superset."),
+        ("AI & Intelligent Automation", "Chatbots, LLM/SLM integrations, and predictive analytics."),
+        ("API Integration & Business Automation", "Webhook-driven backend systems and WhatsApp Cloud API integration."),
+        ("SEO & Digital Marketing", "Result-focused SEO, paid ads, and performance marketing."),
+        ("UI/UX & Product Design", "User experience and interface design focused on clarity and conversion."),
+        ("ERP & Enterprise Development", "Custom ERP systems, HRMS, CRM, and workflow automation."),
+        ("Support & Maintenance", "24/7 monitoring, enhancements, and long-term support.")
+] %}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "ItemList",
+    "name": "Services",
     "itemListElement": [
-        {"@type": "Service", "position": 1, "name": "Custom Web Development", "description": "Full-stack web applications built on FastAPI, Flask, React & Next.js.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 2, "name": "Backend & Database Engineering", "description": "Secure, production-ready backend systems with MongoDB & PostgreSQL.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 3, "name": "E-commerce Development", "description": "AI-powered online stores, multi-vendor systems, and payment gateway integrations.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 4, "name": "Mobile App Development", "description": "Cross-platform mobile applications for iOS & Android.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 5, "name": "Cloud & DevOps Solutions", "description": "Cloud infrastructure and enterprise deployment across AWS, GCP & VPS.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 6, "name": "Data Analytics & Business Intelligence", "description": "Enterprise data ingestion and reporting pipelines built on Apache NiFi, Kafka & Superset.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 7, "name": "AI & Intelligent Automation", "description": "Chatbots, LLM/SLM integrations, and predictive analytics.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 8, "name": "API Integration & Business Automation", "description": "Webhook-driven backend systems and WhatsApp Cloud API integration.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 9, "name": "SEO & Digital Marketing", "description": "Result-focused SEO, paid ads, and performance marketing.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 10, "name": "UI/UX & Product Design", "description": "User experience and interface design focused on clarity and conversion.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 11, "name": "ERP & Enterprise Development", "description": "Custom ERP systems, HRMS, CRM, and workflow automation.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}},
-        {"@type": "Service", "position": 12, "name": "Support & Maintenance", "description": "24/7 monitoring, enhancements, and long-term support.", "provider": {"@type": "Organization", "name": "AVIGRONIX TECHNOLOGIES"}}
+        {% for name, description in services_schema %}
+        {
+            "@type": "ListItem",
+            "position": {{ loop.index }},
+            "item": {
+                "@type": "Service",
+                "name": {{ name | tojson }},
+                "serviceType": {{ name | tojson }},
+                "description": {{ description | tojson }},
+                "url": {{ ((site_url or 'https://avigronix.com') ~ '/services') | tojson }},
+                "provider": {
+                    "@type": "Organization",
+                    "name": "AVIGRONIX TECHNOLOGIES",
+                    "url": {{ (site_url or 'https://avigronix.com') | tojson }}
+                }
+            }
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
     ]
 }
 </script>
@@ -268,7 +292,7 @@
 <section class="py-20 section-brand-gradient text-white text-center">
     <div class="container mx-auto px-6 max-w-3xl">
         <h2 class="text-3xl sm:text-4xl font-bold mb-4">Let’s Build Your Next Digital Product</h2>
-        <p class="text-blue-100 text-lg mb-8">
+        <p class="text-white text-lg mb-8">
             Whether you need a modern web app, enterprise ERP, mobile solution, or cloud automation —
             we deliver with precision and passion.
         </p>

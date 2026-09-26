@@ -1,3 +1,5 @@
+import os
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -11,4 +13,11 @@ from slowapi.util import get_remote_address
 # tracks its own counters (a distributed attack could multiply the effective
 # limit by the number of processes) — fine for a single-process deployment,
 # but worth moving to a Redis storage backend if that changes.
-limiter = Limiter(key_func=get_remote_address, default_limits=["300/minute"])
+#
+# RATE_LIMIT_STORAGE_URI (optional) switches to a shared backend, e.g.
+# "redis://host:6379" (needs `pip install redis`) — see README.
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["300/minute"],
+    storage_uri=os.environ.get("RATE_LIMIT_STORAGE_URI", "memory://"),
+)

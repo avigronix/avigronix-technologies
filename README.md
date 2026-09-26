@@ -55,20 +55,67 @@ host's environment/secrets manager:
 | `MONGODB_URL` | no | `mongodb://localhost:27017` | MongoDB connection string |
 | `DATABASE_NAME` | no | `shop_management` | MongoDB database name |
 | `SITE_URL` | no | `https://avigronix.com` | Used to build the sitemap and canonical/OG URLs — set this to your actual deployed domain |
-| `GA_MEASUREMENT_ID` | no | (a placeholder ID) | Google Analytics 4 measurement ID. Analytics only actually fires once a visitor accepts the cookie-consent banner (Consent Mode v2 — see the audit report's I1 fix) |
+| `GA_MEASUREMENT_ID` | no | `G-QMZ7RMVX47` | Google Analytics 4 measurement ID. Analytics only actually fires once a visitor accepts the cookie-consent banner (Consent Mode v2 — see the audit report's I1 fix) |
+| `ENABLE_API_DOCS` | no | off | Set to `true` to turn on FastAPI's `/docs`, `/redoc` and `/openapi.json` (e.g. on a developer machine). Leave unset in production — they list every endpoint, including the admin ones. |
+| `RATE_LIMIT_STORAGE_URI` | only if you run more than one worker/instance | `memory://` | Where the rate limiter keeps its counters. See "Rate limiting and workers" below. |
 
 ### Reverse proxy / production notes
 
-- Run behind a real process manager (Gunicorn+Uvicorn workers, or Uvicorn's
-  own `--workers`), not `uvicorn main:app --reload` alone.
+- Run under a process manager (systemd, supervisor, Docker restart policy)
+  so the app restarts if it crashes — not `uvicorn main:app --reload`.
 - If deploying behind Nginx/Cloudflare terminating TLS, forward
   `X-Forwarded-Proto` and run Uvicorn with `--proxy-headers` so the app can
   tell it's being served over HTTPS (this affects the HSTS header in
   `main.py`).
-- The in-memory rate limiter (`slowapi`, see `rate_limit.py`) tracks
-  counters per-process. If you ever run multiple workers or instances behind
-  a load balancer, each one counts separately — move to a Redis-backed
-  limiter storage if that matters for you.
+- `GET /health` returns `200 {"status":"ok"}` when the app and MongoDB are
+  reachable and `503` when the database isn't — point your uptime monitor at
+  it. It isn't rate limited, isn't in the sitemap, and is disallowed in
+  `robots.txt`.
+- Preview uploads that are never published are deleted automatically after
+  24 hours (at startup and every 6 hours). Files referenced by any
+  registered shop — active or deactivated — are never deleted, and if the
+  database can't be read the cleanup deletes nothing. A visitor who leaves
+  the preview page open for more than a day before clicking *Publish* would
+  lose their uploaded images and need to upload them again.
+
+### Uploaded images
+
+Every uploaded image is decoded and re-encoded before it is saved, so EXIF
+(camera, timestamps, **GPS location**), XMP, ICC profiles and PNG text
+chunks never reach disk, and files that aren't real images are rejected.
+Images uploaded before this existed can be cleaned with:
+
+```bash
+python scripts/strip_upload_metadata.py --dry-run   # show what would change
+python scripts/strip_upload_metadata.py             # clean in place
+```
+
+It only rewrites files that contain metadata, keeps filenames (so shop
+records still point at them) and modification times, and never touches
+anything it can't read as an image. Run it from the project root with the
+app's venv active; no database or admin key needed.
+
+### Rate limiting and workers
+
+The contact form (5 per 10 minutes per IP), shop preview and registration
+(10 per 10 minutes each) and every other route (300/minute) are rate
+limited. By default the counters live **in the app process's memory**,
+which is only correct with **one** process:
+
+- **One worker (default, recommended for this site's traffic):** the
+  command above (`uvicorn main:app --host 0.0.0.0 --port 8000`) runs a
+  single worker. Nothing to configure.
+- **More than one worker or server** (`--workers 4`, Gunicorn, several
+  containers behind a load balancer): every process would keep its own
+  counters, multiplying the real limit by the number of processes. Point
+  them all at a shared store instead:
+  ```bash
+  pip install redis
+  RATE_LIMIT_STORAGE_URI=redis://localhost:6379
+  ```
+  `mongodb://…` (your existing MongoDB) also works with no extra package,
+  but it makes a blocking database round-trip on every request, so Redis
+  is the better choice if you scale out.
 
 ## Rebuilding the compiled Tailwind CSS
 
@@ -101,14 +148,58 @@ Python data (`blog.html`/`blog_detail.html`'s per-post color, driven by
 in that safelist, add it there too, or its classes will silently be missing
 from the compiled CSS.
 
-## Testing checklist after any change
+## Running the tests
 
-There's no automated test suite. At minimum, manually re-check:
+```bash
+pip install -r requirements-dev.txt   # once, inside your venv
+pytest
+```
 
-- The shop flow end-to-end: `/shop/register` → preview → register → the
-  public shop page (both `/shop/{subdomain}` and via the subdomain itself).
-- The contact form (the honeypot field must stay empty for a real send).
-- The custom 404 page and a couple of the static marketing pages.
+That's the whole suite (pages, htmx partials, sitemap/robots, security
+headers, the full shop flow, upload limits, admin auth, the contact form).
+It is safe to run anywhere:
+
+- **Never touches your real database.** By default it uses an in-memory
+  MongoDB (mongomock-motor), so MongoDB doesn't even need to be running. To
+  run against a real MongoDB instead (what CI does), point it at a server —
+  the tests create and then drop a throwaway `avigronix_test_<random>`
+  database there and refuse to run against any other name:
+  ```bash
+  TEST_MONGODB_URL=mongodb://localhost:27017 pytest
+  ```
+- **Never sends email.** SMTP is replaced by a recorder in every test.
+- **Never writes to `app/uploads/`.** Tests run from a temporary directory
+  with its own empty `uploads/`.
+
+Three tests exercise the MongoDB-transaction path of shop registration and
+only run against a replica set (they're reported as *skipped* with
+mongomock or a standalone server, including CI's). The rollback path used
+on standalone servers is tested everywhere.
+
+### Continuous integration (GitHub Actions)
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs automatically on
+every push and every pull request, as two jobs:
+
+1. **Tests (pytest + MongoDB)** — installs `requirements.txt` +
+   `requirements-dev.txt` and runs `pytest -v` against a throwaway MongoDB
+   service container.
+2. **Dependency audit (pip-audit)** — runs `pip-audit -r requirements.txt`
+   and fails if any pinned production dependency has a known vulnerability.
+
+To see results: open the repository on GitHub → **Actions** tab → pick the
+run for your commit/branch → click a job to see its log (a failing test
+shows its name and assertion there). The same status appears as a ✓/✗ next
+to each commit and as checks at the bottom of every pull request. If you
+want merges blocked until CI passes, enable it under **Settings → Branches →
+Branch protection rules → Require status checks to pass** and select both
+jobs.
+
+### Manual checks that tests don't cover
+
+- Open the shop flow in a real browser once: `/shop/register` → preview →
+  publish, **leaving the optional Payment QR field empty** (the most common
+  real-world case), then open the public shop page.
 - The browser console for errors, especially any `Refused to load/execute`
   Content-Security-Policy violations, after touching `main.py`'s `CSP`
   constant or any `<script>`/`<link>` tag.
