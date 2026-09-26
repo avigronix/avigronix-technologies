@@ -351,6 +351,15 @@ async def get_image(sub_folder: str, filename: str):
 
     return FileResponse(file_path)
 
+@app.get("/favicon.ico", include_in_schema=False)
+@limiter.exempt
+async def favicon():
+    """Browsers request this at the site root by convention, independent of
+    any <link rel="icon"> tag — served here so that no longer 404s."""
+    response = FileResponse(os.path.join("static", "images", "favicon.ico"))
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
 @app.get("/health", include_in_schema=False)
 @limiter.exempt
 async def health():

@@ -44,6 +44,29 @@ async def test_404_page(client):
     r = await client.get("/definitely-not-a-page")
     assert r.status_code == 404
     assert "Page Not Found" in r.text
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text  # error_404.html
+
+
+async def test_500_page(app_running, monkeypatch):
+    import httpx
+    import main
+
+    def boom(*a, **kw):
+        raise RuntimeError("simulated unhandled error")
+
+    monkeypatch.setattr(main, "render_page", boom)
+    # Starlette's ServerErrorMiddleware sends the generated error_500.html
+    # response and then re-raises the original exception (so a real server
+    # still logs/reports it); the default client fixture would surface that
+    # re-raise as a test failure even though the response was correct, so
+    # this one test asks the ASGI transport not to propagate it.
+    transport = httpx.ASGITransport(app=app_running, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+        r = await client.get("/")
+    assert r.status_code == 500
+    assert "Something Went Wrong" in r.text or "went wrong" in r.text.lower()
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text  # error_500.html
+    assert "simulated unhandled error" not in r.text
 
 
 async def test_unknown_blog_post_is_404(client):
@@ -64,7 +87,7 @@ async def test_sitemap(client):
     for post in list_posts():
         assert f"<loc>https://avigronix.com/blog/{post['slug']}</loc>" in body
     # private/operational routes never appear in the sitemap
-    for private in ["/shop/register", "/shop/preview", "/shop/api", "/health"]:
+    for private in ["/shop/register", "/shop/preview", "/shop/api", "/health", "/favicon.ico"]:
         assert f"avigronix.com{private}<" not in body
 
 
@@ -96,6 +119,35 @@ async def test_static_assets_cached(client):
     r = await client.get("/static/css/tailwind.min.css")
     assert r.status_code == 200
     assert r.headers["cache-control"] == "public, max-age=86400"
+
+
+async def test_favicon_ico_served_at_site_root(client):
+    """Browsers request /favicon.ico at the root by convention, independent
+    of any <link rel="icon"> tag — it must not 404."""
+    r = await client.get("/favicon.ico")
+    assert r.status_code == 200
+    assert r.headers["content-type"] in ("image/vnd.microsoft.icon", "image/x-icon")
+    assert r.headers["cache-control"] == "public, max-age=86400"
+    assert r.content[:4] in (b"\x00\x00\x01\x00", b"\x00\x00\x02\x00")  # ICO magic bytes
+
+
+async def test_favicon_ico_is_not_rate_limited(client):
+    for _ in range(310):
+        r = await client.get("/favicon.ico")
+    assert r.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "path,template",
+    [
+        ("/", "base.html (via index.html)"),
+        ("/definitely-not-a-page", "error_404.html"),
+        ("/shop/register", "register_business.html (via base.html)"),
+    ],
+)
+async def test_favicon_ico_linked_in_head(client, path, template):
+    r = await client.get(path)
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text, template
 
 
 # Every encoding tried against the old code (see WEBSITE_AUDIT_REPORT.md,

@@ -25,6 +25,7 @@ async def test_full_flow_preview_register_public_pages(client, db):
     r = await post_preview(client, preview_form(domain="flow-shop"))
     assert r.status_code == 200, r.text
     assert "Publish Website Now" in r.text
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text  # preview_business.html
     # both mandatory uploads were stored under uploads/, optional ones skipped
     files = uploaded_files()
     assert len([f for f in files if f.startswith("logos/")]) == 1
@@ -44,18 +45,21 @@ async def test_full_flow_preview_register_public_pages(client, db):
     r = await client.get("/shop/flow-shop")
     assert r.status_code == 200
     assert "Test Shop" in r.text
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text  # shop_public.html
 
     # public page via the subdomain root route
     r = await client.get("/", headers={"host": "flow-shop.localhost"})
     assert r.status_code == 200
     assert "Test Shop" in r.text
     assert "Official Website" in r.text
+    assert '<link rel="icon" href="/favicon.ico" sizes="any" />' in r.text  # public_shop.html
 
 
 async def test_unknown_subdomain_shows_shop_not_found(client):
     r = await client.get("/", headers={"host": "nosuchshop.localhost"})
     assert r.status_code == 200
     assert "not found" in r.text.lower()
+    assert '<link rel="icon" href="/favicon.ico" sizes="any">' in r.text  # not_found.html
 
 
 async def test_inactive_shop_is_not_public(client, db, admin_key):

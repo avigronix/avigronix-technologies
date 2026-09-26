@@ -61,6 +61,7 @@
     {# ---------- FAVICON ---------- #}
     <link rel="icon" href="{{ url_for('static', path='images/favicon-32x32.png') }}" sizes="32x32" type="image/png"/>
     <link rel="icon" href="{{ url_for('static', path='images/favicon-16x16.png') }}" sizes="16x16" type="image/png"/>
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="{{ url_for('static', path='images/apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', path='manifest.json') }}">
     <link rel="alternate" type="application/rss+xml" title="AVIGRONIX TECHNOLOGIES Blog"
@@ -446,7 +447,7 @@
             <a href="/" hx-get="/" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator" class="flex items-center space-x-3 group">
                 <div class="relative">
                     <picture class="block">
-                        <source srcset="{{ url_for('static', path='images/logo.webp') }}" type="image/webp">
+                        <source srcset="{{ url_for('static', path='images/logo.webp').path }}" type="image/webp">
                         <img src="{{ url_for('static', path='images/logo.png') }}"
                              class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
                              alt="AVIGRONIX TECHNOLOGIES Logo"
@@ -515,7 +516,7 @@
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center space-x-3">
                 <picture class="block">
-                    <source srcset="{{ url_for('static', path='images/logo.webp') }}" type="image/webp">
+                    <source srcset="{{ url_for('static', path='images/logo.webp').path }}" type="image/webp">
                     <img src="{{ url_for('static', path='images/logo.png') }}"
                          class="h-10 w-auto"
                          alt="AVIGRONIX TECHNOLOGIES Logo"

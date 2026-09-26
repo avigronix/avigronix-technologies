@@ -63,10 +63,18 @@ host's environment/secrets manager:
 
 - Run under a process manager (systemd, supervisor, Docker restart policy)
   so the app restarts if it crashes — not `uvicorn main:app --reload`.
-- If deploying behind Nginx/Cloudflare terminating TLS, forward
-  `X-Forwarded-Proto` and run Uvicorn with `--proxy-headers` so the app can
-  tell it's being served over HTTPS (this affects the HSTS header in
-  `main.py`).
+- **Behind Cloudflare / Nginx (avigronix.com is behind Cloudflare), start
+  Uvicorn with proxy headers enabled:**
+  ```bash
+  uvicorn main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips="*"
+  ```
+  Without this the app thinks every request is plain `http` and comes from
+  the proxy's IP. That means: absolute URLs it builds (`og:image`, JSON-LD,
+  `url_for`) are `http://…`, the HSTS header is never sent, and **every
+  visitor shares one rate-limit bucket** (5 contact messages per 10 minutes
+  for the whole world). `--forwarded-allow-ips="*"` is only safe when the
+  app port is reachable *only* through the proxy (bind to `127.0.0.1` or
+  firewall it); otherwise list the proxy's IPs instead of `*`.
 - `GET /health` returns `200 {"status":"ok"}` when the app and MongoDB are
   reachable and `503` when the database isn't — point your uptime monitor at
   it. It isn't rate limited, isn't in the sitemap, and is disallowed in

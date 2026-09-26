@@ -205,7 +205,11 @@ async def test_health_is_not_rate_limited(client):
 # --------------------------------------------------------------------------
 async def test_logo_served_as_webp_with_png_fallback(client):
     r = await client.get("/")
-    assert '<source srcset="http://testserver/static/images/logo.webp" type="image/webp">' in r.text
+    # Relative on purpose: behind Cloudflare the app sees plain http, and
+    # Cloudflare rewrites src/href to https but not srcset — an absolute
+    # http:// srcset was blocked as mixed content and broke the live logo.
+    assert '<source srcset="/static/images/logo.webp" type="image/webp">' in r.text
+    assert not re.search(r'srcset="https?://', r.text)
     assert "static/images/logo.png" in r.text
     webp = await client.get("/static/images/logo.webp")
     assert webp.status_code == 200 and webp.content[:4] == b"RIFF" and webp.content[8:12] == b"WEBP"

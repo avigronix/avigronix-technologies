@@ -5,12 +5,14 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*.pyc
 *.pyo
 *.pyd
 *.so
 
-# Virtual environment
+# Virtual environment (venv*/ also catches names like venv-new/, venv2/)
 venv/
+venv*/
 env/
 ENV/
 .venv/
@@ -92,9 +94,20 @@ docker/volumes/
 docker-compose.override.yml
 
 # ==================================================
+# 📌 Tailwind
+# ==================================================
+# The standalone CLI binary the README's rebuild command downloads into the
+# project root (never commit it — download fresh per platform instead).
+/tailwindcss
+/tailwindcss.exe
+/tailwindcss-*
+
+# ==================================================
 # 📌 Misc
 # ==================================================
 *.swp
 *.swo
 *.bak
 *.orig
+*.old
+*_copy.*
