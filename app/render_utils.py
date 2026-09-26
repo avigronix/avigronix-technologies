@@ -21,7 +21,7 @@ def render_page(request: Request, templates: Jinja2Templates, template_name: str
     context["base_template"] = "partial_base.html" if is_htmx else "base.html"
     context["request"] = request
 
-    response = templates.TemplateResponse(template_name, context)
+    response = templates.TemplateResponse(request, template_name, context)
 
     if is_htmx:
         tmpl = templates.env.get_template(template_name)

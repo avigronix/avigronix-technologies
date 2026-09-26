@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ shop_data.shop_name }} - Official Website</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind.min.css') }}" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
 
     <style>
@@ -208,6 +211,8 @@
               src="{{ shop_data.logo }}"
               alt="{{ shop_data.shop_name }} logo"
               class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl object-cover shadow-md"
+              width="56"
+              height="56"
             />
             <div class="min-w-0">
               <h1 class="text-xl sm:text-2xl font-bold text-gray-900 truncate">
@@ -277,6 +282,8 @@
           src="{{ shop_data.banner }}"
           alt="Banner"
           class="w-full h-full object-cover"
+          width="1600"
+          height="500"
         />
         <div class="absolute inset-0 hero-gradient"></div>
 
@@ -450,6 +457,7 @@
                 <a
                   href="https://wa.me/{{ shop_data.social_media.whatsapp }}"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link text-green-500"
                 >
                   <i class="fab fa-whatsapp"></i>
@@ -458,6 +466,7 @@
                 <a
                   href="https://instagram.com/{{ shop_data.social_media.instagram }}"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link text-pink-500"
                 >
                   <i class="fab fa-instagram"></i>
@@ -466,6 +475,7 @@
                 <a
                   href="https://facebook.com/{{ shop_data.social_media.facebook }}"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link text-blue-600"
                 >
                   <i class="fab fa-facebook"></i>
@@ -474,14 +484,16 @@
                 <a
                   href="https://youtube.com/{{ shop_data.social_media.youtube }}"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link text-red-500"
                 >
                   <i class="fab fa-youtube"></i>
                 </a>
                 {% endif %} {% if shop_data.social_media.website %}
                 <a
-                  href="https://{{ shop_data.social_media.website }}"
+                  href="https://{{ shop_data.social_media.website | replace('https://', '') | replace('http://', '') }}"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link text-indigo-500"
                 >
                   <i class="fas fa-globe"></i>
@@ -509,6 +521,9 @@
       src="{{ shop_data.payment_info.payment_qr }}"
       alt="Payment QR"
       class="rounded-xl w-full shadow-md hover:scale-[1.02] transition-transform duration-300"
+      width="200"
+      height="200"
+      loading="lazy"
     />
   </div>
   {% endif %}
@@ -611,6 +626,7 @@
           <a
             href="https://avigronix.com"
             target="_blank"
+            rel="noopener noreferrer"
             class="font-bold"
             >AVIGRONIX TECHNOLOGIES</a
           >

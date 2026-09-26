@@ -72,43 +72,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     {# ---------- TAILWIND (brand palette) + FONTAWESOME ---------- #}
-    {# The CDN script must load BEFORE the config assignment below — it creates
-       the global `tailwind` object that `.config` is then set on. #}
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-                        heading: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-                    },
-                    // Existing blue/indigo/gray utility classes across the templates now
-                    // resolve to Avigronix brand colors instead of Tailwind's stock palette
-                    // (kept as remapped stock names, not a custom "brand" namespace, since
-                    // the CDN's runtime JIT does not reliably resolve custom nested color
-                    // tokens used inside gradient utilities).
-                    colors: {
-                        blue: {
-                            50: '#F5F9FF', 100: '#E5F0FF', 200: '#CCE1FF', 300: '#ACCEFF',
-                            400: '#7FB3FF', 500: '#538EF5', 600: '#2F6FED', 700: '#285EC8',
-                            800: '#1F4999', 900: '#153367', 950: '#0B1B33',
-                        },
-                        indigo: {
-                            50: '#ECF4FF', 100: '#CCE1FF', 200: '#73A9FC', 300: '#5F98F8',
-                            400: '#4783F2', 500: '#2D6BE4', 600: '#2960CC', 700: '#214FA6',
-                            800: '#193D7D', 900: '#112A54', 950: '#0B1B33',
-                        },
-                        gray: {
-                            50: '#F8FAFC', 100: '#ECEFF3', 200: '#E0E3E8', 300: '#C1C7D1',
-                            400: '#9AA5B4', 500: '#64748B', 600: '#57677E', 700: '#405068',
-                            800: '#2A3A52', 900: '#0B1B33', 950: '#071221',
-                        },
-                    },
-                },
-            },
-        };
-    </script>
+    {# Compiled ahead of time from tailwind.config.js at the project root
+       (see WEBSITE_AUDIT_REPORT.md for the rebuild command) instead of the
+       cdn.tailwindcss.com "play CDN" script — same brand color remapping,
+       fonts and typography plugin, just built once instead of in every
+       visitor's browser. #}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind.min.css') }}" />
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
           integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
@@ -117,14 +86,33 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}" />
 
     {# ---------- HTMX (instant navigation) ---------- #}
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"
+            integrity="sha512-JvpjarJlOl4sW26MnEb3IdSAcGdeTeOaAlu2gUZtfFrRgnChdzELOZKl0mN6ZvI0X+xiX5UMvxjK2Rx2z/fliw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
 
     {# ---------- GLOBAL STYLES ---------- #}
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
+    <!-- Google tag (gtag.js) with Consent Mode v2: analytics is denied by
+         default for every visitor, and only granted if they already chose
+         "Accept" on a previous visit (see the cookie-consent-banner script
+         near the end of <body>, which calls gtag('consent','update',...)
+         on a fresh Accept click this session). -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
+
+        var avxStoredConsent = null;
+        try { avxStoredConsent = localStorage.getItem('avx_cookie_consent'); } catch (e) { /* private mode etc. */ }
+
+        gtag('consent', 'default', {
+            'analytics_storage': avxStoredConsent === 'granted' ? 'granted' : 'denied',
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied'
+        });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
+    <script>
         gtag('js', new Date());
         gtag('config', '{{ ga_measurement_id }}');
     </script>
@@ -427,6 +415,11 @@
 </head>
 
 <body class="bg-white text-gray-900 antialiased">
+{# ================= SKIP TO CONTENT (accessibility) ================= #}
+<a href="#content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-lg">
+    Skip to content
+</a>
 {# ================= NAVIGATION BAR ================= #}
 <nav class="glass-nav fixed top-0 left-0 w-full z-50 py-3">
     <div class="container mx-auto px-4 md:px-6 lg:px-8">
@@ -438,8 +431,8 @@
                          class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
                          alt="AVIGRONIX TECHNOLOGIES Logo"
                          loading="eager"
-                         width="auto"
-                         height="auto" />
+                         width="640"
+                         height="340" />
                     <div class="absolute -inset-1 bg-blue-500/10 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
@@ -502,7 +495,10 @@
             <div class="flex items-center space-x-3">
                 <img src="{{ url_for('static', path='images/logo.png') }}"
                      class="h-10 w-auto"
-                     alt="AVIGRONIX TECHNOLOGIES Logo" />
+                     alt="AVIGRONIX TECHNOLOGIES Logo"
+                     width="640"
+                     height="340"
+                     loading="lazy" />
                 <span class="text-lg font-bold text-gray-900">Menu</span>
             </div>
             <button id="mobileMenuClose"
@@ -583,6 +579,8 @@
                         <img src="{{ url_for('static', path='images/logo-icon.png') }}"
                              class="h-14 w-auto"
                              alt="AVIGRONIX TECHNOLOGIES Logo"
+                             width="500"
+                             height="208"
                              loading="lazy" />
                     </div>
                     <div>
@@ -713,6 +711,59 @@
         </div>
     </div>
 </footer>
+
+{# ================= COOKIE CONSENT BANNER ================= #}
+{# Lives outside #content (the htmx swap target), so it's part of the
+   persistent shell base.html renders once — it never re-appears or
+   duplicates on htmx partial navigations, only on a real full page load. #}
+<div id="cookie-consent-banner"
+     class="hidden fixed inset-x-0 bottom-0 z-[90] bg-gray-900 text-white px-4 py-4 sm:px-6 shadow-2xl">
+    <div class="mx-auto max-w-6xl flex flex-col sm:flex-row items-center gap-4">
+        <p class="text-sm text-gray-300 flex-1">
+            We use cookies for basic site analytics to understand how visitors use our site.
+            You can accept or reject non-essential cookies —
+            <a href="/privacy-policy" hx-get="/privacy-policy" hx-target="#content" hx-push-url="true" hx-swap="innerHTML" hx-indicator="#htmx-indicator" class="underline hover:text-white">read our Privacy Policy</a>.
+        </p>
+        <div class="flex gap-3 shrink-0">
+            <button id="cookie-consent-reject" type="button"
+                    class="px-4 py-2 rounded-lg border border-gray-600 text-sm font-medium hover:bg-gray-800 transition-colors">
+                Reject
+            </button>
+            <button id="cookie-consent-accept" type="button"
+                    class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition-colors">
+                Accept
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var STORAGE_KEY = 'avx_cookie_consent';
+        var banner = document.getElementById('cookie-consent-banner');
+        var acceptBtn = document.getElementById('cookie-consent-accept');
+        var rejectBtn = document.getElementById('cookie-consent-reject');
+        if (!banner || !acceptBtn || !rejectBtn) return;
+
+        var existingChoice = null;
+        try { existingChoice = localStorage.getItem(STORAGE_KEY); } catch (e) { /* private mode etc. */ }
+
+        // Only show the banner if the visitor hasn't already made a choice.
+        if (!existingChoice) {
+            banner.classList.remove('hidden');
+        }
+
+        function choose(value) {
+            try { localStorage.setItem(STORAGE_KEY, value); } catch (e) { /* ignore */ }
+            if (value === 'granted' && typeof gtag === 'function') {
+                gtag('consent', 'update', { 'analytics_storage': 'granted' });
+            }
+            banner.classList.add('hidden');
+        }
+
+        acceptBtn.addEventListener('click', function () { choose('granted'); });
+        rejectBtn.addEventListener('click', function () { choose('denied'); });
+    })();
+</script>
 
     {# ================= JAVASCRIPT ================= #}
     <script>

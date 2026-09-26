@@ -1,19 +1,20 @@
-from fastapi import FastAPI, APIRouter, Request, Form, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Depends, Header
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Dict, Any
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+from typing import Optional, List
 from pathlib import Path
 from datetime import datetime
 import uuid
 import os
-import shutil
-from bson import ObjectId
-import json
+import secrets
+import logging
+from pymongo.errors import DuplicateKeyError
 
 from database import db
 from rate_limit import limiter
+
+logger = logging.getLogger("avigronix.shop")
 
 # Router for shop endpoints
 router = APIRouter(prefix="/shop", tags=["shop"])
@@ -26,6 +27,35 @@ os.makedirs("uploads/banners", exist_ok=True)
 os.makedirs("uploads/bank_qr", exist_ok=True)
 os.makedirs("uploads/payment_qr", exist_ok=True)
 os.makedirs("uploads/shop_qr", exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Admin auth for the internal/admin shop APIs (list-all-shops, status toggle).
+# The public registration/preview/storefront flow below does NOT use this —
+# it stays open by design.
+# ---------------------------------------------------------------------------
+ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "")
+
+
+async def require_admin_key(x_admin_key: str = Header(default="", alias="X-Admin-Key")):
+    """Guards admin-only shop endpoints with a shared-secret header.
+
+    Uses secrets.compare_digest to avoid leaking the key via a timing
+    side-channel, and always rejects if ADMIN_API_KEY isn't configured
+    (so a blank/unset env var can't accidentally leave the endpoint open).
+    """
+    if not ADMIN_API_KEY or not secrets.compare_digest(x_admin_key, ADMIN_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid or missing admin API key")
+
+# Reserved subdomains: names that would be confusing, impersonate a real
+# system route, or collide with the main site's own pages if someone
+# registered a shop under them.
+RESERVED_SUBDOMAINS = {
+    "admin", "www", "api", "mail", "email", "login", "support", "help",
+    "shop", "static", "uploads", "avigronix", "app", "dashboard", "root",
+    "system", "test", "dev", "staging", "about", "services", "team",
+    "contact", "projects", "faq", "blog", "register", "preview",
+    "assets", "cdn", "ftp", "smtp", "null", "undefined",
+}
 
 # Pydantic Models
 class Product(BaseModel):
@@ -75,8 +105,22 @@ class ShopDetailsResponse(BaseModel):
     shop_url: str
     created_at: datetime
 
+class PublicShopAPIResponse(BaseModel):
+    """Exactly the fields shop_public.html shows on the public /shop/{subdomain}
+    page — used to make sure the JSON API can never leak more than the page
+    itself already does (no payment info, address, socials, or _id)."""
+    shop_name: str
+    contact_number: str
+    email: str
+    about: str
+    category: str
+    business_type: str
+    logo: str
+    banner: str
+
 # Utility Functions
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB per file
 
 
 async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
@@ -84,6 +128,8 @@ async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
 
     Uses a generated filename rather than the client-supplied one to avoid
     path traversal / overwriting other uploads on this pre-auth form.
+    Streams the upload in chunks and aborts (deleting the partial file) if
+    it exceeds MAX_UPLOAD_SIZE, so a single request can't fill the disk.
     """
     ext = Path(file.filename or "").suffix.lower()
     if ext not in ALLOWED_IMAGE_EXTENSIONS:
@@ -95,13 +141,25 @@ async def save_uploaded_file(file: UploadFile, upload_dir: str) -> str:
     filename = f"{uuid.uuid4().hex}{ext}"
     file_path = os.path.join(upload_dir, filename)
 
+    size = 0
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while chunk := await file.read(1024 * 1024):
+            size += len(chunk)
+            if size > MAX_UPLOAD_SIZE:
+                buffer.close()
+                os.remove(file_path)
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{file.filename}' is too large. Maximum allowed size is 5 MB.",
+                )
+            buffer.write(chunk)
 
     return f"/uploads/{upload_dir.split('/')[-1]}/{filename}"
 
 async def is_subdomain_available(subdomain: str) -> bool:
     """Check if subdomain is available"""
+    if subdomain.lower() in RESERVED_SUBDOMAINS:
+        return False
     existing_shop = await db.shops.find_one({"subdomain": subdomain})
     return existing_shop is None
 
@@ -116,7 +174,7 @@ async def generate_shop_qr_code(shop_url: str) -> str:
 @router.get("/register", response_class=HTMLResponse)
 async def show_registration_form(request: Request):
     """Show business registration form"""
-    return templates.TemplateResponse("register_business.html", {"request": request})
+    return templates.TemplateResponse(request, "register_business.html")
 
 import re
 @router.post("/preview", response_class=HTMLResponse)
@@ -196,16 +254,23 @@ async def preview_business(
         logo_path = await save_uploaded_file(logo, "uploads/logos")
         banner_path = await save_uploaded_file(banner, "uploads/banners")
 
+        # A browser sends a part for every <input type="file"> in the form
+        # even when the visitor leaves it empty — that comes through as a
+        # real UploadFile with filename="" and size 0, not None, and
+        # UploadFile has no __bool__, so a plain `if bankQR:` is always
+        # truthy and would call save_uploaded_file() on an empty file,
+        # rejecting the whole submission. Only treat it as "provided" when
+        # it actually has a filename.
         bank_qr_path = None
-        if bankQR:
+        if bankQR and bankQR.filename:
             bank_qr_path = await save_uploaded_file(bankQR, "uploads/bank_qr")
 
         payment_qr_path = None
-        if paymentQR:
+        if paymentQR and paymentQR.filename:
             payment_qr_path = await save_uploaded_file(paymentQR, "uploads/payment_qr")
 
         shop_qr_path = None
-        if shopQR:
+        if shopQR and shopQR.filename:
             shop_qr_path = await save_uploaded_file(shopQR, "uploads/shop_qr")
 
         # -------------------------
@@ -263,25 +328,21 @@ async def preview_business(
         }
         # print(shop_data,"shop_datashop_datashop_data")
         return templates.TemplateResponse(
+            request,
             "preview_business.html",
-            {"request": request, "shop_data": shop_data}
+            {"shop_data": shop_data}
         )
 
     except HTTPException:
         raise
 
     except Exception as e:
-        print("Preview Error:", e)
+        logger.error("Error processing shop preview: %s", e)
         raise HTTPException(
             status_code=500,
-            detail=f"Error processing preview: {str(e)}"
+            detail="Error processing preview. Please try again."
         )
 
-
-from fastapi import Form, UploadFile, File, HTTPException, APIRouter
-from datetime import datetime
-import os
-from typing import Optional
 
 # Pydantic model matching the exact JSON structure
 class ShopRegistration(BaseModel):
@@ -321,104 +382,105 @@ class ShopRegistration(BaseModel):
 
 @router.post("/register-business")
 @limiter.limit("10/10minutes")
-async def register_business(request: Request):
-    """Save business to MongoDB - JSON only"""
+async def register_business(request: Request, data: ShopRegistration):
+    """Save business to MongoDB.
+
+    `request` is required here for slowapi's rate limiter to find the
+    caller's IP — it's not otherwise used now that validation goes through
+    the ShopRegistration model below.
+
+    Uses the ShopRegistration model above for real validation (required
+    fields, types) instead of hand-parsing the JSON body — field names
+    match exactly what preview_business.html's `shopData` object sends.
+    """
     try:
-        # Parse JSON data from request body
-        body = await request.body()
-        json_data = json.loads(body)
-        
-        print("Received raw JSON data:", json_data)
-        
-        # Validate required fields
-        if not json_data.get('shopName') or not json_data.get('domain'):
-            raise HTTPException(status_code=400, detail="Shop name and domain are required")
-        
         # Validate subdomain availability
-        if not await is_subdomain_available(json_data['domain']):
+        if not await is_subdomain_available(data.domain):
             raise HTTPException(status_code=400, detail="Subdomain already taken")
-        
+
         # Create shop document - map frontend field names to database field names
         shop_document = {
-            "shop_name": json_data['shopName'],
-            "subdomain": json_data['domain'],
-            "contact_number": json_data['contactNumber'],
-            "email": json_data['email'],
-            "about": json_data['about'],
-            "category": json_data['category'],
-            "business_type": json_data['businessType'],
-            "logo": json_data['logo'],
-            "banner": json_data['banner'],
+            "shop_name": data.shopName,
+            "subdomain": data.domain,
+            "contact_number": data.contactNumber,
+            "email": data.email,
+            "about": data.about,
+            "category": data.category,
+            "business_type": data.businessType,
+            "logo": data.logo,
+            "banner": data.banner,
             "shop_status": "active",
-            "shop_url": json_data.get('shop_url') or f"https://{json_data['domain']}.avigronix.com",
-            "shop_qr": json_data.get('shopQR'),
+            "shop_url": data.shop_url or f"https://{data.domain}.avigronix.com",
+            "shop_qr": data.shopQR,
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
             # Address information
-            "address": json_data['address'],
-            "city": json_data['city'],
-            "state": json_data['state'],
-            "pincode": json_data['pincode'],
+            "address": data.address,
+            "city": data.city,
+            "state": data.state,
+            "pincode": data.pincode,
             # Business information
-            "gst_number": json_data.get('gstNumber'),
-            "support_email": json_data.get('supportEmail'),
-            "opening_hours": json_data.get('openingHours'),
-            "shop_status": json_data.get('shopStatus') or "active",
-            "delivery_available": json_data.get('deliveryAvailable') or False,
+            "gst_number": data.gstNumber,
+            "support_email": data.supportEmail,
+            "opening_hours": data.openingHours,
+            "shop_status": data.shopStatus or "active",
+            "delivery_available": data.deliveryAvailable or False,
             # Social media
             "social_media": {
-                "whatsapp": json_data.get('whatsapp'),
-                "instagram": json_data.get('instagram'),
-                "facebook": json_data.get('facebook'),
-                "youtube": json_data.get('youtube'),
-                "website": json_data.get('website')
+                "whatsapp": data.whatsapp,
+                "instagram": data.instagram,
+                "facebook": data.facebook,
+                "youtube": data.youtube,
+                "website": data.website,
             },
             # Payment information
             "payment_info": {
-                "bank_name": json_data.get('bankName'),
-                "account_holder": json_data.get('accountHolder'),
-                "account_number": json_data.get('accountNumber'),
-                "ifsc_code": json_data.get('ifscCode'),
-                "upi_id": json_data.get('upiId'),
-                "bank_qr": json_data.get('bankQR'),
-                "payment_qr": json_data.get('paymentQR')
+                "bank_name": data.bankName,
+                "account_holder": data.accountHolder,
+                "account_number": data.accountNumber,
+                "ifsc_code": data.ifscCode,
+                "upi_id": data.upiId,
+                "bank_qr": data.bankQR,
+                "payment_qr": data.paymentQR,
             },
             # Collections
             "products": [],
             "banners": []
         }
-        
+
         # Remove None values
         shop_document = {k: v for k, v in shop_document.items() if v is not None}
-        
-        # Insert into MongoDB
-        result = await db.shops.insert_one(shop_document)
-        
+
+        # Insert into MongoDB (unique index on `subdomain` created at startup
+        # catches the race the pre-check above can't)
+        try:
+            result = await db.shops.insert_one(shop_document)
+        except DuplicateKeyError:
+            raise HTTPException(status_code=400, detail="Subdomain already taken")
+
         # Create subdomain mapping
         subdomain_doc = {
-            "subdomain": json_data['domain'],
+            "subdomain": data.domain,
             "shop_id": str(result.inserted_id),
-            "target_url": f"/shop/{json_data['domain']}",
+            "target_url": f"/shop/{data.domain}",
             "active": True,
             "created_at": datetime.now()
         }
         await db.subdomains.insert_one(subdomain_doc)
-        
+
         return {
             "success": True,
-            "message": "Business registered successfully", 
+            "message": "Business registered successfully",
             "shop_id": str(result.inserted_id),
             "shop_url": shop_document["shop_url"],
             "shop_qr": shop_document.get("shop_qr")
         }
-        
-    except json.JSONDecodeError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid JSON data: {str(e)}")
+
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error registering business: {str(e)}")
+        logger.error("Error registering business: %s", e)
+        raise HTTPException(status_code=500, detail="Error registering business. Please try again.")
 
 @router.get("/{subdomain}", response_class=HTMLResponse)
 async def public_shop_page(subdomain: str, request: Request):
@@ -450,52 +512,69 @@ async def public_shop_page(subdomain: str, request: Request):
             "created_at": shop["created_at"]
         }
         
-        return templates.TemplateResponse("shop_public.html", {
-            "request": request, 
+        return templates.TemplateResponse(request, "shop_public.html", {
             "shop_data": shop_data
         })
         
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading shop: {str(e)}")
+        logger.error("Error loading shop '%s': %s", subdomain, e)
+        raise HTTPException(status_code=500, detail="Error loading shop. Please try again.")
 
-@router.get("/api/shop/{subdomain}")
+@router.get("/api/shop/{subdomain}", response_model=PublicShopAPIResponse)
 async def get_shop_data(subdomain: str):
-    """API endpoint to get shop data (for potential mobile app)"""
+    """API endpoint to get shop data (for potential mobile app).
+
+    Public by design (same as the storefront page), but only ever returns
+    the exact fields shop_public.html already renders for any visitor —
+    never payment/bank details, address, social links, or internal/_id
+    fields.
+    """
     try:
         shop = await db.shops.find_one({"subdomain": subdomain, "shop_status": "active"})
-        
+
         if not shop:
             raise HTTPException(status_code=404, detail="Shop not found")
-        
-        # Convert ObjectId to string
-        shop["_id"] = str(shop["_id"])
-        
-        return JSONResponse(content=shop)
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching shop data: {str(e)}")
 
-@router.get("/api/shops")
+        return {
+            "shop_name": shop["shop_name"],
+            "contact_number": shop["contact_number"],
+            "email": shop["email"],
+            "about": shop["about"],
+            "category": shop["category"],
+            "business_type": shop["business_type"],
+            "logo": shop["logo"],
+            "banner": shop["banner"],
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Error fetching shop data for '%s': %s", subdomain, e)
+        raise HTTPException(status_code=500, detail="Error fetching shop data. Please try again.")
+
+@router.get("/api/shops", dependencies=[Depends(require_admin_key)])
 async def list_all_shops(skip: int = 0, limit: int = 50):
-    """API endpoint to list all shops (for admin purposes)"""
+    """Admin-only: list all shops. Requires the X-Admin-Key header."""
     try:
+        limit = min(limit, 50)
         shops = []
         cursor = db.shops.find({"shop_status": "active"}).skip(skip).limit(limit)
-        
+
         async for shop in cursor:
             shop["_id"] = str(shop["_id"])
             shops.append(shop)
-        
-        return {"shops": shops, "total": len(shops)}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching shops: {str(e)}")
 
-@router.put("/api/shop/{subdomain}/status")
+        return {"shops": shops, "total": len(shops)}
+
+    except Exception as e:
+        logger.error("Error fetching shops list: %s", e)
+        raise HTTPException(status_code=500, detail="Error fetching shops. Please try again.")
+
+@router.put("/api/shop/{subdomain}/status", dependencies=[Depends(require_admin_key)])
 async def update_shop_status(subdomain: str, status: str):
-    """Update shop status (active/inactive)"""
+    """Admin-only: update shop status (active/inactive). Requires the X-Admin-Key header."""
     try:
         if status not in ["active", "inactive"]:
             raise HTTPException(status_code=400, detail="Status must be 'active' or 'inactive'")
@@ -513,4 +592,5 @@ async def update_shop_status(subdomain: str, status: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error updating shop status: {str(e)}")
+        logger.error("Error updating status for shop '%s': %s", subdomain, e)
+        raise HTTPException(status_code=500, detail="Error updating shop status. Please try again.")

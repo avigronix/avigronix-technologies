@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, HTMLResponse, Response
+from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -12,24 +12,63 @@ from render_utils import render_page
 from rate_limit import limiter
 from datetime import datetime
 import os
+import html
+import logging
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from database import db
+logger = logging.getLogger("avigronix")
+logging.basicConfig(level=logging.INFO)
+
+from database import db, client as mongo_client
 
 from urllib.parse import urlparse
-import json
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Unique index on subdomain closes the registration race the app-level
+    # availability check alone can't (two concurrent signups for the same
+    # name); duplicate inserts are caught and turned into the normal
+    # 'subdomain already taken' response in routers/shop.py.
+    #
+    # Must never crash app startup: if the collection already has duplicate
+    # subdomains (or the DB is briefly unreachable), index creation fails —
+    # log a clear warning and keep running with the existing app-level
+    # availability check as the fallback, instead of taking the whole site
+    # down.
+    try:
+        await db.shops.create_index("subdomain", unique=True)
+    except Exception as e:
+        logger.warning(
+            "Could not create unique index on shops.subdomain (%s). "
+            "The app will keep running, but the subdomain-race protection "
+            "from this index is not active until the underlying data/DB "
+            "issue is fixed and the index is created.",
+            e,
+        )
+
+    yield
+
+    # Shutdown: release the MongoDB connection pool cleanly. There was no
+    # shutdown handler before this (confirmed: no @app.on_event("shutdown")
+    # or client.close() anywhere in the pre-existing code), so this isn't
+    # migrating prior behavior — it's closing a gap that lifespan's
+    # post-yield half now makes the natural place to fix.
+    mongo_client.close()
+
+
 app = FastAPI(
     title="AVIGRONIX TECHNOLOGIES",
     description="Transform Your Business With Our Digital Solutions",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -53,6 +92,11 @@ def send_email(to: str, subject: str, body: str) -> bool:
     - body: HTML/string body
     """
     try:
+        # Strip CR/LF from anything that becomes a header value, so a
+        # crafted field can't inject extra headers (e.g. Bcc) into the mail.
+        to = to.replace("\r", " ").replace("\n", " ")
+        subject = subject.replace("\r", " ").replace("\n", " ")
+
         msg = MIMEMultipart()
         msg["From"] = SMTP_USER
         msg["To"] = to
@@ -69,17 +113,17 @@ def send_email(to: str, subject: str, body: str) -> bool:
 
         return True
     except Exception as e:
-        print("Email Error:", e)
+        logger.error("Email Error: %s", e)
         return False
     
 class ContactForm(BaseModel):
-    full_name: str
+    full_name: str = Field(..., max_length=200)
     email: EmailStr
-    phone: str
-    company: str | None = None
-    service: str
-    message: str
-    website: str | None = None  # honeypot: real users never see/fill this field
+    phone: str = Field(..., max_length=20)
+    company: str | None = Field(None, max_length=200)
+    service: str = Field(..., max_length=100)
+    message: str = Field(..., max_length=5000)
+    website: str | None = Field(None, max_length=200)  # honeypot: real users never see/fill this field
 
 def extract_subdomain(hostname: str) -> str:
     """Extract subdomain safely"""
@@ -111,6 +155,13 @@ def extract_subdomain(hostname: str) -> str:
     return ""
 
 
+def _is_allowed_cors_origin(origin: str) -> bool:
+    """Single allowlist shared by the preflight (OPTIONS) and real-response
+    CORS branches below, so they can never drift apart again: local dev
+    origins only, for now."""
+    return "localhost" in origin or "127.0.0.1" in origin
+
+
 @app.middleware("http")
 async def shop_subdomain_middleware(request: Request, call_next):
     origin = request.headers.get("origin")
@@ -121,20 +172,22 @@ async def shop_subdomain_middleware(request: Request, call_next):
     host_sub = extract_subdomain(host)
     subdomain = origin_sub or host_sub
 
-    print(f"🌐 Host={host} | Origin={origin} | Subdomain={subdomain}")
+    logger.debug("Host=%s | Origin=%s | Subdomain=%s", host, origin, subdomain)
 
     request.state.subdomain = subdomain
     request.state.shop = None
     request.state.isAvailableSubDomain = False
 
-    # Allow OPTIONS (CORS Preflight)
+    # Allow OPTIONS (CORS Preflight) — uses the exact same allowlist as the
+    # real-response branch further down, so a preflight can never promise
+    # access that the actual response won't also grant.
     if request.method == "OPTIONS":
         response = await call_next(request)
-        if origin:
+        if origin and _is_allowed_cors_origin(origin):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-            response.headers["Access-Control-Allow-Methods"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
         return response
 
     # Subdomain exists → fetch shop
@@ -146,9 +199,9 @@ async def shop_subdomain_middleware(request: Request, call_next):
 
         if not shop:
             return templates.TemplateResponse(
+                request,
                 "not_found.html",
                 {
-                    "request": request,
                     "subdomain": subdomain,
                     "msg": f"Shop '{subdomain}' not found"
                 }
@@ -162,7 +215,7 @@ async def shop_subdomain_middleware(request: Request, call_next):
     response = await call_next(request)
 
     # Add CORS headers for local development only
-    if origin and ("localhost" in origin or "127.0.0.1" in origin):
+    if origin and _is_allowed_cors_origin(origin):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
 
@@ -171,8 +224,14 @@ async def shop_subdomain_middleware(request: Request, call_next):
 
 CSP = (
     "default-src 'self'; "
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
-    "https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com "
+    # 'unsafe-eval' was only ever needed by the cdn.tailwindcss.com "play CDN"
+    # script's runtime JIT compiler — both are gone now that Tailwind is
+    # compiled ahead of time (see WEBSITE_AUDIT_REPORT.md). Nothing else in
+    # the codebase calls eval()/new Function()/string-based setTimeout
+    # (checked), and htmx executes swapped-in <script> tags by re-inserting
+    # real script elements, not eval, so it doesn't need this either.
+    "script-src 'self' 'unsafe-inline' "
+    "https://cdnjs.cloudflare.com https://unpkg.com "
     "https://www.googletagmanager.com https://static.cloudflareinsights.com; "
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
     "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
@@ -216,14 +275,14 @@ app.include_router(shop_manage)
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404:
-        return templates.TemplateResponse("error_404.html", {"request": request}, status_code=404)
+        return templates.TemplateResponse(request, "error_404.html", status_code=404)
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    print("Unhandled server error:", exc)
-    return templates.TemplateResponse("error_500.html", {"request": request}, status_code=500)
+    logger.error("Unhandled server error: %s", exc)
+    return templates.TemplateResponse(request, "error_500.html", status_code=500)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -232,8 +291,9 @@ async def home(request: Request):
     if getattr(request.state, "isAvailableSubDomain", False):
         # print(request.state.shop ,"request.state.shop ")
         return templates.TemplateResponse(
+            request,
             "public_shop.html",
-            {"request": request, "shop_data": request.state.shop }
+            {"shop_data": request.state.shop}
         )
         return JSONResponse({
             "msg": "Shop data fetched successfully",
@@ -319,6 +379,16 @@ async def send_contact_message(request: Request, data: ContactForm):
     if data.website:
         return {"status": 200, "msg": "Message sent successfully"}
 
+    # Escape every user-supplied value before it goes into an HTML email
+    # body — these fields are attacker-controlled free text, and the mail
+    # is rendered as HTML by the recipient's mail client.
+    safe_full_name = html.escape(data.full_name)
+    safe_email = html.escape(data.email)
+    safe_phone = html.escape(data.phone)
+    safe_company = html.escape(data.company) if data.company else "Not Provided"
+    safe_service = html.escape(data.service)
+    safe_message = html.escape(data.message)
+
     # -----------------------------
     # 1. ADMIN MAIL
     # -----------------------------
@@ -330,15 +400,15 @@ async def send_contact_message(request: Request, data: ContactForm):
         <p>You have received a new inquiry from your website.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
 
-        <p><strong>Name:</strong> {data.full_name}</p>
-        <p><strong>Email:</strong> {data.email}</p>
-        <p><strong>Phone:</strong> {data.phone}</p>
-        <p><strong>Company:</strong> {data.company or "Not Provided"}</p>
-        <p><strong>Service Interested:</strong> {data.service}</p>
+        <p><strong>Name:</strong> {safe_full_name}</p>
+        <p><strong>Email:</strong> {safe_email}</p>
+        <p><strong>Phone:</strong> {safe_phone}</p>
+        <p><strong>Company:</strong> {safe_company}</p>
+        <p><strong>Service Interested:</strong> {safe_service}</p>
 
         <p style="margin-top:15px;"><strong>Message:</strong></p>
         <div style="background:#f7f7f7;padding:12px;border-radius:6px;">
-            {data.message}
+            {safe_message}
         </div>
 
         <br>
@@ -361,28 +431,23 @@ async def send_contact_message(request: Request, data: ContactForm):
     # -----------------------------
     # 2. USER ACKNOWLEDGMENT MAIL
     # -----------------------------
+    # `to` here is whatever email address the caller typed in — since the
+    # app's own SMTP account sends this, the body must be fixed, server-
+    # controlled text only (an escaped name is the one exception), never a
+    # reflection of the caller's own message/phone/service. Otherwise this
+    # endpoint could be used to relay attacker-authored HTML to arbitrary
+    # third-party addresses under our sending reputation.
     user_subject = "Thank You for Contacting AVIGRONIX TECHNOLOGIES"
 
     user_body = f"""
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-        <h2 style="color:#0F62FE;">We Received Your Message, {data.full_name}!</h2>
+        <h2 style="color:#0F62FE;">We Received Your Message, {safe_full_name}!</h2>
 
         <p>Thank you for reaching out to us. Our team will get back to you within 24 hours.</p>
 
-        <h3 style="margin-top:20px;">Your Submitted Details:</h3>
-
-        <p><strong>Email:</strong> {data.email}</p>
-        <p><strong>Phone:</strong> {data.phone}</p>
-        <p><strong>Service Interested:</strong> {data.service}</p>
-
-        <p><strong>Your Message:</strong></p>
-        <div style="background:#f7f7f7;padding:12px;border-radius:6px;">
-            {data.message}
-        </div>
-
         <br>
         <p style="color:#666;font-size:14px;">
-            You can contact us anytime at 
+            You can contact us anytime at
             <a href="mailto:avigronix@gmail.com">avigronix@gmail.com</a>.
             <br><br>
             — AVIGRONIX TECHNOLOGIES
@@ -391,7 +456,7 @@ async def send_contact_message(request: Request, data: ContactForm):
     """
 
     ok2 = send_email(
-        to=data.email,  
+        to=data.email,
         subject=user_subject,
         body=user_body
     )

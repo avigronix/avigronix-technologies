@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ shop_data.shop_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind.min.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -14,7 +14,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     {% if shop_data.logo %}
-                    <img src="{{ shop_data.logo }}" alt="{{ shop_data.shop_name }}" class="w-12 h-12 rounded-lg">
+                    <img src="{{ shop_data.logo }}" alt="{{ shop_data.shop_name }}" class="w-12 h-12 rounded-lg" width="48" height="48">
                     {% endif %}
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">{{ shop_data.shop_name }}</h1>
@@ -40,7 +40,7 @@
     <!-- Hero Banner -->
     <section class="relative">
         {% if shop_data.banner %}
-        <img src="{{ shop_data.banner }}" alt="Shop Banner" class="w-full h-64 md:h-80 object-cover">
+        <img src="{{ shop_data.banner }}" alt="Shop Banner" class="w-full h-64 md:h-80 object-cover" width="1600" height="320">
         {% else %}
         <div class="w-full h-64 md:h-80 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
             <div class="text-center text-white">
