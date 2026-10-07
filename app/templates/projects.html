@@ -1,7 +1,8 @@
 {% extends base_template %}
 
-{% block title %}What We Build | Software Solutions & Systems{% endblock %}
-{% block description %}Explore the kind of complete, production-grade systems AVIGRONIX TECHNOLOGIES builds — from legal tech to healthcare to e-commerce, engineered for scale and security.{% endblock %}
+{% block title %}Software Projects & Solutions | Avigronix Technologies{% endblock %}
+{% block description %}Representative software solutions Avigronix Technologies builds — legal tech, healthcare, e-commerce, LMS, AI and analytics systems engineered for scale.{% endblock %}
+{% block breadcrumb_name %}Projects{% endblock %}
 {% block meta_keywords %}custom software solutions, enterprise software examples, SaaS development portfolio, case management system development, e-commerce platform development{% endblock %}
 
 {% block content %}
@@ -18,10 +19,10 @@
     <div class="relative container mx-auto px-6 text-center max-w-4xl">
         <p class="text-blue-300 text-xs tracking-[0.25em] font-semibold uppercase mb-4">What We Build</p>
         <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
-            Solutions Engineered for <span class="gradient-text-accent">Real Business Impact</span>
+            Software Solutions Engineered for <span class="gradient-text-accent">Real Business Impact</span>
         </h1>
         <p class="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
-            Explore the kind of mission-critical software we build — across legal tech, healthcare, retail, HR, analytics, and more —
+            Explore the kind of mission-critical software Avigronix Technologies builds — across legal tech, healthcare, retail, HR, analytics, and more —
             engineered for performance, security, and scale.
         </p>
     </div>
@@ -40,6 +41,7 @@
             </h2>
             <p class="mt-4 text-slate-600 text-sm sm:text-base max-w-3xl mx-auto">
                 Representative examples of the kind of complete, production-grade systems we engineer — not templates, not demos.
+                These describe solution types and capabilities, not named client case studies.
             </p>
         </div>
 
@@ -47,7 +49,7 @@
         <div class="space-y-20">
 
             <!-- ========== PROJECT 1 ========== -->
-            <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div id="court-case-management" class="scroll-mt-28 grid md:grid-cols-2 gap-12 items-center">
                 <div>
                     <span class="inline-block px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600 font-semibold mb-4">
                         Legal Tech
@@ -72,6 +74,9 @@
                         <span class="tech-tag">React</span>
                         <span class="tech-tag">PostgreSQL</span>
                     </div>
+                <a href="/services#custom-web-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: Custom web development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
                 </div>
 
                 <div class="bg-blue-50 p-6 sm:p-10 rounded-3xl text-center shadow-inner">
@@ -81,7 +86,7 @@
             </div>
 
             <!-- ========== PROJECT 2 ========== -->
-            <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div id="ecommerce-platform" class="scroll-mt-28 grid md:grid-cols-2 gap-12 items-center">
                 <div class="order-2 md:order-1 bg-green-50 p-6 sm:p-10 rounded-3xl text-center shadow-inner">
                     <i class="fas fa-shopping-cart text-green-600 text-6xl mb-4"></i>
                     <p class="text-slate-600">E-commerce</p>
@@ -111,11 +116,14 @@
                         <span class="tech-tag">MongoDB</span>
                         <span class="tech-tag">AWS</span>
                     </div>
+                <a href="/services#ecommerce-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: E-commerce development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
                 </div>
             </div>
 
             <!-- ========== PROJECT 3 ========== -->
-            <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div id="healthcare-management" class="scroll-mt-28 grid md:grid-cols-2 gap-12 items-center">
                 <div>
                     <span class="inline-block px-3 py-1 text-xs rounded-full bg-purple-50 text-purple-600 font-semibold mb-4">
                         Healthcare
@@ -140,6 +148,9 @@
                         <span class="tech-tag">Vue.js</span>
                         <span class="tech-tag">MySQL</span>
                     </div>
+                <a href="/services#erp-enterprise" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: ERP & enterprise development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
                 </div>
 
                 <div class="bg-purple-50 p-6 sm:p-10 rounded-3xl text-center shadow-inner">
@@ -153,7 +164,7 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-24">
 
             <!-- LMS -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="learning-management" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-graduation-cap text-orange-600 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Learning Management System</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -164,10 +175,13 @@
                     <span class="tech-tag">Node.js</span>
                     <span class="tech-tag">MongoDB</span>
                 </div>
+                <a href="/services#custom-web-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: Custom web development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
 
             <!-- AI Customer Service -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="ai-customer-service" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-robot text-red-600 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">AI Customer Service</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -178,10 +192,13 @@
                     <span class="tech-tag">TensorFlow</span>
                     <span class="tech-tag">FastAPI</span>
                 </div>
+                <a href="/services#ai-automation" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: AI & intelligent automation <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
 
             <!-- Delivery App -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="local-delivery-app" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-truck text-blue-600 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Local Delivery App</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -192,10 +209,13 @@
                     <span class="tech-tag">Firebase</span>
                     <span class="tech-tag">Node.js</span>
                 </div>
+                <a href="/services#mobile-app-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: Mobile app development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
 
             <!-- POS Billing -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="pos-billing" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-calculator text-amber-600 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">POS Billing System</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -206,10 +226,13 @@
                     <span class="tech-tag">SQLite</span>
                     <span class="tech-tag">Node.js</span>
                 </div>
+                <a href="/services#ecommerce-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: E-commerce development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
 
             <!-- Vendor Management -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="vendor-management" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-people-carry text-slate-700 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Vendor Management System</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -220,10 +243,13 @@
                     <span class="tech-tag">Vue.js</span>
                     <span class="tech-tag">MySQL</span>
                 </div>
+                <a href="/services#erp-enterprise" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: ERP & enterprise development <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
 
             <!-- Analytics Dashboard -->
-            <div class="project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
+            <div id="analytics-dashboard" class="scroll-mt-28 project-card-small rounded-3xl p-6 border border-slate-200 bg-slate-50">
                 <i class="fas fa-chart-line text-teal-600 text-4xl mb-4"></i>
                 <h3 class="text-xl font-bold mb-2">Real-time Analytics Dashboard</h3>
                 <p class="text-slate-600 text-sm mb-4">
@@ -234,6 +260,9 @@
                     <span class="tech-tag">FastAPI</span>
                     <span class="tech-tag">PostgreSQL</span>
                 </div>
+                <a href="/services#data-analytics" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    Related service: Data analytics & BI <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -246,6 +275,7 @@
         <h2 class="text-3xl sm:text-4xl font-bold mb-4">Have a Project in Mind?</h2>
         <p class="text-white text-lg mb-8">
             Let's design, build, and launch your next big product — with enterprise quality and startup speed.
+            See the full list of <a href="/services" class="underline font-semibold">services</a>.
         </p>
         <a href="/contact" class="inline-block px-8 sm:px-10 py-4 bg-white text-blue-600 font-semibold text-lg rounded-2xl shadow-lg hover:bg-slate-100 transition">
             Start Your Project

@@ -1,16 +1,14 @@
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, Response
 from datetime import datetime, timezone
 from email.utils import format_datetime
 from xml.sax.saxutils import escape
-import os
 
-from render_utils import render_page
+from render_utils import render_page, get_site_url, make_templates
 from blog_content import get_post, list_posts
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = make_templates()
 
 @router.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
@@ -39,7 +37,7 @@ async def blog(request: Request):
 # Must be registered before /blog/{slug}, which would otherwise match "rss.xml".
 @router.get("/blog/rss.xml", include_in_schema=False)
 async def blog_rss():
-    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    site = get_site_url()
     posts = sorted(list_posts(), key=lambda p: p["iso_date"], reverse=True)
 
     def rfc822(iso_date: str) -> str:

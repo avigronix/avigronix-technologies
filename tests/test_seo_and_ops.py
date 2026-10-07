@@ -4,7 +4,6 @@ import html
 import json
 import re
 import xml.etree.ElementTree as ET
-from pathlib import Path
 
 import pytest
 
@@ -127,10 +126,121 @@ async def test_services_page_has_a_service_schema_per_service_card(client):
         assert entry["@type"] == "ListItem" and entry["position"] == i
         service = entry["item"]
         assert service["@type"] == "Service"
-        assert service["provider"]["name"] == "AVIGRONIX TECHNOLOGIES"
+        assert service["provider"]["name"] == "Avigronix Technologies"
+        assert service["provider"]["@id"] == "https://avigronix.com/#organization"
         assert service["name"] and service["description"]
     # the schema must describe exactly the service cards shown on the page
     assert [html.unescape(t) for t in card_titles] == [e["item"]["name"] for e in items]
+
+
+# --------------------------------------------------------------------------
+# Brand entity: Organization / WebSite / titles
+# --------------------------------------------------------------------------
+async def test_organization_entity(client):
+    org = [b for b in json_ld_blocks((await client.get("/")).text) if b["@type"] == "Organization"][0]
+    assert org["@id"] == "https://avigronix.com/#organization"
+    assert org["name"] == "Avigronix Technologies"
+    assert "AVIGRONIX TECHNOLOGIES" in org["alternateName"]
+    assert org["url"] == "https://avigronix.com/"
+    assert org["logo"]["url"] == "https://avigronix.com/static/images/logo.png"
+    assert org["email"] == "avigronix@gmail.com"
+    # no invented social profiles
+    assert "sameAs" not in org
+
+
+async def test_website_schema_on_home_only(client):
+    home = [b for b in json_ld_blocks((await client.get("/")).text) if b["@type"] == "WebSite"]
+    assert len(home) == 1
+    assert home[0]["url"] == "https://avigronix.com/"
+    assert home[0]["publisher"]["@id"] == "https://avigronix.com/#organization"
+    assert "potentialAction" not in home[0]  # the site has no search feature
+    about = [b for b in json_ld_blocks((await client.get("/about")).text) if b["@type"] == "WebSite"]
+    assert not about
+
+
+@pytest.mark.parametrize("path", ["/", "/about", "/blog/fastapi-best-practices"])
+async def test_social_and_schema_urls_are_https(client, path):
+    """The app sees plain http behind Cloudflare; image/logo URLs in meta tags
+    and JSON-LD must still be https (they come from SITE_URL, not url_for)."""
+    r = await client.get(path)
+    assert meta(r.text, "property", "og:image") == "https://avigronix.com/static/images/og-banner.png"
+    assert meta(r.text, "name", "twitter:image") == "https://avigronix.com/static/images/og-banner.png"
+    for block in re.findall(r'<script type="application/ld\+json">(.*?)</script>', r.text, re.S):
+        assert "http://" not in block
+
+
+@pytest.mark.parametrize("path", [p for p in PAGES_WITH_OWN_DESCRIPTION if p != "/shop/register"])
+async def test_important_pages_name_the_brand_in_title(client, path):
+    r = await client.get(path)
+    title = " ".join(re.search(r"<title>(.*?)</title>", r.text, re.S).group(1).split())
+    assert "Avigronix Technologies" in title
+    assert len(re.findall(r"<h1[\s>]", r.text)) == 1
+
+
+async def test_titles_are_unique(client):
+    titles = set()
+    for path in PAGES_WITH_OWN_DESCRIPTION:
+        r = await client.get(path)
+        titles.add(" ".join(re.search(r"<title>(.*?)</title>", r.text, re.S).group(1).split()))
+    assert len(titles) == len(PAGES_WITH_OWN_DESCRIPTION)
+
+
+@pytest.mark.parametrize("path,name", [("/about", "About"), ("/services", "Services"), ("/contact", "Contact")])
+async def test_breadcrumb_uses_short_page_name(client, path, name):
+    crumbs = [b for b in json_ld_blocks((await client.get(path)).text) if b["@type"] == "BreadcrumbList"][0]
+    assert crumbs["itemListElement"][-1]["name"] == name
+
+
+async def test_blog_post_is_an_article_without_invented_modified_date(client):
+    r = await client.get("/blog/fastapi-best-practices")
+    assert meta(r.text, "property", "og:type") == "article"
+    post = [b for b in json_ld_blocks(r.text) if b["@type"] == "BlogPosting"][0]
+    assert post["datePublished"] == "2026-06-12"
+    assert "dateModified" not in post  # the post has no recorded revision date
+    assert post["publisher"]["@id"] == "https://avigronix.com/#organization"
+
+
+async def test_blog_post_with_real_update_date_reports_it(client, monkeypatch):
+    import blog_content
+
+    monkeypatch.setitem(blog_content.BLOG_POSTS["fastapi-best-practices"], "updated", "July 1, 2026")
+    r = await client.get("/blog/fastapi-best-practices")
+    post = [b for b in json_ld_blocks(r.text) if b["@type"] == "BlogPosting"][0]
+    assert post["dateModified"] == "2026-07-01"
+    assert "<lastmod>2026-07-01</lastmod>" in (await client.get("/sitemap.xml")).text
+
+
+@pytest.mark.parametrize("path", ["/", "/services", "/projects", "/blog/fastapi-best-practices",
+                                  "/blog/database-optimization", "/blog/cloud-migration-strategy",
+                                  "/blog/cybersecurity-best-practices"])
+async def test_internal_fragment_links_point_at_real_sections(client, path):
+    r = await client.get(path)
+    for target, fragment in set(re.findall(r'href="(/[\w/-]*)#([\w-]+)"', r.text)):
+        page = (await client.get(target)).text
+        assert f'id="{fragment}"' in page, f"{path} links to {target}#{fragment}, which doesn't exist"
+
+
+# --------------------------------------------------------------------------
+# Trailing slashes
+# --------------------------------------------------------------------------
+async def test_trailing_slash_is_one_permanent_relative_redirect(client):
+    r = await client.get("/about/?x=1", follow_redirects=False)
+    assert r.status_code == 301
+    assert r.headers["location"] == "/about?x=1"
+
+
+async def test_trailing_slash_redirect_is_not_an_open_redirect(client):
+    # httpx would parse "//evil.example/" as a host, so send the raw path.
+    import httpx
+
+    url = httpx.URL("http://testserver/").copy_with(raw_path=b"//evil.example/")
+    r = await client.get(url, follow_redirects=False)
+    assert r.status_code == 301
+    assert r.headers["location"] == "/evil.example"
+
+
+async def test_root_is_not_redirected(client):
+    assert (await client.get("/", follow_redirects=False)).status_code == 200
 
 
 # --------------------------------------------------------------------------
@@ -243,3 +353,56 @@ def test_dotenv_loaded_before_app_modules_are_imported():
         if isinstance(node, ast.Import):
             for alias in node.names:
                 assert alias.name not in app_modules or node.lineno > load_line
+
+
+async def test_htmx_title_update_is_plain_text(client):
+    r = await client.get("/blog/cybersecurity-best-practices", headers={"HX-Request": "true"})
+    title = json.loads(r.headers["HX-Trigger"])["pageTitleUpdate"]
+    assert "&amp;" not in title and "RBAC & Beyond" in title
+
+
+@pytest.mark.parametrize("path", ["/", "/about", "/blog/fastapi-best-practices", "/shop/register"])
+async def test_every_router_renders_shared_globals(client, path):
+    """pages.py and shop.py used to have their own template environments
+    without site_url / ga_measurement_id: analytics was silently off on every
+    page except the homepage, and the footer year was blank."""
+    r = await client.get(path)
+    assert re.search(r"gtag/js\?id=G-[A-Z0-9]+", r.text)
+    assert re.search(r"© \d{4} AVIGRONIX TECHNOLOGIES", r.text)
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("", "https://avigronix.com"),
+    ("https://avigronix.com/", "https://avigronix.com"),
+    ("  https://avigronix.com//  ", "https://avigronix.com"),
+    ("http://avigronix.com", "https://avigronix.com"),
+    ("http://localhost:8000", "http://localhost:8000"),
+    ("avigronix.com", "https://avigronix.com"),
+])
+def test_site_url_is_normalized(monkeypatch, raw, expected):
+    from render_utils import get_site_url
+
+    monkeypatch.setenv("SITE_URL", raw)
+    assert get_site_url() == expected
+
+
+async def test_no_unverified_performance_statistics_on_home(client):
+    text = (await client.get("/")).text
+    for claim in ("99.9%", "~50 ms", "latency_ms"):
+        assert claim not in text
+
+
+async def test_no_unverified_geo_coordinates(client):
+    text = (await client.get("/")).text
+    assert 'name="geo.position"' not in text and 'name="ICBM"' not in text
+
+
+async def test_team_cta_does_not_promise_an_open_positions_page(client):
+    text = (await client.get("/team")).text
+    assert "View Open Positions" not in text
+
+
+async def test_request_path_cannot_inject_markup_into_head(client):
+    r = await client.get("/blog/%3C%2Fscript%3E%3Cscript%3Ealert(1)%3C%2Fscript%3E")
+    assert r.status_code == 404
+    assert "<script>alert(1)" not in r.text

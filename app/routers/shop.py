@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException, Depends, Header
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from pathlib import Path
 from datetime import datetime
 import uuid
@@ -18,13 +17,13 @@ from image_sanitize import InvalidImageError, strip_metadata
 
 from database import db
 from rate_limit import limiter
+from render_utils import make_templates
 
 logger = logging.getLogger("avigronix.shop")
 
 # Router for shop endpoints
 router = APIRouter(prefix="/shop", tags=["shop"])
-templates = Jinja2Templates(directory="templates")
-templates.env.globals["current_year"] = datetime.now().year
+templates = make_templates()
 
 # Ensure upload directories exist
 UPLOAD_SUBDIRS = ("logos", "banners", "bank_qr", "payment_qr", "shop_qr")
@@ -105,53 +104,6 @@ RESERVED_SUBDOMAINS = {
 }
 
 # Pydantic Models
-class Product(BaseModel):
-    id: str
-    image: str
-    title: str
-    description: str
-    price: float
-    discountPrice: Optional[float] = None
-    rating: float = 0.0
-    category: str
-
-class Banner(BaseModel):
-    id: str
-    title: str
-    image: str
-    redirectUrl: str
-    active: bool = True
-
-class ShopDetails(BaseModel):
-    shop_name: str
-    subdomain: str
-    contact_number: str
-    email: str
-    about: str
-    category: str
-    business_type: str
-    logo: str
-    banner: str
-    products: List[Product] = []
-    banners: List[Banner] = []
-    shop_status: str = "active"
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
-
-class ShopDetailsResponse(BaseModel):
-    id: str
-    shop_name: str
-    subdomain: str
-    contact_number: str
-    email: str
-    about: str
-    category: str
-    business_type: str
-    logo: str
-    banner: str
-    shop_url: str
-    created_at: datetime
-
 class PublicShopAPIResponse(BaseModel):
     """Exactly the fields shop_public.html shows on the public /shop/{subdomain}
     page — used to make sure the JSON API can never leak more than the page
@@ -265,13 +217,6 @@ async def is_subdomain_available(subdomain: str) -> bool:
         return False
     existing_shop = await db.shops.find_one({"subdomain": subdomain})
     return existing_shop is None
-
-async def generate_shop_qr_code(shop_url: str) -> str:
-    """Generate QR code for shop URL"""
-    # For now, using a QR code service URL
-    # You can implement actual QR generation later
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={shop_url}"
-    return qr_url
 
 # Routes
 @router.get("/register", response_class=HTMLResponse)
@@ -434,7 +379,6 @@ async def preview_business(
             "shopStatus": shopStatus,
             "deliveryAvailable": deliveryAvailable,
         }
-        # print(shop_data,"shop_datashop_datashop_data")
         return templates.TemplateResponse(
             request,
             "preview_business.html",
@@ -525,7 +469,6 @@ async def register_business(request: Request, data: ShopRegistration):
             "business_type": data.businessType,
             "logo": data.logo,
             "banner": data.banner,
-            "shop_status": "active",
             "shop_url": data.shop_url or f"https://{data.domain}.avigronix.com",
             "shop_qr": data.shopQR,
             "created_at": datetime.now(),

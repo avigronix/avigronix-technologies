@@ -1,7 +1,24 @@
 {% extends base_template %}
 
-{% block title %}About Us | Software Development Company in India{% endblock %}
-{% block description %}AVIGRONIX TECHNOLOGIES is a software development company specializing in backend engineering, cloud infrastructure & data analytics — serving clients across India, the US, Europe & the Middle East.{% endblock %}
+{% block title %}About Avigronix Technologies | Software Engineering Company{% endblock %}
+{% block description %}Avigronix Technologies is a software and product engineering company in Noida, India, building backend, cloud, data and AI solutions for clients worldwide.{% endblock %}
+{% block breadcrumb_name %}About{% endblock %}
+
+{% block structured_data %}
+{% set site_root = site_url or 'https://avigronix.com' %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": {{ (site_root ~ '/about') | tojson }},
+    "url": {{ (site_root ~ '/about') | tojson }},
+    "name": "About Avigronix Technologies",
+    "inLanguage": "en",
+    "about": { "@id": {{ (site_root ~ '/#organization') | tojson }} },
+    "mainEntity": { "@id": {{ (site_root ~ '/#organization') | tojson }} }
+}
+</script>
+{% endblock %}
 {% block meta_keywords %}software development company India, backend engineering company, enterprise software company Noida, technology partner for startups, cloud infrastructure company{% endblock %}
 
 {% block content %}
@@ -16,14 +33,15 @@
     </div>
 
     <div class="relative container mx-auto px-6 max-w-5xl text-center">
-        <p class="text-blue-300 text-xs uppercase tracking-[0.25em] font-semibold mb-3">Who We Are</p>
         <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+            <span class="block text-blue-300 text-xs sm:text-sm uppercase tracking-[0.25em] font-semibold mb-3">About Avigronix Technologies</span>
             Building Digital Products<br>
             That Shape the Future
         </h1>
         <p class="text-slate-300 text-lg max-w-3xl mx-auto leading-relaxed">
-            We’re a team of engineers, designers, architects, and innovators helping businesses
-            worldwide adopt modern, scalable, and intelligent technology solutions.
+            Avigronix Technologies is a software and product engineering company based in Noida, India.
+            Our engineers, designers, and architects help startups, SMEs, and enterprises worldwide adopt
+            modern, scalable, and intelligent technology solutions.
         </p>
     </div>
 </section>
@@ -51,7 +69,9 @@
 
                 <p class="text-lg text-slate-600 leading-relaxed">
                     From MVPs to enterprise ecosystems, we build solutions that are fast, secure,
-                    scalable, and engineered for long-term success.
+                    scalable, and engineered for long-term success. Explore our
+                    <a href="/services" class="text-blue-600 font-semibold hover:text-blue-700">software development services</a>
+                    or the <a href="/projects" class="text-blue-600 font-semibold hover:text-blue-700">kinds of systems we build</a>.
                 </p>
             </div>
 
@@ -76,6 +96,29 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Company at a glance -->
+        <div class="mt-16 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-10">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Avigronix Technologies at a Glance</h2>
+            <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+                <div>
+                    <dt class="font-semibold text-slate-900">Company</dt>
+                    <dd class="mt-1 text-slate-600">AVIGRONIX TECHNOLOGIES — Backend, Cloud &amp; Data Engineering Partners</dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-slate-900">Based in</dt>
+                    <dd class="mt-1 text-slate-600">Noida Sector 59, Uttar Pradesh, India</dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-slate-900">Serving</dt>
+                    <dd class="mt-1 text-slate-600">Startups, SMEs &amp; enterprises across India, the US, Europe &amp; the Middle East</dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-slate-900">What we do</dt>
+                    <dd class="mt-1 text-slate-600">Custom web, mobile &amp; backend development, cloud &amp; DevOps, data analytics, AI automation and enterprise systems</dd>
+                </div>
+            </dl>
         </div>
     </div>
 </section>

@@ -1,7 +1,7 @@
 {% extends base_template %}
 
-{% block title %}Custom Software Development Company | AVIGRONIX TECHNOLOGIES{% endblock %}
-{% block description %}Custom backend, web & mobile app development using FastAPI, Flask, MongoDB, and cloud infrastructure (AWS/GCP). Serving startups & enterprises across India, the US & Europe.{% endblock %}
+{% block title %}Avigronix Technologies | Web, Mobile, AI & Cloud Solutions{% endblock %}
+{% block description %}Avigronix Technologies is a software development company delivering custom web, mobile, backend, AI, cloud, data and enterprise software solutions for businesses in India and worldwide.{% endblock %}
 {% block meta_keywords %}custom software development company, FastAPI development company, Flask development services, MongoDB development company, backend development company India, cloud DevOps AWS GCP, enterprise software development, software development company India, API development services{% endblock %}
 
 {% block content %}
@@ -29,13 +29,15 @@
         <!-- Title -->
         <div>
           <h1 class="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl">
+            <span class="mb-3 block text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-base">Avigronix Technologies</span>
             Build <span class="gradient-text-accent">serious products</span><br class="hidden sm:block" />
             with a serious tech team.
           </h1>
           <p class="mt-5 max-w-xl text-base text-slate-300 sm:text-lg">
-            AVIGRONIX TECHNOLOGIES helps you design, build, and scale digital products — from MVP to enterprise.
-            We specialize in <span class="font-semibold text-cyan-300">FastAPI, Python, React, Cloud & DevOps</span> to ship
-            secure, high-performance software that actually moves business metrics.
+            AVIGRONIX TECHNOLOGIES is a software and product engineering company based in Noida, India,
+            helping startups and enterprises build and scale digital products — from MVP to enterprise.
+            We specialize in <span class="font-semibold text-cyan-300">FastAPI, Python, React, Cloud & DevOps</span>,
+            data engineering, and AI.
           </p>
         </div>
 
@@ -109,26 +111,26 @@ app = FastAPI(title="AVIGRONIX TECHNOLOGIES API")
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "latency_ms": 12}
+    return {"status": "ok"}
 
 <span class="text-emerald-400"># Designed, built & maintained by</span>
 <span class="text-cyan-300">AVIGRONIX TECHNOLOGIES</span>
 </pre>
           </div>
 
-          <!-- Metrics -->
+          <!-- Engineering focus (descriptive, not measured statistics) -->
           <div class="mt-5 grid grid-cols-3 gap-3 text-xs text-slate-300">
             <div class="rounded-2xl bg-slate-900/80 p-3 border border-slate-700/80">
-              <p class="text-[10px] text-slate-400">Avg API latency</p>
-              <p class="mt-1 text-sm font-semibold text-emerald-300">~50 ms</p>
+              <p class="text-[10px] text-slate-400">APIs</p>
+              <p class="mt-1 text-sm font-semibold text-emerald-300">Fast</p>
             </div>
             <div class="rounded-2xl bg-slate-900/80 p-3 border border-slate-700/80">
-              <p class="text-[10px] text-slate-400">Uptime</p>
-              <p class="mt-1 text-sm font-semibold text-blue-300">99.9%</p>
+              <p class="text-[10px] text-slate-400">Security</p>
+              <p class="mt-1 text-sm font-semibold text-blue-300">Built-in</p>
             </div>
             <div class="rounded-2xl bg-slate-900/80 p-3 border border-slate-700/80">
-              <p class="text-[10px] text-slate-400">Release frequency</p>
-              <p class="mt-1 text-sm font-semibold text-purple-300">Weekly</p>
+              <p class="text-[10px] text-slate-400">Deployment</p>
+              <p class="mt-1 text-sm font-semibold text-purple-300">Reliable</p>
             </div>
           </div>
 
@@ -174,6 +176,9 @@ async def health_check():
         <p class="mt-3 text-sm text-slate-600">
           We work closely with founders, product owners, and CTOs to ship software that users love and businesses rely on.
         </p>
+        <a href="/about" class="mt-3 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+          About Avigronix Technologies <i class="fas fa-arrow-right ml-1 text-xs"></i>
+        </a>
       </div>
 
       <div class="flex flex-col items-start rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
@@ -227,8 +232,8 @@ async def health_check():
           <li>• REST & WebSocket APIs, background workers</li>
           <li>• Reporting, analytics, and custom workflows</li>
         </ul>
-        <a href="/services" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
-          Learn more <i class="fas fa-arrow-right ml-1 text-xs"></i>
+        <a href="/services#custom-web-development" class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+          Learn more<span class="sr-only"> about web app and SaaS development</span> <i class="fas fa-arrow-right ml-1 text-xs"></i>
         </a>
       </article>
 
@@ -246,8 +251,8 @@ async def health_check():
           <li>• Secure API integration with your backend</li>
           <li>• Push notifications, analytics, and offline modes</li>
         </ul>
-        <a href="/services" class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700">
-          Learn more <i class="fas fa-arrow-right ml-1 text-xs"></i>
+        <a href="/services#mobile-app-development" class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+          Learn more<span class="sr-only"> about mobile app development</span> <i class="fas fa-arrow-right ml-1 text-xs"></i>
         </a>
       </article>
 
@@ -265,11 +270,16 @@ async def health_check():
           <li>• Observability, logging, and alerting</li>
           <li>• Performance tuning and cost optimization</li>
         </ul>
-        <a href="/services" class="mt-4 inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-700">
-          Learn more <i class="fas fa-arrow-right ml-1 text-xs"></i>
+        <a href="/services#cloud-devops" class="mt-4 inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-700">
+          Learn more<span class="sr-only"> about cloud and DevOps</span> <i class="fas fa-arrow-right ml-1 text-xs"></i>
         </a>
       </article>
     </div>
+
+    <p class="mt-10 text-center text-sm text-slate-600">
+      Also: e-commerce, ERP &amp; enterprise systems, data analytics, AI automation, API integrations, UI/UX and long-term support.
+      <a href="/services" class="font-semibold text-blue-600 hover:text-blue-700">See all software development services</a>
+    </p>
   </div>
 </section>
 
@@ -367,6 +377,9 @@ async def health_check():
       <p class="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed">
         From legal tech to healthcare to retail — these are the kinds of complete, end-to-end
         systems we build: designed for scale, security, and long-term growth.
+      </p>
+      <p class="mt-3 text-sm">
+        <a href="/projects" class="font-semibold text-blue-600 hover:text-blue-700">Explore representative projects &amp; solutions <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
       </p>
     </div>
 
@@ -593,7 +606,7 @@ async def health_check():
   </div>
 </section>
 
-<!-- ========================= TESTIMONIALS ========================= -->
+<!-- ========================= WHY BUSINESSES CHOOSE US ========================= -->
 <section class="bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-12 sm:py-16 text-white">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-3xl mx-auto mb-12">
@@ -692,6 +705,10 @@ async def health_check():
       <a href="/faq" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
         View all FAQs <i class="fas fa-arrow-right ml-2 text-sm"></i>
       </a>
+      <p class="mt-4 text-sm text-slate-600">
+        Or read our <a href="/blog" class="font-semibold text-blue-600 hover:text-blue-700">engineering blog</a>
+        on FastAPI, cloud migration, security and database performance.
+      </p>
     </div>
   </div>
 </section>

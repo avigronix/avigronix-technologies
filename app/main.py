@@ -7,7 +7,6 @@ load_dotenv()
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, PlainTextResponse, FileResponse, JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from slowapi import _rate_limit_exceeded_handler
@@ -15,9 +14,8 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from routers import pages
 from routers.shop import router as shop_manage, cleanup_orphaned_uploads
-from render_utils import render_page
+from render_utils import render_page, get_site_url, make_templates
 from rate_limit import limiter
-from datetime import datetime
 import os
 import html
 import asyncio
@@ -250,6 +248,25 @@ async def shop_subdomain_middleware(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def trailing_slash_redirect_middleware(request: Request, call_next):
+    """Canonical URLs have no trailing slash (/about, not /about/). Starlette's
+    built-in redirect_slashes answers /about/ with a 307 to an absolute
+    http:// URL (the app sees plain http behind Cloudflare), which Cloudflare
+    then 301s to https — two hops, the first one temporary. Answer with a
+    single permanent redirect instead, using a relative Location so the
+    browser keeps whatever scheme and host it actually requested."""
+    path = request.url.path
+    if request.method in ("GET", "HEAD") and path != "/" and path.endswith("/"):
+        # Collapse leading slashes too: a Location of "//evil.com" would be a
+        # protocol-relative URL, i.e. an open redirect to another host.
+        target = "/" + path.strip("/")
+        if request.url.query:
+            target += "?" + request.url.query
+        return Response(status_code=301, headers={"Location": target})
+    return await call_next(request)
+
+
 CSP = (
     "default-src 'self'; "
     # 'unsafe-eval' was only ever needed by the cdn.tailwindcss.com "play CDN"
@@ -288,12 +305,7 @@ async def security_headers_middleware(request: Request, call_next):
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Templates
-templates = Jinja2Templates(directory="templates")
-
-
-templates.env.globals['current_year'] = datetime.now().year
-templates.env.globals['site_url'] = os.environ.get("SITE_URL", "https://avigronix.com")
-templates.env.globals['ga_measurement_id'] = os.environ.get("GA_MEASUREMENT_ID", "G-QMZ7RMVX47")
+templates = make_templates()
 
 # Include routers
 app.include_router(pages.router)
@@ -315,20 +327,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    # If request is from subdomain → return shop data JSON
+    # A request on a shop subdomain gets that shop's public page
     if getattr(request.state, "isAvailableSubDomain", False):
-        # print(request.state.shop ,"request.state.shop ")
         return templates.TemplateResponse(
             request,
             "public_shop.html",
             {"shop_data": request.state.shop}
         )
-        return JSONResponse({
-            "msg": "Shop data fetched successfully",
-            "status": 200,
-            "isAvailableSubDomain": True,
-            "data": request.state.shop   # ← DB result sent to frontend
-        })
 
     # Otherwise show normal homepage
     return render_page(request, templates, "index.html")
@@ -380,7 +385,7 @@ def google_site_verification():
 def sitemap():
     from blog_content import list_posts
 
-    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    site = get_site_url()
     static_pages = [
         ("/", "weekly", "1.0"),
         ("/about", "monthly", "0.8"),
@@ -399,8 +404,12 @@ def sitemap():
         for path, freq, priority in static_pages
     ]
     for post in list_posts():
+        # lastmod only where a real date exists: the post's own updated date,
+        # or its publish date if it has never been revised.
+        lastmod = post.get("iso_updated") or post["iso_date"]
         urls.append(
-            f"<url><loc>{site}/blog/{post['slug']}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>"
+            f"<url><loc>{site}/blog/{post['slug']}</loc><lastmod>{lastmod}</lastmod>"
+            f"<changefreq>monthly</changefreq><priority>0.6</priority></url>"
         )
 
     xml = (
@@ -413,7 +422,7 @@ def sitemap():
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
-    site = os.environ.get("SITE_URL", "https://avigronix.com")
+    site = get_site_url()
     content = f"""
 User-agent: *
 Allow: /

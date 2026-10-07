@@ -1,35 +1,54 @@
 {% extends base_template %}
 
-{% block title %}{{ post.title }} | AVIGRONIX TECHNOLOGIES{% endblock %}
+{% block title %}{{ post.title }} | Avigronix Technologies{% endblock %}
 {% block description %}{{ post.excerpt }}{% endblock %}
 {% block meta_keywords %}{{ post.tags | join(', ') }}, {{ post.title | lower }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_extra %}
+    <meta property="article:published_time" content="{{ post.iso_date }}"/>
+    {% if post.iso_updated %}<meta property="article:modified_time" content="{{ post.iso_updated }}"/>{% endif %}
+    {% for tag in post.tags %}<meta property="article:tag" content="{{ tag }}"/>
+    {% endfor %}
+{% endblock %}
 
 {% block structured_data %}
+{% set site_root = site_url or 'https://avigronix.com' %}
+{% set post_url = site_root ~ '/blog/' ~ slug %}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": {{ (post_url ~ '#article') | tojson }},
     "headline": {{ post.title | tojson }},
     "description": {{ post.excerpt | tojson }},
     "datePublished": "{{ post.iso_date }}",
-    "dateModified": "{{ post.iso_date }}",
+    {% if post.iso_updated %}"dateModified": "{{ post.iso_updated }}",{% endif %}
+    "inLanguage": "en",
     "author": {
         "@type": "Organization",
-        "name": "AVIGRONIX TECHNOLOGIES",
-        "url": "{{ site_url or 'https://avigronix.com' }}"
+        "@id": {{ (site_root ~ '/#organization') | tojson }},
+        "name": "Avigronix Technologies",
+        "url": {{ (site_root ~ '/') | tojson }}
     },
     "publisher": {
         "@type": "Organization",
-        "name": "AVIGRONIX TECHNOLOGIES",
+        "@id": {{ (site_root ~ '/#organization') | tojson }},
+        "name": "Avigronix Technologies",
         "logo": {
             "@type": "ImageObject",
-            "url": "{{ url_for('static', path='images/logo.png') }}"
+            "url": {{ (site_root ~ '/static/images/logo.png') | tojson }}
         }
     },
-    "image": "{{ url_for('static', path='images/og-banner.png') }}",
+    "image": {{ (site_root ~ '/static/images/og-banner.png') | tojson }},
+    "url": {{ post_url | tojson }},
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "{{ site_url or 'https://avigronix.com' }}/blog/{{ slug }}"
+        "@id": {{ post_url | tojson }}
+    },
+    "isPartOf": {
+        "@type": "Blog",
+        "@id": {{ (site_root ~ '/blog#blog') | tojson }},
+        "name": "Avigronix Technologies Engineering Blog"
     },
     "keywords": {{ post.tags | join(', ') | tojson }}
 }
@@ -41,12 +60,16 @@
 <section class="pt-32 pb-20 bg-gradient-to-br from-blue-50 to-indigo-100">
     <div class="container mx-auto px-6 text-center">
         <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 max-w-3xl mx-auto">{{ post.title }}</h1>
-        <div class="flex items-center justify-center text-gray-600 space-x-4">
-            <span>{{ post.date }}</span>
+        <div class="flex flex-wrap items-center justify-center text-gray-600 gap-x-4 gap-y-1">
+            <time datetime="{{ post.iso_date }}">{{ post.date }}</time>
+            {% if post.updated %}
+            <span>•</span>
+            <span>Updated <time datetime="{{ post.iso_updated }}">{{ post.updated }}</time></span>
+            {% endif %}
             <span>•</span>
             <span>{{ post.read_time }}</span>
             <span>•</span>
-            <span>AVIGRONIX TECHNOLOGIES</span>
+            <span>By <a href="/about" class="text-blue-600 hover:text-blue-700">Avigronix Technologies</a></span>
         </div>
     </div>
 </section>
@@ -62,6 +85,28 @@
                 <p>{{ section.body }}</p>
             {% endfor %}
         </article>
+
+        {% if post.related_services %}
+        <!-- Related services -->
+        <aside class="mt-12 rounded-2xl border border-blue-100 bg-blue-50 p-6" aria-labelledby="related-services-heading">
+            <h2 id="related-services-heading" class="text-xl font-bold text-gray-900 mb-3">How Avigronix Technologies can help</h2>
+            <p class="text-gray-600 mb-4">
+                The practices in this article are part of how we deliver these services:
+            </p>
+            <ul class="space-y-2">
+                {% for label, href in post.related_services %}
+                <li>
+                    <a href="{{ href }}" class="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
+                        <i class="fas fa-arrow-right mr-2 text-sm"></i> {{ label }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="text-gray-600 mt-4">
+                Have a project in mind? <a href="/contact" class="text-blue-600 font-semibold hover:text-blue-700">Talk to our engineers</a>.
+            </p>
+        </aside>
+        {% endif %}
 
         <!-- Back to Blog -->
         <div class="mt-12 pt-8 border-t border-gray-200">

@@ -10,7 +10,7 @@
     {# ---------- SEO TITLE + DESCRIPTION (OVERRIDABLE) ---------- #}
     <title>
         {% block title %}
-            {{ seo_title or "AVIGRONIX TECHNOLOGIES | Software, Web, Mobile & AI Development Company in India" }}
+            {{ seo_title or "Avigronix Technologies | Web, Mobile, AI & Cloud Solutions" }}
         {% endblock %}
     </title>
 
@@ -18,7 +18,7 @@
        named block here, so every page's own description was silently ignored. #}
     <meta name="description"
           content="{% filter striptags %}{% block description %}
-              {{ seo_description or 'AVIGRONIX TECHNOLOGIES is a Noida, India-based software development company delivering backend engineering, web & mobile apps, cloud infrastructure, and data analytics to clients across India, the US, Europe, and the Middle East.' }}
+              {{ seo_description or 'Avigronix Technologies is a Noida, India-based software development company delivering backend engineering, web & mobile apps, cloud infrastructure, and data analytics to clients across India, the US, Europe, and the Middle East.' }}
           {% endblock %}{% endfilter %}">
 
     <meta name="keywords"
@@ -26,37 +26,47 @@
               {{ seo_keywords or 'software development company India, backend development FastAPI Flask, web development Noida, mobile app development India, cloud DevOps AWS GCP, data analytics, AVIGRONIX TECHNOLOGIES' }}
           {% endblock %}">
 
-    <meta name="author" content="AVIGRONIX TECHNOLOGIES" />
+    <meta name="author" content="Avigronix Technologies" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#2F6FED">
 
     {# ---------- CANONICAL URL (also used for og:url) ---------- #}
-    {% set page_canonical_url = canonical_url or ((site_url or 'https://avigronix.com') ~ request.url.path) %}
+    {% set site_root = site_url or 'https://avigronix.com' %}
+    {% set page_canonical_url = canonical_url or (site_root ~ request.url.path) %}
     <link rel="canonical" href="{{ page_canonical_url }}"/>
 
-    {# ---------- GEO / LOCAL SEO (NOIDA, INDIA) ---------- #}
-    <meta name="geo.region" content="IN-UP">
-    <meta name="geo.placename" content="Noida">
-    <meta name="geo.position" content="28.5892;77.3563">
-    <meta name="ICBM" content="28.5892, 77.3563">
+    {# Absolute URLs for social/structured-data images are built from site_url,
+       not url_for(): behind Cloudflare the app sees plain http, so url_for()
+       produced http:// image and logo URLs that crawlers and link previews
+       read as-is (Cloudflare only rewrites src/href attributes, not meta
+       content or JSON-LD). #}
+    {% set og_image_url = seo_image or (site_root ~ '/static/images/og-banner.png') %}
+    {% set org_logo_url = site_root ~ '/static/images/logo.png' %}
+    {% set org_id = site_root ~ '/#organization' %}
+
+    {# Geo meta tags (geo.position / ICBM) were removed: their coordinates
+       weren't verified against the Sector 59 office, and Google doesn't use
+       them. The address lives in the Organization schema below instead. #}
 
     {# ---------- OPEN GRAPH (FACEBOOK / LINKEDIN) ---------- #}
-    <meta property="og:site_name" content="AVIGRONIX TECHNOLOGIES"/>
-    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Avigronix Technologies"/>
+    <meta property="og:locale" content="en_IN"/>
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}"/>
     <meta property="og:title" content="{{ self.title()|striptags }}"/>
     <meta property="og:description" content="{{ self.description()|striptags }}"/>
     <meta property="og:url" content="{{ page_canonical_url }}"/>
-    <meta property="og:image"
-          content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
+    <meta property="og:image" content="{{ og_image_url }}"/>
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Avigronix Technologies logo"/>
+    {% block og_extra %}{% endblock %}
 
     {# ---------- TWITTER CARD ---------- #}
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="{{ self.title()|striptags }}"/>
     <meta name="twitter:description" content="{{ self.description()|striptags }}"/>
-    <meta name="twitter:image"
-          content="{{ seo_image or url_for('static', path='images/og-banner.png') }}"/>
+    <meta name="twitter:image" content="{{ og_image_url }}"/>
+    <meta name="twitter:image:alt" content="Avigronix Technologies logo"/>
 
     {# ---------- FAVICON ---------- #}
     <link rel="icon" href="{{ url_for('static', path='images/favicon-32x32.png') }}" sizes="32x32" type="image/png"/>
@@ -156,6 +166,13 @@
             scroll-behavior: smooth;
         }
 
+        /* Offset content by the fixed navbar's exact height (no gap below it).
+           Fallbacks match the navbar per breakpoint; JS refines --nav-h. */
+        :root { --nav-h: 65px; }
+        @media (min-width: 768px) { :root { --nav-h: 73px; } }
+        @media (min-width: 1024px) { :root { --nav-h: 81px; } }
+        #content { padding-top: var(--nav-h); }
+
         /* Glass effect for navbar */
         .glass-nav {
             background: rgba(255, 255, 255, 0.95);
@@ -219,48 +236,6 @@
             width: 80%;
         }
 
-        /* Mobile menu animations */
-        .mobile-menu-enter {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-
-        .mobile-menu-enter-active {
-            transform: translateX(0);
-            opacity: 1;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-
-        .mobile-menu-exit {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .mobile-menu-exit-active {
-            transform: translateX(100%);
-            opacity: 0;
-            transition: transform 0.3s ease-in, opacity 0.3s ease-in;
-        }
-
-        /* Overlay animation */
-        .overlay-enter {
-            opacity: 0;
-        }
-
-        .overlay-enter-active {
-            opacity: 1;
-            transition: opacity 0.3s ease-out;
-        }
-
-        .overlay-exit {
-            opacity: 1;
-        }
-
-        .overlay-exit-active {
-            opacity: 0;
-            transition: opacity 0.3s ease-in;
-        }
-
         /* Hover effects for buttons */
         .hover-lift {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -272,13 +247,6 @@
         }
 
         /* Gradient text */
-        .gradient-text {
-            background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
         .gradient-text-accent {
             background: linear-gradient(90deg, var(--color-blue-light) 0%, var(--color-blue) 55%, var(--color-teal) 100%);
             -webkit-background-clip: text;
@@ -335,13 +303,6 @@
             .htmx-indicator-bar { animation: none; }
         }
 
-        /* Responsive typography */
-        @media (max-width: 640px) {
-            .text-responsive {
-                font-size: 0.875rem;
-            }
-        }
-
         /* Loading animation */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -357,14 +318,29 @@
     {% block extra_css %}{% endblock %}
 
     {# ---------- ORGANIZATION SCHEMA (JSON-LD) ---------- #}
+    {# The same entity on every page, identified by a stable @id so the
+       WebSite, Service, and BlogPosting schemas can reference it instead of
+       re-describing it. Only facts shown on the site itself go here.
+       sameAs is deliberately absent: no official social/company profile URLs
+       exist in the project yet. Add them here once they're live. #}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "AVIGRONIX TECHNOLOGIES",
-        "url": "{{ site_url or 'https://avigronix.com' }}",
-        "logo": "{{ site_logo or url_for('static', path='images/logo.png') }}",
-        "description": "Backend engineering, web & mobile development, cloud infrastructure, and data analytics company serving clients across India, the US, Europe, and the Middle East",
+        "@id": {{ org_id | tojson }},
+        "name": "Avigronix Technologies",
+        "alternateName": ["AVIGRONIX TECHNOLOGIES", "Avigronix"],
+        "url": {{ (site_root ~ '/') | tojson }},
+        "logo": {
+            "@type": "ImageObject",
+            "url": {{ org_logo_url | tojson }},
+            "width": 640,
+            "height": 340
+        },
+        "image": {{ (site_root ~ '/static/images/og-banner.png') | tojson }},
+        "description": "Avigronix Technologies is a software and product engineering company based in Noida, India, building custom web, mobile, backend, cloud, data and AI solutions for startups, SMEs and enterprises across India, the US, Europe and the Middle East.",
+        "email": "avigronix@gmail.com",
+        "telephone": "+91-9450891557",
         "address": {
             "@type": "PostalAddress",
             "streetAddress": "Sector 59",
@@ -373,6 +349,7 @@
             "postalCode": "201301",
             "addressCountry": "IN"
         },
+        "areaServed": ["India", "United States", "Europe", "Middle East"],
         "contactPoint": [{
             "@type": "ContactPoint",
             "telephone": "+91-9450891557",
@@ -382,16 +359,41 @@
             "availableLanguage": ["English", "Hindi"]
         }],
         "knowsAbout": [
-            "Backend Development", "FastAPI", "Flask", "Python",
-            "React", "Next.js", "MongoDB", "PostgreSQL",
-            "REST API Development", "Cloud & DevOps", "AWS", "GCP",
-            "Data Analytics", "Business Automation"
+            "Custom Software Development", "Web Application Development",
+            "Backend Development", "REST API Development", "Mobile App Development",
+            "E-commerce Development", "ERP, HRMS & CRM Systems",
+            "Cloud & DevOps", "AWS", "GCP",
+            "Data Analytics", "Apache NiFi", "Apache Kafka",
+            "AI & Intelligent Automation", "LLM Integration", "WhatsApp Cloud API",
+            "Business Automation", "UI/UX Design",
+            "Python", "FastAPI", "Flask", "React", "Next.js", "Flutter",
+            "MongoDB", "PostgreSQL"
         ]
     }
     </script>
 
+    {% if request.url.path == '/' %}
+    {# ---------- WEBSITE SCHEMA (homepage only) ---------- #}
+    {# No SearchAction: the site has no search feature to point it at. #}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": {{ (site_root ~ '/#website') | tojson }},
+        "name": "Avigronix Technologies",
+        "alternateName": ["AVIGRONIX TECHNOLOGIES", "Avigronix"],
+        "url": {{ (site_root ~ '/') | tojson }},
+        "inLanguage": "en",
+        "publisher": { "@id": {{ org_id | tojson }} }
+    }
+    </script>
+    {% endif %}
+
     {% if request.url.path != '/' %}
-    {# ---------- BREADCRUMB SCHEMA (derived from the page's own title block) ---------- #}
+    {# ---------- BREADCRUMB SCHEMA ---------- #}
+    {# Pages name their own crumb with {% block breadcrumb_name %}; otherwise
+       it falls back to the part of the <title> before the first "|". #}
+    {% set crumb_name = self.breadcrumb_name() | trim %}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -401,14 +403,14 @@
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "{{ site_url or 'https://avigronix.com' }}/"
+                "item": {{ (site_root ~ '/') | tojson }}
             },
             {% if post is defined and post %}
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Blog",
-                "item": "{{ site_url or 'https://avigronix.com' }}/blog"
+                "item": {{ (site_root ~ '/blog') | tojson }}
             },
             {
                 "@type": "ListItem",
@@ -420,7 +422,7 @@
             {
                 "@type": "ListItem",
                 "position": 2,
-                "name": {{ (self.title() | trim).split('|')[0].strip() | tojson }},
+                "name": {{ (crumb_name or (self.title() | trim).split('|')[0].strip()) | tojson }},
                 "item": {{ page_canonical_url | tojson }}
             }
             {% endif %}
@@ -428,6 +430,8 @@
     }
     </script>
     {% endif %}
+    {# Declared (never printed) so self.breadcrumb_name() above always exists. #}
+    {% if false %}{% block breadcrumb_name %}{% endblock %}{% endif %}
 
     {# ---------- PER-PAGE STRUCTURED DATA (FAQPage, BlogPosting, etc.) ---------- #}
     {% block structured_data %}{% endblock %}
@@ -450,7 +454,7 @@
                         <source srcset="{{ url_for('static', path='images/logo.webp').path }}" type="image/webp">
                         <img src="{{ url_for('static', path='images/logo.png') }}"
                              class="h-10 md:h-12 lg:h-14 w-auto transition-all duration-300 group-hover:scale-105 group-hover:rotate-3"
-                             alt="AVIGRONIX TECHNOLOGIES Logo"
+                             alt="Avigronix Technologies home"
                              loading="eager"
                              width="640"
                              height="340" />
@@ -519,7 +523,7 @@
                     <source srcset="{{ url_for('static', path='images/logo.webp').path }}" type="image/webp">
                     <img src="{{ url_for('static', path='images/logo.png') }}"
                          class="h-10 w-auto"
-                         alt="AVIGRONIX TECHNOLOGIES Logo"
+                         alt="Avigronix Technologies logo"
                          width="640"
                          height="340"
                          loading="lazy" />
@@ -589,7 +593,7 @@
     </div>
 
     {# ================= MAIN CONTENT AREA ================= #}
-    <main id="content" class="min-h-screen pt-20 md:pt-24">
+    <main id="content" class="min-h-screen">
         {% block content %}{% endblock %}
     </main>
 
@@ -601,19 +605,23 @@
             <div class="lg:col-span-2">
                 <div class="flex items-start space-x-4 mb-6">
                     <div class="relative">
+                        {# Decorative: the company name is printed right beside it. #}
                         <img src="{{ url_for('static', path='images/logo-icon.png') }}"
                              class="h-14 w-auto"
-                             alt="AVIGRONIX TECHNOLOGIES Logo"
+                             alt=""
                              width="500"
                              height="208"
                              loading="lazy" />
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold mb-1">AVIGRONIX TECHNOLOGIES</h3>
+                        {# A <p>, not a heading: this is site chrome repeated on every page,
+                           not a section of the page's content. #}
+                        <p class="font-heading text-2xl font-bold mb-1">AVIGRONIX TECHNOLOGIES</p>
                         <p class="text-blue-300 font-medium">Backend, Cloud &amp; Data Engineering Partners</p>
                     </div>
                 </div>
                 <p class="text-gray-300 leading-relaxed max-w-xl">
+                    Avigronix Technologies is a software and product engineering company based in Noida, India.
                     We build custom backend systems, web &amp; mobile applications, cloud infrastructure,
                     and data-driven automation — serving clients across India, the US, Europe, and the
                     Middle East with production-grade engineering and enterprise deployment expertise.
@@ -626,10 +634,10 @@
 
             <!-- Quick Links -->
             <div>
-                <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                <h2 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
                     <i class="fas fa-link mr-2 text-blue-400"></i>
                     Quick Links
-                </h4>
+                </h2>
                 <ul class="space-y-3">
                     {% macro footer_link(name, link, icon) %}
                         <li>
@@ -654,10 +662,10 @@
 
             <!-- Contact Info -->
             <div>
-                <h4 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
+                <h2 class="text-lg font-bold mb-6 pb-2 border-b border-gray-800 flex items-center">
                     <i class="fas fa-address-book mr-2 text-blue-400"></i>
                     Contact Info
-                </h4>
+                </h2>
                 <ul class="space-y-4">
                     <li class="flex items-start">
                         <div class="bg-blue-900/30 p-2 rounded-lg mr-3">
@@ -792,6 +800,21 @@
 
     {# ================= JAVASCRIPT ================= #}
     <script>
+        // Keep --nav-h in sync with the fixed navbar's real height
+        (function () {
+            var nav = document.querySelector('nav.glass-nav');
+            if (!nav) return;
+            function setNavHeight() {
+                document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+            }
+            setNavHeight();
+            if ('ResizeObserver' in window) {
+                new ResizeObserver(setNavHeight).observe(nav);
+            } else {
+                window.addEventListener('resize', setNavHeight);
+            }
+        })();
+
         // Mobile Menu Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileToggle = document.getElementById('mobileMenuToggle');
@@ -845,22 +868,6 @@
                 });
             });
 
-            // Update active nav link on scroll
-            function updateActiveNav() {
-                const currentPath = window.location.pathname;
-                const navLinks = document.querySelectorAll('.nav-link');
-                
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === currentPath) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-
-            // Initialize
-            updateActiveNav();
-
             // Smooth scroll for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
@@ -887,15 +894,6 @@
                 el.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                 });
-            });
-        });
-
-        // Current year for copyright
-        document.addEventListener('DOMContentLoaded', function() {
-            const yearElements = document.querySelectorAll('[data-current-year]');
-            const currentYear = new Date().getFullYear();
-            yearElements.forEach(el => {
-                el.textContent = currentYear;
             });
         });
 

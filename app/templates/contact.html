@@ -1,6 +1,22 @@
 {% extends base_template %}
-{% block title %}Contact Us | AVIGRONIX TECHNOLOGIES{% endblock %}
-{% block description %}Get in touch with AVIGRONIX TECHNOLOGIES for custom software development, backend engineering, cloud solutions & data analytics. Response within 24 hours.{% endblock %}
+{% block title %}Contact Avigronix Technologies | Start Your Software Project{% endblock %}
+{% block description %}Contact Avigronix Technologies in Noida, India for custom software development, backend engineering, cloud solutions & data analytics. Response within 24 hours.{% endblock %}
+{% block breadcrumb_name %}Contact{% endblock %}
+
+{% block structured_data %}
+{% set site_root = site_url or 'https://avigronix.com' %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": {{ (site_root ~ '/contact') | tojson }},
+    "url": {{ (site_root ~ '/contact') | tojson }},
+    "name": "Contact Avigronix Technologies",
+    "inLanguage": "en",
+    "about": { "@id": {{ (site_root ~ '/#organization') | tojson }} }
+}
+</script>
+{% endblock %}
 {% block meta_keywords %}contact software development company, hire FastAPI developer, hire backend developer India, hire MongoDB developer{% endblock %}
 
 {% block content %}
@@ -9,10 +25,10 @@
 <section class="py-20 bg-gradient-to-b from-[#0F1629] to-[#142447] text-white">
     <div class="container mx-auto px-6 text-center max-w-3xl">
         <h1 class="text-4xl md:text-5xl font-semibold mb-4 leading-tight">
-            Let's Connect
+            Contact Avigronix Technologies
         </h1>
         <p class="text-base md:text-lg text-gray-300 leading-relaxed">
-            Tell us about your project, and our experts will get back to you shortly.
+            Let's connect — tell us about your project, and our experts will get back to you shortly.
         </p>
     </div>
 </section>
@@ -23,6 +39,7 @@
 
         <!-- LEFT CONTACT CARDS (Slim + Professional) -->
         <div class="space-y-6" id="contact-info">
+            <h2 class="sr-only">Contact details</h2>
 
             <!-- Card Component -->
             {% macro card(icon, title, line1, line2) %}
@@ -49,7 +66,7 @@
         <!-- RIGHT CONTACT FORM (Slim + Minimal) -->
         <div class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-8" id="contact-form">
 
-            <h3 class="text-2xl font-semibold text-gray-900 mb-2">Send Us a Message</h3>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-2">Send Us a Message</h2>
             <p class="text-gray-600 text-sm mb-8">Our team will reach out within 24 hours.</p>
 
             <form class="space-y-6" id="contactForm">

@@ -1,6 +1,12 @@
 """Blog post content — a small hand-maintained store since there's no CMS.
 Each entry is real, original content written by AVIGRONIX TECHNOLOGIES,
 not per-client testimonials or claims about third parties.
+
+Optional per-post fields:
+  updated           — "Month D, YYYY" of a genuine content revision. Only set
+                      it when the post was actually edited; it drives the
+                      BlogPosting dateModified and the sitemap lastmod.
+  related_services  — (anchor text, /services#id) links shown under the post.
 """
 
 BLOG_POSTS = {
@@ -12,6 +18,10 @@ BLOG_POSTS = {
         "color": "blue",
         "tags": ["FastAPI", "Python"],
         "excerpt": "Practical architecture patterns, authentication, and deployment strategies we use to build high-performance, scalable APIs with FastAPI.",
+        "related_services": [
+            ("Backend & database engineering", "/services#backend-database-engineering"),
+            ("Custom web application development", "/services#custom-web-development"),
+        ],
         "sections": [
             {
                 "heading": None,
@@ -72,6 +82,10 @@ BLOG_POSTS = {
         "color": "green",
         "tags": ["Cloud", "AWS", "GCP"],
         "excerpt": "A practical framework for planning and executing cloud migrations without the downtime and cost surprises that derail most projects.",
+        "related_services": [
+            ("Cloud & DevOps solutions", "/services#cloud-devops"),
+            ("Support & maintenance for live systems", "/services#support-maintenance"),
+        ],
         "sections": [
             {
                 "heading": None,
@@ -127,6 +141,10 @@ BLOG_POSTS = {
         "color": "orange",
         "tags": ["Security", "Backend"],
         "excerpt": "The security practices we build into every backend by default — authentication, access control, and safe handling of user-submitted data.",
+        "related_services": [
+            ("Backend & database engineering", "/services#backend-database-engineering"),
+            ("API integration & business automation", "/services#api-integration-automation"),
+        ],
         "sections": [
             {
                 "heading": None,
@@ -181,6 +199,10 @@ BLOG_POSTS = {
         "color": "purple",
         "tags": ["Database", "MongoDB", "PostgreSQL"],
         "excerpt": "How we approach query performance and schema design across MongoDB and PostgreSQL as an application's traffic grows.",
+        "related_services": [
+            ("Backend & database engineering", "/services#backend-database-engineering"),
+            ("Data analytics & business intelligence", "/services#data-analytics"),
+        ],
         "sections": [
             {
                 "heading": None,
@@ -236,12 +258,19 @@ def _iso_date(human_date: str) -> str:
     return datetime.strptime(human_date, "%B %d, %Y").strftime("%Y-%m-%d")
 
 
+def _with_iso_dates(post: dict) -> dict:
+    out = {**post, "iso_date": _iso_date(post["date"])}
+    if post.get("updated"):
+        out["iso_updated"] = _iso_date(post["updated"])
+    return out
+
+
 def get_post(slug: str) -> dict | None:
     post = BLOG_POSTS.get(slug)
     if post is None:
         return None
-    return {**post, "iso_date": _iso_date(post["date"])}
+    return _with_iso_dates(post)
 
 
 def list_posts() -> list[dict]:
-    return [{"slug": slug, **post, "iso_date": _iso_date(post["date"])} for slug, post in BLOG_POSTS.items()]
+    return [{"slug": slug, **_with_iso_dates(post)} for slug, post in BLOG_POSTS.items()]

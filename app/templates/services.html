@@ -1,7 +1,8 @@
 {% extends base_template %}
 
-{% block title %}Services | Backend, Web, Cloud & Data Engineering{% endblock %}
-{% block description %}Backend development (FastAPI, Flask), web & mobile apps, cloud & DevOps (AWS, GCP), database engineering (MongoDB, PostgreSQL), data analytics, and API integration services.{% endblock %}
+{% block title %}Software Development Services | Avigronix Technologies{% endblock %}
+{% block description %}Avigronix Technologies offers custom web, backend, mobile, e-commerce, ERP, cloud & DevOps, data analytics and AI automation services for growing businesses.{% endblock %}
+{% block breadcrumb_name %}Services{% endblock %}
 {% block meta_keywords %}backend development services, FastAPI development, Flask development company, MongoDB development services, cloud DevOps services, API integration services, data analytics services, custom web development, database engineering services{% endblock %}
 
 {% block structured_data %}
@@ -9,26 +10,28 @@
    (the ItemList shape Google documents). Built with tojson so the output is
    always well-formed JSON. #}
 {% set services_schema = [
-        ("Custom Web Development", "Full-stack web applications built on FastAPI, Flask, React & Next.js."),
-        ("Backend & Database Engineering", "Secure, production-ready backend systems with MongoDB & PostgreSQL."),
-        ("E-commerce Development", "AI-powered online stores, multi-vendor systems, and payment gateway integrations."),
-        ("Mobile App Development", "Cross-platform mobile applications for iOS & Android."),
-        ("Cloud & DevOps Solutions", "Cloud infrastructure and enterprise deployment across AWS, GCP & VPS."),
-        ("Data Analytics & Business Intelligence", "Enterprise data ingestion and reporting pipelines built on Apache NiFi, Kafka & Superset."),
-        ("AI & Intelligent Automation", "Chatbots, LLM/SLM integrations, and predictive analytics."),
-        ("API Integration & Business Automation", "Webhook-driven backend systems and WhatsApp Cloud API integration."),
-        ("SEO & Digital Marketing", "Result-focused SEO, paid ads, and performance marketing."),
-        ("UI/UX & Product Design", "User experience and interface design focused on clarity and conversion."),
-        ("ERP & Enterprise Development", "Custom ERP systems, HRMS, CRM, and workflow automation."),
-        ("Support & Maintenance", "24/7 monitoring, enhancements, and long-term support.")
+        ("Custom Web Development", "Full-stack web applications built on FastAPI, Flask, React & Next.js.", "custom-web-development"),
+        ("Backend & Database Engineering", "Secure, production-ready backend systems and APIs with MongoDB & PostgreSQL.", "backend-database-engineering"),
+        ("E-commerce Development", "AI-powered online stores, multi-vendor marketplaces, and payment gateway integrations.", "ecommerce-development"),
+        ("Mobile App Development", "Cross-platform mobile applications for iOS & Android.", "mobile-app-development"),
+        ("Cloud & DevOps Solutions", "Cloud infrastructure and enterprise deployment across AWS, GCP & VPS.", "cloud-devops"),
+        ("Data Analytics & Business Intelligence", "Enterprise data ingestion and reporting pipelines built on Apache NiFi, Kafka & Superset.", "data-analytics"),
+        ("AI & Intelligent Automation", "Chatbots, LLM/SLM integrations, and predictive analytics.", "ai-automation"),
+        ("API Integration & Business Automation", "Webhook-driven backend systems and WhatsApp Cloud API integration.", "api-integration-automation"),
+        ("SEO & Digital Marketing", "Result-focused SEO, paid ads, and performance marketing.", "seo-digital-marketing"),
+        ("UI/UX & Product Design", "User experience and interface design focused on clarity and conversion.", "ui-ux-design"),
+        ("ERP & Enterprise Development", "Custom ERP systems, HRMS, CRM, and workflow automation.", "erp-enterprise"),
+        ("Support & Maintenance", "Monitoring, enhancements, audits, refactoring and long-term support.", "support-maintenance")
 ] %}
+{% set site_root = site_url or 'https://avigronix.com' %}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": "Services",
+    "name": "Software Development Services by Avigronix Technologies",
+    "url": {{ (site_root ~ '/services') | tojson }},
     "itemListElement": [
-        {% for name, description in services_schema %}
+        {% for name, description, anchor in services_schema %}
         {
             "@type": "ListItem",
             "position": {{ loop.index }},
@@ -37,11 +40,13 @@
                 "name": {{ name | tojson }},
                 "serviceType": {{ name | tojson }},
                 "description": {{ description | tojson }},
-                "url": {{ ((site_url or 'https://avigronix.com') ~ '/services') | tojson }},
+                "url": {{ (site_root ~ '/services#' ~ anchor) | tojson }},
+                "areaServed": ["India", "United States", "Europe", "Middle East"],
                 "provider": {
                     "@type": "Organization",
-                    "name": "AVIGRONIX TECHNOLOGIES",
-                    "url": {{ (site_url or 'https://avigronix.com') | tojson }}
+                    "@id": {{ (site_root ~ '/#organization') | tojson }},
+                    "name": "Avigronix Technologies",
+                    "url": {{ (site_root ~ '/') | tojson }}
                 }
             }
         }{% if not loop.last %},{% endif %}
@@ -65,11 +70,12 @@
     <div class="relative container mx-auto px-6 max-w-4xl text-center">
         <p class="text-blue-300 text-xs tracking-[0.25em] uppercase mb-4">What We Do</p>
         <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
-            Digital Solutions Designed<br/>For Modern Businesses
+            Software Development Services<br/>For Modern Businesses
         </h1>
         <p class="text-slate-300 text-lg max-w-3xl mx-auto">
-            From enterprise-grade applications to cloud-native systems and AI-powered automation, 
-            we engineer technology that delivers performance, scalability, and real business impact.
+            Avigronix Technologies provides end-to-end software engineering — from enterprise-grade applications
+            to cloud-native systems, data pipelines, and AI-powered automation — engineered for performance,
+            scalability, and real business impact.
         </p>
     </div>
 </section>
@@ -91,8 +97,8 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
 
             <!-- SERVICE CARD TEMPLATE -->
-            {% macro service(icon, color, title, desc, features) %}
-            <div class="group bg-slate-50 border border-slate-200 hover:border-transparent hover:shadow-xl p-8 rounded-3xl transition">
+            {% macro service(icon, color, title, desc, features, anchor, related=[]) %}
+            <div id="{{ anchor }}" class="scroll-mt-28 group bg-slate-50 border border-slate-200 hover:border-transparent hover:shadow-xl p-8 rounded-3xl transition">
                 <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
                     style="background-color: {{ color }}20;">
                     <i class="{{ icon }} text-3xl" style="color: {{ color }}"></i>
@@ -109,8 +115,17 @@
                     {% endfor %}
                 </ul>
 
+                {% if related %}
+                <p class="mb-6 text-sm text-slate-600">
+                    <span class="font-semibold text-slate-700">See also:</span>
+                    {% for label, href in related %}
+                    <a href="{{ href }}" class="text-blue-600 hover:text-blue-800 underline-offset-2 hover:underline">{{ label }}</a>{% if not loop.last %} · {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+
                 <a href="/contact" class="text-blue-600 font-semibold hover:text-blue-800 inline-flex items-center">
-                    Get Started <i class="fas fa-arrow-right ml-2"></i>
+                    Get Started<span class="sr-only"> with {{ title }}</span> <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
             {% endmacro %}
@@ -126,7 +141,9 @@
                     'React / Next.js Frontend',
                     'Real-time Features',
                     'API-first Architecture'
-                ]
+                ],
+                'custom-web-development',
+                [("Court case management system", "/projects#court-case-management"), ("FastAPI best practices", "/blog/fastapi-best-practices")]
             ) }}
 
             <!-- Backend & Database Engineering -->
@@ -140,7 +157,9 @@
                     'REST API Development',
                     'JWT Auth & RBAC',
                     'Redis Caching'
-                ]
+                ],
+                'backend-database-engineering',
+                [("Database optimization guide", "/blog/database-optimization"), ("Securing web applications", "/blog/cybersecurity-best-practices")]
             ) }}
 
             <!-- 2. E-commerce -->
@@ -154,7 +173,9 @@
                     'Multi-vendor Support',
                     'Omnichannel Selling',
                     'Analytics Dashboard'
-                ]
+                ],
+                'ecommerce-development',
+                [("E-commerce platform", "/projects#ecommerce-platform"), ("POS billing system", "/projects#pos-billing")]
             ) }}
 
             <!-- 3. Mobile Apps -->
@@ -168,7 +189,9 @@
                     'Offline Support',
                     'Push Notifications',
                     'API Integration'
-                ]
+                ],
+                'mobile-app-development',
+                [("Local delivery app", "/projects#local-delivery-app")]
             ) }}
 
             <!-- 4. Cloud & DevOps -->
@@ -182,7 +205,9 @@
                     'Linux & Nginx Administration',
                     'CI/CD Pipelines',
                     'Enterprise Deployments'
-                ]
+                ],
+                'cloud-devops',
+                [("Cloud migration strategy", "/blog/cloud-migration-strategy")]
             ) }}
 
             <!-- Data Analytics & Business Intelligence -->
@@ -196,7 +221,9 @@
                     'Superset & Grafana Dashboards',
                     'Telecom Analytics',
                     'Real-time Reporting'
-                ]
+                ],
+                'data-analytics',
+                [("Real-time analytics dashboard", "/projects#analytics-dashboard")]
             ) }}
 
             <!-- 5. AI & Automation -->
@@ -210,7 +237,9 @@
                     'SLM Integration (Ollama)',
                     'Process Automation',
                     'Data Insights'
-                ]
+                ],
+                'ai-automation',
+                [("AI customer service", "/projects#ai-customer-service")]
             ) }}
 
             <!-- API Integration & Business Automation -->
@@ -224,7 +253,9 @@
                     'Webhook-driven Systems',
                     'Third-party API Integration',
                     'Workflow Automation'
-                ]
+                ],
+                'api-integration-automation',
+                []
             ) }}
 
             <!-- 6. SEO & Digital Marketing -->
@@ -238,7 +269,9 @@
                     'Ad Campaigns',
                     'Brand Positioning',
                     'Lead Generation'
-                ]
+                ],
+                'seo-digital-marketing',
+                []
             ) }}
 
             <!-- 7. UI/UX Design -->
@@ -252,7 +285,9 @@
                     'Design Systems',
                     'Product Branding',
                     'High-Fidelity UI'
-                ]
+                ],
+                'ui-ux-design',
+                []
             ) }}
 
             <!-- 8. ERP & Enterprise Systems -->
@@ -266,7 +301,9 @@
                     'Vendor Management',
                     'Workflow Automation',
                     'Secure Role-based Access'
-                ]
+                ],
+                'erp-enterprise',
+                [("Vendor management system", "/projects#vendor-management"), ("Healthcare management system", "/projects#healthcare-management"), ("Learning management system", "/projects#learning-management")]
             ) }}
 
             <!-- 9. Maintenance -->
@@ -274,13 +311,16 @@
                 'fas fa-tools',
                 '#8b5cf6',
                 'Support & Maintenance',
-                '24/7 monitoring, enhancements, updates, and long-term support for all digital products.',
+                '24/7 monitoring, enhancements, updates, and long-term support for all digital products — plus audits, refactoring, and modernization of existing systems.',
                 [
                     '24/7 Support',
                     'Performance Optimization',
                     'Security Patches',
-                    'Error Monitoring'
-                ]
+                    'Error Monitoring',
+                    'Code Audit & Refactoring'
+                ],
+                'support-maintenance',
+                [("Questions about support", "/faq")]
             ) }}
 
         </div>
@@ -294,7 +334,8 @@
         <h2 class="text-3xl sm:text-4xl font-bold mb-4">Let’s Build Your Next Digital Product</h2>
         <p class="text-white text-lg mb-8">
             Whether you need a modern web app, enterprise ERP, mobile solution, or cloud automation —
-            we deliver with precision and passion.
+            we deliver with precision and passion. Not sure which service fits?
+            <a href="/faq" class="underline font-semibold">Read the FAQ</a>.
         </p>
         <a href="/contact" class="inline-block px-8 sm:px-10 py-4 bg-white text-blue-700 font-semibold text-lg rounded-2xl shadow-xl hover:bg-slate-100 transition">
             Get Free Consultation
